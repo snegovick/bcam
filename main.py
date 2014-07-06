@@ -60,7 +60,7 @@ class Screen(gtk.DrawingArea):
         cr.fill()
         
         for p in self.paths:
-            p.draw(cr, (self.allocation.width/2,self.allocation.height/2))
+            p.draw(cr, (self.allocation.width/2,self.allocation.height/2), 0.2, (0,0,0))
 
         cr_gdk.set_source_surface(cr_surf)
         cr_gdk.paint()
@@ -109,6 +109,7 @@ def __mk_left_vbox():
 def run(Widget):
     dxfloader = DXFLoader()
     paths = dxfloader.load("./gear.dxf")
+    
 
     window = gtk.Window()
     window.resize(width, height)

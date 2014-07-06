@@ -1,10 +1,11 @@
 import loader
-from path import ELine, Path
+from path import ELine, EArc, Path
 
 import dxfgrabber
 
 class DXFEnum:
     line = "LINE"
+    arc = "ARC"
 
 class DXFLoader(loader.SourceLoader):
     def __init__(self):
@@ -17,7 +18,7 @@ class DXFLoader(loader.SourceLoader):
         layer_count = len(dxf.layers) # collection of layer definitions
         block_definition_count = len(dxf.blocks) #  dict like collection of block definitions
         entitiy_count = len(dxf.entities) # list like collection of entities
-        print dxf.entities
+        #print dxf.entities
         blocks = dxf.blocks
         de = DXFEnum()
         paths = []
@@ -27,7 +28,13 @@ class DXFLoader(loader.SourceLoader):
                 if e.dxftype == de.line:
                     el = ELine(tuple(e.start[:2]), tuple(e.end[:2]))
                     p.add_element(el)
-            print p.elements
+                elif e.dxftype == de.arc:
+                    el = EArc(tuple(e.center[:2]), e.radius, e.startangle, e.endangle)
+                    p.add_element(el)                    
+                else:
+                    print e.dxftype
             paths.append(p)
+            print "Trying to connect path:"
+            print p.mk_connected_path()
+            #print p.elements
         return paths
-            
