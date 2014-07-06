@@ -2,6 +2,7 @@ import pygtk
 pygtk.require('2.0')
 import gtk, gobject, cairo
 import sys
+from loader_dxf import DXFLoader
 
 width=640
 height=480
@@ -13,6 +14,7 @@ class Screen(gtk.DrawingArea):
     step = 0
     event_consumers = []
     active_event_consumer = None
+    paths = []
 
     def periodic(self):
         self.queue_draw()
@@ -40,16 +42,25 @@ class Screen(gtk.DrawingArea):
     # Handle the expose-event by drawing
     def do_expose_event(self, event):
         # Create the cairo context
+        
+        
         cr_gdk = self.window.cairo_create()
 
         surface = cr_gdk.get_target()
 
-        cr_surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
+        cr_surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.allocation.width, self.allocation.height)
         cr = cairo.Context(cr_surf)
         
         # Restrict Cairo to the exposed area; avoid extra work
         cr.rectangle(event.area.x, event.area.y, event.area.width, event.area.height)
         cr.clip()
+
+        cr.set_source_rgb(1.0,1.0,1.0)
+        cr.rectangle(0, 0, self.allocation.width, self.allocation.height)
+        cr.fill()
+        
+        for p in self.paths:
+            p.draw(cr, (self.allocation.width/2,self.allocation.height/2))
 
         cr_gdk.set_source_surface(cr_surf)
         cr_gdk.paint()
@@ -96,12 +107,18 @@ def __mk_left_vbox():
         
 # GTK mumbo-jumbo to show the widget in a window and quit when it's closed
 def run(Widget):
+    dxfloader = DXFLoader()
+    paths = dxfloader.load("./gear.dxf")
+
     window = gtk.Window()
     window.resize(width, height)
     window.connect("delete-event", gtk.main_quit)
     widget = Widget()
     widget.connect("button_press_event", widget.button_press_event)
     widget.set_events(gtk.gdk.BUTTON_PRESS_MASK)
+    #widget.window = window
+
+    widget.paths = paths
 
     left_vbox = __mk_left_vbox()
 
