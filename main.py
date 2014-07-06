@@ -3,9 +3,12 @@ pygtk.require('2.0')
 import gtk, gobject, cairo
 import sys
 from loader_dxf import DXFLoader
+from events import EVEnum, EventProcessor
 
 width=640
 height=480
+ee = EVEnum()
+ep = EventProcessor()
 
 class Screen(gtk.DrawingArea):
 
@@ -102,13 +105,22 @@ def __mk_right_vbox():
 def __mk_left_vbox():
     left_vbox = gtk.VBox(homogeneous=False, spacing=0)
     load_dxf = gtk.Button(label="Load...")
+    load_dxf.connect("clicked", lambda *args: ep.process(ee.load_click, args))
     left_vbox.pack_start(load_dxf, expand=False, fill=False, padding=0)
+
+    paths_label = gtk.Label("Paths")
+    scrolled_window = gtk.ScrolledWindow()
+    gtklist = gtk.List()
+    scrolled_window.add_with_viewport(gtklist)
+    left_vbox.pack_start(paths_label, expand=False, fill=False, padding=0)
+    left_vbox.pack_start(scrolled_window, expand=True, fill=True, padding=0)
+
     return left_vbox
         
 # GTK mumbo-jumbo to show the widget in a window and quit when it's closed
 def run(Widget):
     dxfloader = DXFLoader()
-    paths = dxfloader.load("./gear.dxf")
+    #paths = dxfloader.load("./gear.dxf")
     
 
     window = gtk.Window()
@@ -119,7 +131,7 @@ def run(Widget):
     widget.set_events(gtk.gdk.BUTTON_PRESS_MASK)
     #widget.window = window
 
-    widget.paths = paths
+    #widget.paths = paths
 
     left_vbox = __mk_left_vbox()
 
