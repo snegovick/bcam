@@ -2,7 +2,6 @@ import pygtk
 pygtk.require('2.0')
 import gtk, gobject, cairo
 import sys
-from loader_dxf import DXFLoader
 from events import EVEnum, EventProcessor
 
 width=640
@@ -21,6 +20,7 @@ class Screen(gtk.DrawingArea):
 
     def periodic(self):
         self.queue_draw()
+        ep.process()
         return True
     
     def button_press_event(self, widget, event):
@@ -62,8 +62,9 @@ class Screen(gtk.DrawingArea):
         cr.rectangle(0, 0, self.allocation.width, self.allocation.height)
         cr.fill()
         
-        for p in self.paths:
-            p.draw(cr, (self.allocation.width/2,self.allocation.height/2), 0.2, (0,0,0))
+        if ep.file_data!=None:
+            for p in ep.file_data:
+                p.draw(cr, (self.allocation.width/2,self.allocation.height/2), 0.2, (0,0,0))
 
         cr_gdk.set_source_surface(cr_surf)
         cr_gdk.paint()
@@ -105,7 +106,7 @@ def __mk_right_vbox():
 def __mk_left_vbox():
     left_vbox = gtk.VBox(homogeneous=False, spacing=0)
     load_dxf = gtk.Button(label="Load...")
-    load_dxf.connect("clicked", lambda *args: ep.process(ee.load_click, args))
+    load_dxf.connect("clicked", lambda *args: ep.push_event(ee.load_click, args))
     left_vbox.pack_start(load_dxf, expand=False, fill=False, padding=0)
 
     paths_label = gtk.Label("Paths")
@@ -119,10 +120,6 @@ def __mk_left_vbox():
         
 # GTK mumbo-jumbo to show the widget in a window and quit when it's closed
 def run(Widget):
-    dxfloader = DXFLoader()
-    #paths = dxfloader.load("./gear.dxf")
-    
-
     window = gtk.Window()
     window.resize(width, height)
     window.connect("delete-event", gtk.main_quit)
