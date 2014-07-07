@@ -63,6 +63,10 @@ class EventProcessor(object):
                 label = gtk.Label(p.name)
                 list_item = gtk.ListItem()
                 list_item.add(label)
+                list_item.show()
                 label.show()
-                gtklist.add(list_item)
+                self.mw.gtklist.add(list_item)
 
+
+ee = EVEnum()
+ep = EventProcessor()
