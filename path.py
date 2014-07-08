@@ -49,7 +49,7 @@ class ECircle:
         self.line_width = lw
         
     def draw(self, ctx):
-        ctx.arc(self.center[0], self.center[1], self.radius)
+        ctx.arc(self.center[0], self.center[1], self.radius, 0, math.pi*2)
         if self.line_width != None:
             ctx.set_line_width(self.line_width)
         ctx.stroke()

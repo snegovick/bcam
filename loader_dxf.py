@@ -1,5 +1,5 @@
 import loader
-from path import ELine, EArc, Path
+from path import ELine, EArc, ECircle, Path
 
 import dxfgrabber
 
