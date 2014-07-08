@@ -6,6 +6,7 @@ import dxfgrabber
 class DXFEnum:
     line = "LINE"
     arc = "ARC"
+    circle = "CIRCLE"
 
 class DXFLoader(loader.SourceLoader):
     def __init__(self):
@@ -30,7 +31,10 @@ class DXFLoader(loader.SourceLoader):
                     p.add_element(el)
                 elif e.dxftype == de.arc:
                     el = EArc(tuple(e.center[:2]), e.radius, e.startangle, e.endangle)
-                    p.add_element(el)                    
+                    p.add_element(el)
+                elif e.dxftype == de.circle:
+                    el = ECircle(tuple(e.center[:2]), e.radius)
+                    p.add_element(el)
                 else:
                     print e.dxftype
             paths.append(p)

@@ -4,6 +4,7 @@ class ELine:
     def __init__(self, start, end, lw=None):
         self.start = start
         self.end = end
+        self.joinable = True
         self.line_width = lw
     
     def draw(self, ctx):
@@ -25,6 +26,8 @@ class EArc:
 
         self.start = (self.center[0]+math.cos(self.startangle)*self.radius, self.center[1]+math.sin(self.startangle)*self.radius)
         self.end = (self.center[0]+math.cos(self.endangle)*self.radius, self.center[1]+math.sin(self.endangle)*self.radius)
+
+        self.joinable = True
         self.line_width = lw
     
     def draw(self, ctx):
@@ -36,6 +39,23 @@ class EArc:
     def __repr__(self):
         return "EArc ("+str(self.start)+", "+str(self.end)+")\r\n"
 
+class ECircle:
+    def __init__(self, center, radius, lw=None):
+        self.center = center
+        self.radius = radius
+        self.start = None
+        self.end = None
+        self.joinable = False
+        self.line_width = lw
+        
+    def draw(self, ctx):
+        ctx.arc(self.center[0], self.center[1], self.radius)
+        if self.line_width != None:
+            ctx.set_line_width(self.line_width)
+        ctx.stroke()
+
+    def __repr__(self):
+        return "ECircle (center: "+str(self.center)+", r: "+str(self.radius)+")\r\n"
 
 class Path(object):
     def __init__(self, elements, name):
@@ -56,6 +76,9 @@ class Path(object):
             cont = False
             current = ce[-1]
             for e in self.elements:
+                if not e.joinable:
+                    continue
+
                 if e not in ce:
                     if abs(e.start[0]-current.end[0])<0.001 and abs(e.start[1]-current.end[1])<0.001:
                         ce.append(e)

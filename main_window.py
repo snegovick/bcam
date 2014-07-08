@@ -84,3 +84,8 @@ class MainWindow(object):
         self.scrolled_window.add_with_viewport(self.gtklist)
         self.left_vbox.pack_start(self.paths_label, expand=False, fill=False, padding=0)
         self.left_vbox.pack_start(self.scrolled_window, expand=True, fill=True, padding=0)
+
+        self.available_tools_label = gtk.Label("Tools")
+        self.drill_tool_button = gtk.Button("Drill")
+        self.left_vbox.pack_start(self.available_tools_label, expand=False, fill=False, padding=0)
+        self.left_vbox.pack_start(self.drill_tool_button, expand=False, fill=False, padding=0)
