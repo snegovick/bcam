@@ -15,6 +15,7 @@ class EventProcessor(object):
     ee = EVEnum()
     file_data = None
     event_list = []
+    selected_elements = []
     def __init__(self):
         self.events = {
             self.ee.load_click: self.load_click,
@@ -76,7 +77,11 @@ class EventProcessor(object):
         for p in self.file_data:
             for e in p.elements:
                 if e.distance_to_pt((cx, cy))<1:
-                    e.toggle_selected()
+                    if (e.toggle_selected() == True):
+                        self.selected_elements.append(e)
+                    else:
+                        self.selected_elements.remove(e)
+        print self.selected_elements
 
 ee = EVEnum()
 ep = EventProcessor()

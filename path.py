@@ -17,6 +17,7 @@ class Element(object):
 
     def toggle_selected(self):
         self.selected = not self.selected
+        return self.selected
 
     def set_lt(self, ctx):
         if self.lt != None:
@@ -26,7 +27,6 @@ class Element(object):
             else:
                 ctx.set_source_rgb(self.lt.color[0], self.lt.color[1], self.lt.color[2])
                 ctx.set_line_width(self.lt.lw)
-
 
 class ELine(Element):
     def __init__(self, start, end, lt):
