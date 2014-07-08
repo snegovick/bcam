@@ -4,6 +4,7 @@ import gtk, gobject, cairo
 import sys
 from events import EVEnum, EventProcessor, ee, ep
 from main_window import MainWindow
+from state import state
 
 width=640
 height=480
@@ -15,7 +16,6 @@ class Screen(gtk.DrawingArea):
     step = 0
     event_consumers = []
     active_event_consumer = None
-    paths = []
 
     def periodic(self):
         self.queue_draw()
@@ -24,7 +24,8 @@ class Screen(gtk.DrawingArea):
     
     def button_press_event(self, widget, event):
         pass
-        # if event.button == 1:
+        if event.button == 1:
+            ep.push_event(ee.screen_left_click, (event.x, event.y))
         #     layer0 = objects2d[0]
         #     layer1 = objects2d[1]
         #     for obj in layer0+layer1:
@@ -44,6 +45,7 @@ class Screen(gtk.DrawingArea):
     # Handle the expose-event by drawing
     def do_expose_event(self, event):
         # Create the cairo context
+        state.offset = (self.allocation.width/2,self.allocation.height/2)
 
         cr_gdk = self.window.cairo_create()
         surface = cr_gdk.get_target()
@@ -60,7 +62,7 @@ class Screen(gtk.DrawingArea):
         
         if ep.file_data!=None:
             for p in ep.file_data:
-                p.draw(cr, (self.allocation.width/2,self.allocation.height/2), 0.2, (0,0,0))
+                p.draw(cr, state.offset)
 
         cr_gdk.set_source_surface(cr_surf)
         cr_gdk.paint()

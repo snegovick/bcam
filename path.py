@@ -1,24 +1,55 @@
 import math
+from state import state
 
-class ELine:
-    def __init__(self, start, end, lw=None):
+class Element(object):
+    def __init__(self, lt):
+        self.selected = False
+        self.lt = lt
+
+    def draw(self, ctx):
+        pass
+
+    def distance_to_pt(self, pt):
+        return 1000
+
+    def set_selected(self):
+        self.selected = True
+
+    def toggle_selected(self):
+        self.selected = not self.selected
+
+    def set_lt(self, ctx):
+        if self.lt != None:
+            if self.selected:
+                ctx.set_source_rgb(self.lt.selected_color[0], self.lt.selected_color[1], self.lt.selected_color[2])
+                ctx.set_line_width(self.lt.selected_lw)
+            else:
+                ctx.set_source_rgb(self.lt.color[0], self.lt.color[1], self.lt.color[2])
+                ctx.set_line_width(self.lt.lw)
+
+
+class ELine(Element):
+    def __init__(self, start, end, lt):
+        super(ELine, self).__init__(lt)
         self.start = start
         self.end = end
         self.joinable = True
-        self.line_width = lw
     
     def draw(self, ctx):
+        self.set_lt(ctx)
         ctx.move_to(self.start[0], self.start[1])
         ctx.line_to(self.end[0], self.end[1])
-        if self.line_width != None:
-            ctx.set_line_width(self.line_width)
         ctx.stroke()
+
+    def distance_to_pt(self, pt):
+        return 1000
 
     def __repr__(self):
         return "ELine ("+str(self.start)+", "+str(self.end)+")\r\n"
 
-class EArc:
-    def __init__(self, center, radius, startangle, endangle, lw=None):
+class EArc(Element):
+    def __init__(self, center, radius, startangle, endangle, lt):
+        super(EArc, self).__init__(lt)
         self.center = center
         self.radius = radius
         self.startangle = math.radians(startangle)
@@ -28,31 +59,34 @@ class EArc:
         self.end = (self.center[0]+math.cos(self.endangle)*self.radius, self.center[1]+math.sin(self.endangle)*self.radius)
 
         self.joinable = True
-        self.line_width = lw
     
     def draw(self, ctx):
+        self.set_lt(ctx)
         ctx.arc(self.center[0], self.center[1], self.radius, self.startangle, self.endangle)
-        if self.line_width != None:
-            ctx.set_line_width(self.line_width)
         ctx.stroke()
+
+    def distance_to_pt(self, pt):
+        return 1000
 
     def __repr__(self):
         return "EArc ("+str(self.start)+", "+str(self.end)+")\r\n"
 
-class ECircle:
-    def __init__(self, center, radius, lw=None):
+class ECircle(Element):
+    def __init__(self, center, radius, lt):
+        super(ECircle, self).__init__(lt)
         self.center = center
         self.radius = radius
         self.start = None
         self.end = None
         self.joinable = False
-        self.line_width = lw
         
     def draw(self, ctx):
+        self.set_lt(ctx)
         ctx.arc(self.center[0], self.center[1], self.radius, 0, math.pi*2)
-        if self.line_width != None:
-            ctx.set_line_width(self.line_width)
         ctx.stroke()
+
+    def distance_to_pt(self, pt):
+        return math.sqrt((pt[0]-self.center[0])**2 + (pt[1]-self.center[1])**2)-self.radius
 
     def __repr__(self):
         return "ECircle (center: "+str(self.center)+", r: "+str(self.radius)+")\r\n"
@@ -60,7 +94,6 @@ class ECircle:
 class Path(object):
     def __init__(self, elements, name):
         self.elements = elements
-        self.closed = False
         self.name = name
 
     def add_element(self, e):
@@ -90,7 +123,7 @@ class Path(object):
                 break
 
         if abs(ce[0].start[0]-ce[-1].end[0])<0.001 and abs(ce[0].start[1]-ce[-1].end[1])<0.001:
-            self.closed = True
+            pass # have to move joined path to separate subpath
         if len(self.elements) == len(ce):
             self.elements = ce
             return True
@@ -102,11 +135,9 @@ class Path(object):
     def get_closed(self):
         return self.closed
 
-    def draw(self, ctx, offset, line_width, color):
-        ctx.set_line_width(line_width)
-        ctx.set_source_rgb(color[0], color[1], color[2])
+    def draw(self, ctx, offset):
         ctx.translate(offset[0], offset[1])
-        ctx.scale(10, 10)
+        ctx.scale(state.scale[0], state.scale[1])
         for e in self.elements:
             e.draw(ctx)
         ctx.identity_matrix()

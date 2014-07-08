@@ -1,5 +1,6 @@
 import loader
 from path import ELine, EArc, ECircle, Path
+from settings import settings
 
 import dxfgrabber
 
@@ -27,18 +28,18 @@ class DXFLoader(loader.SourceLoader):
             p = Path([], b.name)
             for e in b:
                 if e.dxftype == de.line:
-                    el = ELine(tuple(e.start[:2]), tuple(e.end[:2]))
+                    el = ELine(tuple(e.start[:2]), tuple(e.end[:2]), settings.get_def_lt())
                     p.add_element(el)
                 elif e.dxftype == de.arc:
-                    el = EArc(tuple(e.center[:2]), e.radius, e.startangle, e.endangle)
+                    el = EArc(tuple(e.center[:2]), e.radius, e.startangle, e.endangle, settings.get_def_lt())
                     p.add_element(el)
                 elif e.dxftype == de.circle:
-                    el = ECircle(tuple(e.center[:2]), e.radius)
+                    el = ECircle(tuple(e.center[:2]), e.radius, settings.get_def_lt())
                     p.add_element(el)
                 else:
                     print e.dxftype
             paths.append(p)
             print "Trying to connect path:"
-            print p.mk_connected_path()
-            #print p.elements
+            #print p.mk_connected_path()
+            print p.elements
         return paths
