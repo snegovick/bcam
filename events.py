@@ -97,6 +97,7 @@ class EventProcessor(object):
         self.pointer_position = (cx, cy)
         if (self.left_press_start!=None):
             if self.file_data == None:
+                self.left_press_start=None
                 return
 
             # just a click
