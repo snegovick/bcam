@@ -107,6 +107,7 @@ class EventProcessor(object):
                 for p in self.file_data:
                     for e in p.elements:
                         if (e.distance_to_pt((cx, cy))<1):
+                            #print "accepted"
                             if (e.toggle_selected() == True):
                                 self.selected_elements.append(e)
                             else:
@@ -133,7 +134,7 @@ class EventProcessor(object):
                                     self.selected_elements.append(e)
                                 else:
                                     self.selected_elements.remove(e)
-            print self.selected_elements
+            #print self.selected_elements
 
         self.left_press_start=None
         

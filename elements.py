@@ -1,5 +1,5 @@
 import math
-from calc_utils import AABB, CircleUtils
+from calc_utils import AABB, CircleUtils, LineUtils
 
 class Element(object):
     def __init__(self, lt):
@@ -46,7 +46,13 @@ class ELine(Element):
         ctx.stroke()
 
     def distance_to_pt(self, pt):
-        return 1000
+        lu = LineUtils(self.start, self.end)
+        return lu.distance_to_pt(pt)
+
+
+    def get_aabb(self):
+        lu = LineUtils(self.start, self.end)
+        return lu.get_aabb()
 
     def __repr__(self):
         return "ELine ("+str(self.start)+", "+str(self.end)+")\r\n"
@@ -95,10 +101,8 @@ class ECircle(Element):
         return cu.distance_to_pt(pt)
 
     def get_aabb(self):
-        cx = self.center[0]
-        cy = self.center[1]
-        r = self.radius
-        return AABB(cx-r, cy-r, cx+3, cy+r)
+        cu = CircleUtils(self.center, self.radius)
+        return cu.get_aabb()
         
     def __repr__(self):
         return "ECircle (center: "+str(self.center)+", r: "+str(self.radius)+")\r\n"
