@@ -64,6 +64,13 @@ class Screen(gtk.DrawingArea):
             for p in ep.file_data:
                 p.draw(cr, state.offset)
 
+        if ep.operations!=None:
+            cr.translate(state.offset[0], state.offset[1])
+            cr.scale(state.scale[0], state.scale[1])
+            for o in ep.operations:
+                o.draw(cr)
+            cr.identity_matrix()
+
         cr_gdk.set_source_surface(cr_surf)
         cr_gdk.paint()
 
