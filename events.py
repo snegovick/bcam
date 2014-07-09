@@ -5,22 +5,27 @@ import sys
 
 from loader_dxf import DXFLoader
 from state import state
+from tool_op_drill import TODrill
+from settings import settings
 
 class EVEnum:
     load_click = "load_click"
     load_file = "load_file"
     screen_left_click = "screen_left_click"
+    drill_tool_click = "drill_tool_click"
 
 class EventProcessor(object):
     ee = EVEnum()
     file_data = None
     event_list = []
     selected_elements = []
+    operations = []
     def __init__(self):
         self.events = {
             self.ee.load_click: self.load_click,
             self.ee.load_file: self.load_file,
-            self.ee.screen_left_click: self.screen_left_click
+            self.ee.screen_left_click: self.screen_left_click,
+            self.ee.drill_tool_click: self.drill_tool_click
         }
 
     def push_event(self, event, *args):
@@ -82,6 +87,15 @@ class EventProcessor(object):
                     else:
                         self.selected_elements.remove(e)
         print self.selected_elements
+
+    def drill_tool_click(self, args):
+        print "drill tool click:", args
+        print self.selected_elements
+        for e in self.selected_elements:
+            drl_op = TODrill(settings)
+            if drl_op.apply(e):
+                self.operations.append(drl_op)
+        print self.operations
 
 ee = EVEnum()
 ep = EventProcessor()

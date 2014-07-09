@@ -87,5 +87,6 @@ class MainWindow(object):
 
         self.available_tools_label = gtk.Label("Tools")
         self.drill_tool_button = gtk.Button("Drill")
+        self.drill_tool_button.connect("clicked", lambda *args: ep.push_event(ee.drill_tool_click, args))
         self.left_vbox.pack_start(self.available_tools_label, expand=False, fill=False, padding=0)
         self.left_vbox.pack_start(self.drill_tool_button, expand=False, fill=False, padding=0)

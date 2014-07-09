@@ -1,3 +1,4 @@
+from tool import Tool, ToolType
 class LineType:
     def __init__(self, lw, selected_lw, color, selected_color):
         self.lw = lw
@@ -8,6 +9,7 @@ class LineType:
 class Settings:
     def __init__(self):
         self.line_types = {"default": LineType(0.2, 0.5, (0,0,0), (1,0,0))}
+        self.tool = Tool("cylinder", ToolType.cylinder)
 
     def get_lt(self, name):
         return self.line_types[name]

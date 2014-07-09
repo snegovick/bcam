@@ -5,6 +5,7 @@ class Element(object):
     def __init__(self, lt):
         self.selected = False
         self.lt = lt
+        self.operations = {"drill": False}
 
     def draw(self, ctx):
         pass
@@ -79,6 +80,7 @@ class ECircle(Element):
         self.start = None
         self.end = None
         self.joinable = False
+        self.operations["drill"] = True
         
     def draw(self, ctx):
         self.set_lt(ctx)
