@@ -5,6 +5,7 @@ import sys
 from events import EVEnum, EventProcessor, ee, ep
 from main_window import MainWindow
 from state import state
+from settings import settings
 
 width=640
 height=480
@@ -23,24 +24,15 @@ class Screen(gtk.DrawingArea):
         return True
     
     def button_press_event(self, widget, event):
-        pass
         if event.button == 1:
-            ep.push_event(ee.screen_left_click, (event.x, event.y))
-        #     layer0 = objects2d[0]
-        #     layer1 = objects2d[1]
-        #     for obj in layer0+layer1:
-        #         if obj.check_if_point_belongs(event.x - width/2., event.y-height/2.):
-        #             if self.active_object != None:
-        #                 self.active_object.selected = False
-        #             self.active_object = obj
-        #             self.active_object.selected = True
-        #             obj.click_handler(event)
-        #             return
-        # elif event.button == 3:
-        #     if self.active_object!=None:
-        #         self.active_object.click_handler(event)
-        #     else:
-        #         print "Select object"
+            ep.push_event(ee.screen_left_press, (event.x, event.y))
+
+    def button_release_event(self, widget, event):
+        if event.button == 1:
+            ep.push_event(ee.screen_left_release, (event.x, event.y))
+
+    def motion_notify_event(self, widget, event):
+        ep.push_event(ee.pointer_motion, (event.x, event.y))
 
     # Handle the expose-event by drawing
     def do_expose_event(self, event):
@@ -69,6 +61,17 @@ class Screen(gtk.DrawingArea):
             cr.scale(state.scale[0], state.scale[1])
             for o in ep.operations:
                 o.draw(cr)
+            cr.identity_matrix()
+
+        # draw selection box
+        if ep.left_press_start != None:
+            cr.translate(state.offset[0], state.offset[1])
+            cr.scale(state.scale[0], state.scale[1])
+            settings.select_box_lt.set_lt(cr)
+            w = ep.pointer_position[0] - ep.left_press_start[0]
+            h = ep.pointer_position[1] - ep.left_press_start[1]
+            cr.rectangle(ep.left_press_start[0], ep.left_press_start[1], w, h)
+            cr.fill()
             cr.identity_matrix()
 
         cr_gdk.set_source_surface(cr_surf)

@@ -15,7 +15,9 @@ class MainWindow(object):
         self.window.connect("delete-event", gtk.main_quit)
         self.widget = Widget()
         self.widget.connect("button_press_event", self.widget.button_press_event)
-        self.widget.set_events(gtk.gdk.BUTTON_PRESS_MASK)
+        self.widget.connect("button_release_event", self.widget.button_release_event)
+        self.widget.connect("motion_notify_event", self.widget.motion_notify_event)
+        self.widget.set_events(gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.POINTER_MOTION_MASK)
 
         self.__mk_left_vbox()
 

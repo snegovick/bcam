@@ -7,11 +7,14 @@ from loader_dxf import DXFLoader
 from state import state
 from tool_op_drill import TODrill
 from settings import settings
+from calc_utils import AABB, OverlapEnum
 
 class EVEnum:
     load_click = "load_click"
     load_file = "load_file"
-    screen_left_click = "screen_left_click"
+    screen_left_press = "screen_left_press"
+    screen_left_release = "screen_left_release"
+    pointer_motion = "pointer_motion"
     drill_tool_click = "drill_tool_click"
 
 class EventProcessor(object):
@@ -20,11 +23,16 @@ class EventProcessor(object):
     event_list = []
     selected_elements = []
     operations = []
+    left_press_start = None
+    pointer_position = None
+
     def __init__(self):
         self.events = {
             self.ee.load_click: self.load_click,
             self.ee.load_file: self.load_file,
-            self.ee.screen_left_click: self.screen_left_click,
+            self.ee.screen_left_press: self.screen_left_press,
+            self.ee.screen_left_release: self.screen_left_release,
+            self.ee.pointer_motion: self.pointer_motion,
             self.ee.drill_tool_click: self.drill_tool_click
         }
 
@@ -75,18 +83,64 @@ class EventProcessor(object):
                 label.show()
                 self.mw.gtklist.add(list_item)
 
-    def screen_left_click(self, args):
-        print "click at", args
+    def screen_left_press(self, args):
+        print "press at", args
         cx = (args[0][0]-state.offset[0])/state.scale[0]
         cy = (args[0][1]-state.offset[1])/state.scale[1]
-        for p in self.file_data:
-            for e in p.elements:
-                if e.distance_to_pt((cx, cy))<1:
-                    if (e.toggle_selected() == True):
-                        self.selected_elements.append(e)
-                    else:
-                        self.selected_elements.remove(e)
-        print self.selected_elements
+        self.left_press_start = (cx, cy)
+        self.pointer_position = (cx, cy)
+
+    def screen_left_release(self, args):
+        print "release at", args
+        cx = (args[0][0]-state.offset[0])/state.scale[0]
+        cy = (args[0][1]-state.offset[1])/state.scale[1]
+        self.pointer_position = (cx, cy)
+        if (self.left_press_start!=None):
+            if self.file_data == None:
+                return
+
+            # just a click
+            dx = abs(cx-self.left_press_start[0])
+            dy = abs(cy-self.left_press_start[1])
+            print "dx, dy:", dx, dy
+            if dx<1 and dy<1:
+                for p in self.file_data:
+                    for e in p.elements:
+                        if (e.distance_to_pt((cx, cy))<1):
+                            if (e.toggle_selected() == True):
+                                self.selected_elements.append(e)
+                            else:
+                                self.selected_elements.remove(e)
+                            
+            # selection with a box
+            else:
+                ex = cx
+                ey = cy
+                sx = self.left_press_start[0]
+                sy = self.left_press_start[1]
+                select_aabb = AABB(sx, sy, ex, ey)
+                for p in self.file_data:
+                    for e in p.elements:
+                        e_aabb = e.get_aabb()
+                        if (e_aabb != None):
+                            print "e:", e_aabb
+                            print "select:", select_aabb
+
+                            overlap = select_aabb.aabb_in_aabb(e_aabb)
+                            print "overlap",overlap
+                            if (overlap != OverlapEnum.no_overlap) and (overlap != OverlapEnum.fully_lays_inside):
+                                if (e.toggle_selected() == True):
+                                    self.selected_elements.append(e)
+                                else:
+                                    self.selected_elements.remove(e)
+            print self.selected_elements
+
+        self.left_press_start=None
+        
+    def pointer_motion(self, args):
+        cx = (args[0][0]-state.offset[0])/state.scale[0]
+        cy = (args[0][1]-state.offset[1])/state.scale[1]
+        self.pointer_position = (cx, cy)
 
     def drill_tool_click(self, args):
         print "drill tool click:", args
