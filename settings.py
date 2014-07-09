@@ -14,7 +14,7 @@ class LineType:
         ctx.set_line_width(self.lw)
 
     def set_selected_lt(self, ctx):
-        if len(self.selected_color == 3):
+        if len(self.selected_color) == 3:
             ctx.set_source_rgb(self.selected_color[0], self.selected_color[1], self.selected_color[2])
         else:
             ctx.set_source_rgba(self.selected_color[0], self.selected_color[1], self.selected_color[2], self.selected_color[3])

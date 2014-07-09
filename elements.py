@@ -26,11 +26,10 @@ class Element(object):
     def set_lt(self, ctx):
         if self.lt != None:
             if self.selected:
-                ctx.set_source_rgb(self.lt.selected_color[0], self.lt.selected_color[1], self.lt.selected_color[2])
-                ctx.set_line_width(self.lt.selected_lw)
+                self.lt.set_selected_lt(ctx)
             else:
-                ctx.set_source_rgb(self.lt.color[0], self.lt.color[1], self.lt.color[2])
-                ctx.set_line_width(self.lt.lw)
+                self.lt.set_lt(ctx)
+
 
 class ELine(Element):
     def __init__(self, start, end, lt):
