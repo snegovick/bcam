@@ -3,7 +3,7 @@ from elements import *
 from calc_utils import pt_to_pt_dist
 
 
-class Path(Element):
+class Path(object):
     def __init__(self, elements, name):
         self.elements = elements
         self.name = name
@@ -35,7 +35,7 @@ class Path(Element):
                 dists.append(pt_to_pt_dist(e.end, current.end))
                 dists.append(pt_to_pt_dist(e.start, current.start))
                 md = min(dists)
-                print dists
+                #print dists
                 if md<min_dist:
                     min_dist = md
                     min_dist_id = i

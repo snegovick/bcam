@@ -18,6 +18,7 @@ class EVEnum:
     pointer_motion = "pointer_motion"
     drill_tool_click = "drill_tool_click"
     join_elements_click = "join_elements_click"
+    deselect_all = "deselect_all"
 
 class EventProcessor(object):
     ee = EVEnum()
@@ -36,7 +37,8 @@ class EventProcessor(object):
             self.ee.screen_left_release: self.screen_left_release,
             self.ee.pointer_motion: self.pointer_motion,
             self.ee.drill_tool_click: self.drill_tool_click,
-            self.ee.join_elements_click: self.join_elements_click
+            self.ee.join_elements_click: self.join_elements_click,
+            self.ee.deselect_all: self.deselect_all
         }
 
     def push_event(self, event, *args):
@@ -163,14 +165,18 @@ class EventProcessor(object):
             p = Path(self.selected_elements, "path")
             connected = p.mk_connected_path()
             if connected != None:
-                for e in self.selected_elements:
-                    e.toggle_selected()
-                self.selected_elements = []
+                self.deselect_all()
                 for e in connected.elements:
                     for i, p in enumerate(self.file_data):
                         if e in self.file_data[i].elements:
                             self.file_data[i].elements.remove(e)
                 self.file_data.append(connected)
+
+    def deselect_all(self, args):
+        for e in self.selected_elements:
+            e.toggle_selected()
+        self.selected_elements = []
+
 
 ee = EVEnum()
 ep = EventProcessor()

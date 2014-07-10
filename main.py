@@ -27,6 +27,11 @@ class Screen(gtk.DrawingArea):
         if event.button == 1:
             ep.push_event(ee.screen_left_press, (event.x, event.y))
 
+    def key_press_event(self, widget, event):
+        print event.keyval
+        if event.keyval == 65307: # ESC
+            ep.push_event(ee.deselect_all, (None))
+
     def button_release_event(self, widget, event):
         if event.button == 1:
             ep.push_event(ee.screen_left_release, (event.x, event.y))
