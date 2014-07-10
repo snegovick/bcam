@@ -16,19 +16,36 @@ class Path(object):
             return None
         available = self.elements[:]
         ce = [] # connected elements go here
-        s = self.elements[0]
-        ce.append(s)
+
+        not_joinables = []
+        for i, e in enumerate(available):
+            if not e.joinable:
+                not_joinables.append(i)
+
+        not_joinables.reverse()
+        for nj in not_joinables:
+            del available[nj]
+
+        available_len = len(available)
+
+        if available_len==0:
+            return None
+
+        #find first joinable
+        ce.append(available[0])
         del available[0]
+
         while True:
             if len(available)==0:
                 break
             cont = False
             current = ce[-1]
+            #print ce
+            #print "available[0]:", available[0]
+            #print "current:", current
             min_dist = pt_to_pt_dist(available[0].start, current.end)
             min_dist_id = 0
             for i, e in enumerate(available):
-                if not e.joinable:
-                    continue
                 dists = []
                 dists.append(pt_to_pt_dist(e.start, current.end))
                 dists.append(pt_to_pt_dist(e.end, current.start))
@@ -39,6 +56,7 @@ class Path(object):
                 if md<min_dist:
                     min_dist = md
                     min_dist_id = i
+                    print "md, i:", md, i
             if (min_dist<0.001):
                 ce.append(available[i])
                 del available[i]
@@ -50,9 +68,10 @@ class Path(object):
 
         if abs(ce[0].start[0]-ce[-1].end[0])<0.001 and abs(ce[0].start[1]-ce[-1].end[1])<0.001:
             pass # have to move joined path to separate subpath
-        print "len(self.elements):", len(self.elements), "len(ce):", len(ce)
-        if len(self.elements) == len(ce):
-            return Path(ce, self.name+".sub")
+        print "available len", available_len, "len(ce):", len(ce)
+        print available
+        #if available_len == len(ce):
+        return Path(ce, self.name+".sub")
         return None
 
     def set_closed(self):

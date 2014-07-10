@@ -19,6 +19,9 @@ class Element(object):
     def set_selected(self):
         self.selected = True
 
+    def unset_selected(self):
+        self.selected = False
+
     def toggle_selected(self):
         self.selected = not self.selected
         return self.selected

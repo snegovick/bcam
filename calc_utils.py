@@ -90,12 +90,13 @@ class ArcUtils:
         return AABB(x_min, y_min, x_max, y_max)
 
     def distance_to_pt(self, pt):
-        a = math.atan2(self.center[1]-pt[1], self.center[0]-pt[0])
+        a = math.atan2(pt[1]-self.center[1], pt[0]-self.center[0])
+        print a, self.sa, self.ea
         if a>=self.sa and a<=self.ea:
             dist = pt_to_pt_dist(pt, self.center)-self.radius
         elif a<self.sa:
             dist = pt_to_pt_dist(pt, self.start)
-        elif a<self.ea:
+        elif a>self.ea:
             dist = pt_to_pt_dist(pt, self.end)
         return abs(dist)
 

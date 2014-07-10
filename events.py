@@ -19,6 +19,8 @@ class EVEnum:
     drill_tool_click = "drill_tool_click"
     join_elements_click = "join_elements_click"
     deselect_all = "deselect_all"
+    shift_press = "shift_press"
+    shift_release = "shift_release"
 
 class EventProcessor(object):
     ee = EVEnum()
@@ -28,6 +30,7 @@ class EventProcessor(object):
     operations = []
     left_press_start = None
     pointer_position = None
+    shift_pressed = False
 
     def __init__(self):
         self.events = {
@@ -38,7 +41,9 @@ class EventProcessor(object):
             self.ee.pointer_motion: self.pointer_motion,
             self.ee.drill_tool_click: self.drill_tool_click,
             self.ee.join_elements_click: self.join_elements_click,
-            self.ee.deselect_all: self.deselect_all
+            self.ee.deselect_all: self.deselect_all,
+            self.ee.shift_press: self.shift_press,
+            self.ee.shift_release: self.shift_release
         }
 
     def push_event(self, event, *args):
@@ -114,11 +119,18 @@ class EventProcessor(object):
                     for e in p.elements:
                         if (e.distance_to_pt((cx, cy))<1):
                             #print "accepted"
-                            if (e.toggle_selected() == True):
-                                self.selected_elements.append(e)
+                            if self.shift_pressed:
+                                if not e in self.selected_elements:
+                                    e.set_selected()
+                                    self.selected_elements.append(e)
                             else:
                                 if e in self.selected_elements:
                                     self.selected_elements.remove(e)
+                                    e.unset_selected()
+                                else:
+                                    self.deselect_all(None)
+                                    e.set_selected()
+                                    self.selected_elements.append(e)
                             
             # selection with a box
             else:
@@ -127,20 +139,21 @@ class EventProcessor(object):
                 sx = self.left_press_start[0]
                 sy = self.left_press_start[1]
                 select_aabb = AABB(sx, sy, ex, ey)
+                if not self.shift_pressed:
+                    self.deselect_all(None)
                 for p in self.file_data:
                     for e in p.elements:
-                        e_aabb = e.get_aabb()
-                        if (e_aabb != None):
-                            print "e:", e_aabb
-                            print "select:", select_aabb
-
-                            overlap = select_aabb.aabb_in_aabb(e_aabb)
-                            print "overlap",overlap
-                            if (overlap != OverlapEnum.no_overlap) and (overlap != OverlapEnum.fully_lays_inside):
-                                if (e.toggle_selected() == True):
+                        if not e in self.selected_elements:
+                            e_aabb = e.get_aabb()
+                            if (e_aabb != None):
+                                print "e:", e_aabb
+                                print "select:", select_aabb
+                                
+                                overlap = select_aabb.aabb_in_aabb(e_aabb)
+                                print "overlap",overlap
+                                if (overlap != OverlapEnum.no_overlap) and (overlap != OverlapEnum.fully_lays_inside):
+                                    e.set_selected()
                                     self.selected_elements.append(e)
-                                else:
-                                    self.selected_elements.remove(e)
             #print self.selected_elements
 
         self.left_press_start=None
@@ -165,7 +178,7 @@ class EventProcessor(object):
             p = Path(self.selected_elements, "path")
             connected = p.mk_connected_path()
             if connected != None:
-                self.deselect_all()
+                self.deselect_all(None)
                 for e in connected.elements:
                     for i, p in enumerate(self.file_data):
                         if e in self.file_data[i].elements:
@@ -176,6 +189,12 @@ class EventProcessor(object):
         for e in self.selected_elements:
             e.toggle_selected()
         self.selected_elements = []
+
+    def shift_press(self, args):
+        self.shift_pressed = True
+
+    def shift_release(self, args):
+        self.shift_pressed = False
 
 
 ee = EVEnum()
