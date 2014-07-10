@@ -115,7 +115,8 @@ class EventProcessor(object):
                             if (e.toggle_selected() == True):
                                 self.selected_elements.append(e)
                             else:
-                                self.selected_elements.remove(e)
+                                if e in self.selected_elements:
+                                    self.selected_elements.remove(e)
                             
             # selection with a box
             else:
@@ -162,11 +163,14 @@ class EventProcessor(object):
             p = Path(self.selected_elements, "path")
             connected = p.mk_connected_path()
             if connected != None:
+                for e in self.selected_elements:
+                    e.toggle_selected()
                 self.selected_elements = []
                 for e in connected.elements:
                     for i, p in enumerate(self.file_data):
                         if e in self.file_data[i].elements:
                             self.file_data[i].elements.remove(e)
+                self.file_data.append(connected)
 
 ee = EVEnum()
 ep = EventProcessor()
