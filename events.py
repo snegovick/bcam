@@ -8,6 +8,7 @@ from state import state
 from tool_op_drill import TODrill
 from settings import settings
 from calc_utils import AABB, OverlapEnum
+from path import Path
 
 class EVEnum:
     load_click = "load_click"
@@ -16,6 +17,7 @@ class EVEnum:
     screen_left_release = "screen_left_release"
     pointer_motion = "pointer_motion"
     drill_tool_click = "drill_tool_click"
+    join_elements_click = "join_elements_click"
 
 class EventProcessor(object):
     ee = EVEnum()
@@ -33,7 +35,8 @@ class EventProcessor(object):
             self.ee.screen_left_press: self.screen_left_press,
             self.ee.screen_left_release: self.screen_left_release,
             self.ee.pointer_motion: self.pointer_motion,
-            self.ee.drill_tool_click: self.drill_tool_click
+            self.ee.drill_tool_click: self.drill_tool_click,
+            self.ee.join_elements_click: self.join_elements_click
         }
 
     def push_event(self, event, *args):
@@ -152,6 +155,18 @@ class EventProcessor(object):
             if drl_op.apply(e):
                 self.operations.append(drl_op)
         print self.operations
+
+    def join_elements_click(self, args):
+        if self.selected_elements!=None:
+            print self.selected_elements
+            p = Path(self.selected_elements, "path")
+            connected = p.mk_connected_path()
+            if connected != None:
+                self.selected_elements = []
+                for e in connected.elements:
+                    for i, p in enumerate(self.file_data):
+                        if e in self.file_data[i].elements:
+                            self.file_data[i].elements.remove(e)
 
 ee = EVEnum()
 ep = EventProcessor()

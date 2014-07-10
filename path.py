@@ -1,8 +1,9 @@
 from state import state
 from elements import *
+from calc_utils import pt_to_pt_dist
 
 
-class Path(object):
+class Path(Element):
     def __init__(self, elements, name):
         self.elements = elements
         self.name = name
@@ -12,33 +13,47 @@ class Path(object):
 
     def mk_connected_path(self):
         if len(self.elements)==0:
-            return False
+            return None
+        available = self.elements[:]
         ce = [] # connected elements go here
         s = self.elements[0]
         ce.append(s)
+        del available[0]
         while True:
+            if len(available)==0:
+                break
             cont = False
             current = ce[-1]
-            for e in self.elements:
+            min_dist = pt_to_pt_dist(available[0].start, current.end)
+            min_dist_id = 0
+            for i, e in enumerate(available):
                 if not e.joinable:
                     continue
-
-                if e not in ce:
-                    if abs(e.start[0]-current.end[0])<0.001 and abs(e.start[1]-current.end[1])<0.001:
-                        ce.append(e)
-                        cont = True
-                        break
+                dists = []
+                dists.append(pt_to_pt_dist(e.start, current.end))
+                dists.append(pt_to_pt_dist(e.end, current.start))
+                dists.append(pt_to_pt_dist(e.end, current.end))
+                dists.append(pt_to_pt_dist(e.start, current.start))
+                md = min(dists)
+                print dists
+                if md<min_dist:
+                    min_dist = md
+                    min_dist_id = i
+            if (min_dist<0.001):
+                ce.append(available[i])
+                del available[i]
+                cont = True
 
             if not cont:
-                print "havent found next for", current
+                print "Ive tried hard, but still no success, so break"
                 break
 
         if abs(ce[0].start[0]-ce[-1].end[0])<0.001 and abs(ce[0].start[1]-ce[-1].end[1])<0.001:
             pass # have to move joined path to separate subpath
+        print "len(self.elements):", len(self.elements), "len(ce):", len(ce)
         if len(self.elements) == len(ce):
-            self.elements = ce
-            return True
-        return False
+            return Path(ce, self.name+".sub")
+        return None
 
     def set_closed(self):
         self.closed = True

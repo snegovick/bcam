@@ -87,8 +87,14 @@ class MainWindow(object):
         self.left_vbox.pack_start(self.paths_label, expand=False, fill=False, padding=0)
         self.left_vbox.pack_start(self.scrolled_window, expand=True, fill=True, padding=0)
 
-        self.available_tools_label = gtk.Label("Tools")
+        self.tool_ops_label = gtk.Label("Tool operations")
         self.drill_tool_button = gtk.Button("Drill")
         self.drill_tool_button.connect("clicked", lambda *args: ep.push_event(ee.drill_tool_click, args))
-        self.left_vbox.pack_start(self.available_tools_label, expand=False, fill=False, padding=0)
+        self.left_vbox.pack_start(self.tool_ops_label, expand=False, fill=False, padding=0)
         self.left_vbox.pack_start(self.drill_tool_button, expand=False, fill=False, padding=0)
+
+        self.tools_label = gtk.Label("Tools")
+        self.mk_connected_path = gtk.Button("Join elements")
+        self.mk_connected_path.connect("clicked", lambda *args: ep.push_event(ee.join_elements_click, args))
+        self.left_vbox.pack_start(self.tools_label, expand=False, fill=False, padding=0)
+        self.left_vbox.pack_start(self.mk_connected_path, expand=False, fill=False, padding=0)
