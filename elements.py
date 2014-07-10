@@ -1,5 +1,5 @@
 import math
-from calc_utils import AABB, CircleUtils, LineUtils
+from calc_utils import AABB, CircleUtils, LineUtils, ArcUtils
 
 class Element(object):
     def __init__(self, lt):
@@ -75,7 +75,12 @@ class EArc(Element):
         ctx.stroke()
 
     def distance_to_pt(self, pt):
-        return 1000
+        au = ArcUtils(self.center, self.radius, self.startangle, self.endangle)
+        return au.distance_to_pt(pt)
+
+    def get_aabb(self):
+        au = ArcUtils(self.center, self.radius, self.startangle, self.endangle)
+        return au.get_aabb()
 
     def __repr__(self):
         return "EArc ("+str(self.start)+", "+str(self.end)+")\r\n"

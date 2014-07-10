@@ -72,6 +72,33 @@ class CircleUtils:
             return 0 if dist<0 else dist
         return abs(dist)
 
+class ArcUtils:
+    def __init__(self, center, radius, startangle, endangle):
+        self.center = center
+        self.radius = radius
+        self.sa = startangle
+        self.ea = endangle
+        self.start = (self.center[0]+math.cos(self.sa)*self.radius, self.center[1]+math.sin(self.sa)*self.radius)
+        self.end = (self.center[0]+math.cos(self.ea)*self.radius, self.center[1]+math.sin(self.ea)*self.radius)
+
+    def get_aabb(self):
+        x_min = min(self.start[0], self.end[0], self.center[0])
+        y_min = min(self.start[1], self.end[1], self.center[1])
+        x_max = max(self.start[0], self.end[0], self.center[0])
+        y_max = max(self.start[1], self.end[1], self.center[1])
+
+        return AABB(x_min, y_min, x_max, y_max)
+
+    def distance_to_pt(self, pt):
+        a = math.atan2(self.center[1]-pt[1], self.center[0]-pt[0])
+        if a>=self.sa and a<=self.ea:
+            dist = pt_to_pt_dist(pt, self.center)-self.radius
+        elif a<self.sa:
+            dist = pt_to_pt_dist(pt, self.start)
+        elif a<self.ea:
+            dist = pt_to_pt_dist(pt, self.end)
+        return abs(dist)
+
 class LineUtils:
     def __init__(self, start, end):
         self.start = start
