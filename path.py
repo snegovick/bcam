@@ -13,6 +13,30 @@ class Path(object):
     def add_element(self, e):
         self.elements.append(e)
 
+    def __find_adjacent_element(self, current, available):
+        min_dist = pt_to_pt_dist(available[0].start, current.end)
+        min_dist_id = 0
+        min_order = {"turnaround": False, "offset": 1}
+        for i, e in enumerate(available):
+            orders = []
+            dists = []
+            dists.append(pt_to_pt_dist(e.start, current.end))
+            orders.append({"turnaround": False, "offset": 1})
+            dists.append(pt_to_pt_dist(e.end, current.start))
+            orders.append({"turnaround": False, "offset": -1})
+            dists.append(pt_to_pt_dist(e.end, current.end))
+            orders.append({"turnaround": True, "offset": 1})
+            dists.append(pt_to_pt_dist(e.start, current.start))
+            orders.append({"turnaround": True, "offset": -1})
+            md = min(dists)
+            #print dists
+            if md<min_dist:
+                min_dist = md
+                min_dist_id = i
+                min_order = orders[dists.index(md)]
+                #print "md, i:", md, i
+        return min_dist, min_dist_id, min_order
+
     def mk_connected_path(self):
         if len(self.elements)==0:
             return None
@@ -43,32 +67,13 @@ class Path(object):
             if len(available)==0:
                 break
             cont = False
-            current = ce[-1]
+            current = (ce[-1], ce[0])
             #print ce
             #print "available[0]:", available[0]
             #print "current:", current
-            min_dist = pt_to_pt_dist(available[0].start, current.end)
-            min_dist_id = 0
-            min_order = {"turnaround": False, "offset": 1}
-            for i, e in enumerate(available):
-                orders = []
-                dists = []
-                dists.append(pt_to_pt_dist(e.start, current.end))
-                orders.append({"turnaround": False, "offset": 1})
-                dists.append(pt_to_pt_dist(e.end, current.start))
-                orders.append({"turnaround": False, "offset": -1})
-                dists.append(pt_to_pt_dist(e.end, current.end))
-                orders.append({"turnaround": True, "offset": 1})
-                dists.append(pt_to_pt_dist(e.start, current.start))
-                orders.append({"turnaround": True, "offset": -1})
-                md = min(dists)
-                #print dists
-                if md<min_dist:
-                    min_dist = md
-                    min_dist_id = i
-                    min_order = orders[dists.index(md)]
-                    print "md, i:", md, i
+            min_dist, min_dist_id, min_order = self.__find_adjacent_element(current[0], available)
             if (min_dist<0.001):
+                i = min_dist_id
                 ce.append(available[i])
                 if min_order["offset"] == 1:
                     if min_order["turnaround"] == False:
@@ -82,6 +87,23 @@ class Path(object):
                         self.ordered_elements.insert(len(self.ordered_elements)-2, available[i].turnaround())
                 del available[i]
                 cont = True
+            if not cont:
+                min_dist, min_dist_id, min_order = self.__find_adjacent_element(current[1], available)
+                if (min_dist<0.001):
+                    i = min_dist_id
+                    ce.append(available[i])
+                    if min_order["offset"] == 1:
+                        if min_order["turnaround"] == False:
+                            self.ordered_elements.append(available[i])
+                        else:
+                            self.ordered_elements.append(available[i].turnaround())
+                    else:
+                        if min_order["turnaround"] == False:
+                            self.ordered_elements.insert(len(self.ordered_elements)-2, available[i])
+                        else:
+                            self.ordered_elements.insert(len(self.ordered_elements)-2, available[i].turnaround())
+                    del available[i]
+                    cont = True
 
             if not cont:
                 print "Ive tried hard, but still no success, so break"

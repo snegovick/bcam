@@ -86,6 +86,7 @@ class MainWindow(object):
         self.paths_label = gtk.Label("Paths")
         self.scrolled_window = gtk.ScrolledWindow()
         self.gtklist = gtk.List()
+        self.gtklist.connect("selection_changed", lambda *args: ep.push_event(ee.path_list_selection_changed, args))
         self.scrolled_window.add_with_viewport(self.gtklist)
         self.left_vbox.pack_start(self.paths_label, expand=False, fill=False, padding=0)
         self.left_vbox.pack_start(self.scrolled_window, expand=True, fill=True, padding=0)

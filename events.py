@@ -22,6 +22,7 @@ class EVEnum:
     shift_press = "shift_press"
     shift_release = "shift_release"
     update_paths_list = "update_paths_lilst"
+    path_list_selection_changed = "path_list_selection_changed"
 
 class EventProcessor(object):
     ee = EVEnum()
@@ -45,7 +46,8 @@ class EventProcessor(object):
             self.ee.deselect_all: self.deselect_all,
             self.ee.shift_press: self.shift_press,
             self.ee.shift_release: self.shift_release,
-            self.ee.update_paths_list: self.update_paths_list
+            self.ee.update_paths_list: self.update_paths_list,
+            self.ee.path_list_selection_changed: self.path_list_selection_changed
         }
 
     def push_event(self, event, *args):
@@ -88,6 +90,8 @@ class EventProcessor(object):
             for c in children:
                 self.mw.gtklist.remove(c)
             for p in self.file_data:
+                if p.name[0] == '*':
+                    continue
                 label = gtk.Label(p.name)
                 list_item = gtk.ListItem()
                 list_item.add(label)
@@ -204,6 +208,18 @@ class EventProcessor(object):
 
     def shift_release(self, args):
         self.shift_pressed = False
+
+    def path_list_selection_changed(self, args):
+        selection = args[0][0].get_selection()
+        self.deselect_all(None)
+        for li in selection:
+            name = li.children()[0].get_text()
+            for p in self.file_data:
+                if p.name == name:
+                    for e in p.elements:
+                        if not e in self.selected_elements:
+                            e.set_selected()
+                            self.selected_elements.append(e)
 
 
 ee = EVEnum()
