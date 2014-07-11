@@ -7,6 +7,9 @@ class Element(object):
         self.lt = lt
         self.operations = {"drill": False}
 
+    def draw_element(self, ctx):
+        pass
+
     def draw(self, ctx):
         pass
 
@@ -43,11 +46,14 @@ class ELine(Element):
         self.start = start
         self.end = end
         self.joinable = True
+
+    def draw_element(self, ctx):
+        ctx.move_to(self.start[0], self.start[1])
+        ctx.line_to(self.end[0], self.end[1])
     
     def draw(self, ctx):
         self.set_lt(ctx)
-        ctx.move_to(self.start[0], self.start[1])
-        ctx.line_to(self.end[0], self.end[1])
+        self.draw_element(ctx)
         ctx.stroke()
 
     def distance_to_pt(self, pt):
@@ -62,7 +68,7 @@ class ELine(Element):
         return lu.get_aabb()
 
     def __repr__(self):
-        return "ELine ("+str(self.start)+", "+str(self.end)+")\r\n"
+        return "<ELine ("+str(self.start)+", "+str(self.end)+")>\r\n"
 
 class EArc(Element):
     def __init__(self, center, radius, startangle, endangle, lt):
@@ -76,10 +82,13 @@ class EArc(Element):
         self.end = (self.center[0]+math.cos(self.endangle)*self.radius, self.center[1]+math.sin(self.endangle)*self.radius)
 
         self.joinable = True
+
+    def draw_element(self, ctx):
+        ctx.arc(self.center[0], self.center[1], self.radius, self.startangle, self.endangle)
     
     def draw(self, ctx):
         self.set_lt(ctx)
-        ctx.arc(self.center[0], self.center[1], self.radius, self.startangle, self.endangle)
+        self.draw_element(ctx)
         ctx.stroke()
 
     def turnaround(self):
@@ -94,7 +103,7 @@ class EArc(Element):
         return au.get_aabb()
 
     def __repr__(self):
-        return "EArc ("+str(self.start)+", "+str(self.end)+")\r\n"
+        return "<EArc ("+str(self.start)+", "+str(self.end)+")>\r\n"
 
 class ECircle(Element):
     def __init__(self, center, radius, lt):
@@ -105,10 +114,13 @@ class ECircle(Element):
         self.end = None
         self.joinable = False
         self.operations["drill"] = True
+
+    def draw_element(self, ctx):
+        ctx.arc(self.center[0], self.center[1], self.radius, 0, math.pi*2)
         
     def draw(self, ctx):
         self.set_lt(ctx)
-        ctx.arc(self.center[0], self.center[1], self.radius, 0, math.pi*2)
+        self.draw_element(ctx)
         ctx.stroke()
 
     def distance_to_pt(self, pt):
@@ -120,4 +132,4 @@ class ECircle(Element):
         return cu.get_aabb()
         
     def __repr__(self):
-        return "ECircle (center: "+str(self.center)+", r: "+str(self.radius)+")\r\n"
+        return "<ECircle (center: "+str(self.center)+", r: "+str(self.radius)+")>\r\n"

@@ -6,6 +6,7 @@ import sys
 from loader_dxf import DXFLoader
 from state import state
 from tool_op_drill import TODrill
+from tool_op_exact_follow import TOExactFollow
 from settings import settings
 from calc_utils import AABB, OverlapEnum
 from path import Path
@@ -23,12 +24,14 @@ class EVEnum:
     shift_release = "shift_release"
     update_paths_list = "update_paths_lilst"
     path_list_selection_changed = "path_list_selection_changed"
+    exact_follow_tool_click = "exact_follow_tool_click"
 
 class EventProcessor(object):
     ee = EVEnum()
     file_data = None
     event_list = []
     selected_elements = []
+    selected_path = None
     operations = []
     left_press_start = None
     pointer_position = None
@@ -47,7 +50,8 @@ class EventProcessor(object):
             self.ee.shift_press: self.shift_press,
             self.ee.shift_release: self.shift_release,
             self.ee.update_paths_list: self.update_paths_list,
-            self.ee.path_list_selection_changed: self.path_list_selection_changed
+            self.ee.path_list_selection_changed: self.path_list_selection_changed,
+            self.ee.exact_follow_tool_click: self.exact_follow_tool_click,
         }
 
     def push_event(self, event, *args):
@@ -212,15 +216,23 @@ class EventProcessor(object):
     def path_list_selection_changed(self, args):
         selection = args[0][0].get_selection()
         self.deselect_all(None)
+        self.selected_path = None
         for li in selection:
             name = li.children()[0].get_text()
             for p in self.file_data:
                 if p.name == name:
+                    self.selected_path = p
                     for e in p.elements:
                         if not e in self.selected_elements:
                             e.set_selected()
                             self.selected_elements.append(e)
 
+    def exact_follow_tool_click(self, args):
+        print "exact follow tool click:", args
+        print "selected path:", self.selected_path
+        if self.selected_path != None:
+            path_follow_op = TOExactFollow(settings, self.selected_path)
+            self.operations.append(path_follow_op)
 
 ee = EVEnum()
 ep = EventProcessor()

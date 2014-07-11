@@ -22,7 +22,7 @@ class LineType:
 
 class Settings:
     def __init__(self):
-        self.line_types = {"default": LineType(0.2, 0.5, (0,0,0), (1,0,0))}
+        self.line_types = {"default": LineType(0.08, 0.1, (0,0,0), (1,0,0))}
         self.tool = Tool("cylinder", ToolType.cylinder)
         self.select_box_lt = LineType(0.1, 0.1, (0, 1, 0, 0.2), (0, 1, 0, 0.2))
 

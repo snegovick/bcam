@@ -31,4 +31,4 @@ class TODrill(ToolOperation):
         return False
 
     def __repr__(self):
-        return "Drill at "+str(self.center)
+        return "<Drill at "+str(self.center)+">"

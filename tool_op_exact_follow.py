@@ -7,28 +7,33 @@ class TOExactFollow(ToolOperation):
         self.name = "exact follow"
         self.depth = depth
         self.path = path
-\
+
     def set_lt(self, ctx):
         ctx.set_source_rgb(1, 0, 0)
-        ctx.set_line_width(3)
+        ctx.set_line_width(0.3)
 
     def set_fill_lt(self, ctx):
         ctx.set_source_rgba(1, 0, 0, 0.5)
-        ctx.set_line_width(2.9)
+        ctx.set_line_width(0.29)
+
+    def __draw_elements(self, ctx):
+        for e in self.path.elements:
+            #class_name = type(e).__name__
+            e.draw_element(ctx)
 
     def draw(self, ctx):
         self.set_lt(ctx)
-        ctx.arc(self.center[0], self.center[1], self.tool.diameter/2.0, 0, 2*math.pi);
+        self.__draw_elements(ctx)
         ctx.stroke()
         self.set_fill_lt(ctx)
-        ctx.arc(self.center[0], self.center[1], self.tool.diameter/2.0, 0, 2*math.pi);
+        self.__draw_elements(ctx)
         ctx.stroke()
 
-    def apply(self, element):
+    def apply(self, path):
         if (element.operations[self.name]):
             self.center = element.center
             return True
         return False
 
     def __repr__(self):
-        return "Exact follow at "+str(self.center)
+        return "<Exact follow>"
