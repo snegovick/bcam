@@ -21,6 +21,7 @@ class EVEnum:
     deselect_all = "deselect_all"
     shift_press = "shift_press"
     shift_release = "shift_release"
+    update_paths_list = "update_paths_lilst"
 
 class EventProcessor(object):
     ee = EVEnum()
@@ -43,7 +44,8 @@ class EventProcessor(object):
             self.ee.join_elements_click: self.join_elements_click,
             self.ee.deselect_all: self.deselect_all,
             self.ee.shift_press: self.shift_press,
-            self.ee.shift_release: self.shift_release
+            self.ee.shift_release: self.shift_release,
+            self.ee.update_paths_list: self.update_paths_list
         }
 
     def push_event(self, event, *args):
@@ -80,11 +82,11 @@ class EventProcessor(object):
             #print 'Closed, no files selected'
         dialog.destroy()
 
-    def load_file(self, args):
-        print "load file", args
-        dxfloader = DXFLoader()
-        self.file_data = dxfloader.load(args[0])
+    def update_paths_list(self, args):
         if self.file_data != None:
+            children = self.mw.gtklist.children()
+            for c in children:
+                self.mw.gtklist.remove(c)
             for p in self.file_data:
                 label = gtk.Label(p.name)
                 list_item = gtk.ListItem()
@@ -92,6 +94,12 @@ class EventProcessor(object):
                 list_item.show()
                 label.show()
                 self.mw.gtklist.add(list_item)
+
+    def load_file(self, args):
+        print "load file", args
+        dxfloader = DXFLoader()
+        self.file_data = dxfloader.load(args[0])
+        self.push_event(self.ee.update_paths_list, (None))
 
     def screen_left_press(self, args):
         print "press at", args
@@ -184,6 +192,7 @@ class EventProcessor(object):
                         if e in self.file_data[i].elements:
                             self.file_data[i].elements.remove(e)
                 self.file_data.append(connected)
+                self.push_event(self.ee.update_paths_list, (None))
 
     def deselect_all(self, args):
         for e in self.selected_elements:
