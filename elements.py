@@ -16,6 +16,9 @@ class Element(object):
     def get_aabb(self):
         return None
 
+    def turnaround(self):
+        return None
+
     def set_selected(self):
         self.selected = True
 
@@ -51,6 +54,8 @@ class ELine(Element):
         lu = LineUtils(self.start, self.end)
         return lu.distance_to_pt(pt)
 
+    def turnaround(self):
+        return ELine(self.end, self.start, self.lt)
 
     def get_aabb(self):
         lu = LineUtils(self.start, self.end)
@@ -76,6 +81,9 @@ class EArc(Element):
         self.set_lt(ctx)
         ctx.arc(self.center[0], self.center[1], self.radius, self.startangle, self.endangle)
         ctx.stroke()
+
+    def turnaround(self):
+        return ELine(self.center, self.radius, self.endangle, self.startangle, self.lt)
 
     def distance_to_pt(self, pt):
         au = ArcUtils(self.center, self.radius, self.startangle, self.endangle)

@@ -7,6 +7,8 @@ class Path(object):
     def __init__(self, elements, name):
         self.elements = elements
         self.name = name
+        self.order = None
+        self.ordered_elements = []
 
     def add_element(self, e):
         self.elements.append(e)
@@ -32,7 +34,9 @@ class Path(object):
             return None
 
         #find first joinable
+        self.order = [0]
         ce.append(available[0])
+        self.ordered_elements = [available[0]]
         del available[0]
 
         while True:
@@ -45,20 +49,37 @@ class Path(object):
             #print "current:", current
             min_dist = pt_to_pt_dist(available[0].start, current.end)
             min_dist_id = 0
+            min_order = {"turnaround": False, "offset": 1}
             for i, e in enumerate(available):
+                orders = []
                 dists = []
                 dists.append(pt_to_pt_dist(e.start, current.end))
+                orders.append({"turnaround": False, "offset": 1})
                 dists.append(pt_to_pt_dist(e.end, current.start))
+                orders.append({"turnaround": False, "offset": -1})
                 dists.append(pt_to_pt_dist(e.end, current.end))
+                orders.append({"turnaround": True, "offset": 1})
                 dists.append(pt_to_pt_dist(e.start, current.start))
+                orders.append({"turnaround": True, "offset": -1})
                 md = min(dists)
                 #print dists
                 if md<min_dist:
                     min_dist = md
                     min_dist_id = i
+                    min_order = orders[dists.index(md)]
                     print "md, i:", md, i
             if (min_dist<0.001):
                 ce.append(available[i])
+                if min_order["offset"] == 1:
+                    if min_order["turnaround"] == False:
+                        self.ordered_elements.append(available[i])
+                    else:
+                        self.ordered_elements.append(available[i].turnaround())
+                else:
+                    if min_order["turnaround"] == False:
+                        self.ordered_elements.insert(len(self.ordered_elements)-2, available[i])
+                    else:
+                        self.ordered_elements.insert(len(self.ordered_elements)-2, available[i].turnaround())
                 del available[i]
                 cont = True
 

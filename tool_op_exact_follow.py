@@ -2,12 +2,12 @@ import math
 from tool_operation import ToolOperation
 
 class TOExactFollow(ToolOperation):
-    def __init__(self, settings, center=None, depth=None):
+    def __init__(self, settings, path, depth=None):
         super(TOExactFollow, self).__init__(settings)
-        self.name = "drill"
-        self.center = center
+        self.name = "exact follow"
         self.depth = depth
-
+        self.path = path
+\
     def set_lt(self, ctx):
         ctx.set_source_rgb(1, 0, 0)
         ctx.set_line_width(3)
