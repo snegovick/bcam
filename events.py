@@ -270,6 +270,10 @@ class EventProcessor(object):
 
     def update_settings(self, args):
         print "settings update:", args
+        new_value = args[0][1][0].get_value()
+        setting = args[0][0]
+        setting.set_value(new_value)
+        
 
 ee = EVEnum()
 ep = EventProcessor()

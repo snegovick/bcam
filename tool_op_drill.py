@@ -1,5 +1,5 @@
 import math
-from tool_operation import ToolOperation, TOEnum, TOSetting, TOSettingsEnum
+from tool_operation import ToolOperation, TOEnum, TOSetting
 from state import state
 from settings import settings
 
@@ -7,7 +7,10 @@ class TODrill(ToolOperation):
     def __init__(self, settings, center=None, depth=None):
         super(TODrill, self).__init__(settings)
         self.name = TOEnum.drill
-        self.center = center
+        if center!=None:
+            self.center = list(center)
+        else:
+            self.center = None
         self.depth = depth
 
     def set_lt(self, ctx):
@@ -29,7 +32,7 @@ class TODrill(ToolOperation):
     def apply(self, element, depth=0):
         self.depth = depth
         if (element.operations[self.name]):
-            self.center = element.center
+            self.center = list(element.center)
             print self.get_gcode()
             return True
         return False
@@ -41,10 +44,19 @@ class TODrill(ToolOperation):
             self.center = args["center"]
 
     def get_settings_list(self):
-        settings_lst = [TOSetting(TOSettingsEnum.drill_depth, "float", 0, settings.material.thickness, self.depth, "Depth", self),
-                       TOSetting(TOSettingsEnum.drill_center_x, "float", None, None, self.center[0], "Center x", self),
-                       TOSetting(TOSettingsEnum.drill_center_y, "float", None, None, self.center[1], "Center y", self)]
+        settings_lst = [TOSetting("float", 0, settings.material.thickness, self.depth, "Depth", self.set_depth_s),
+                        TOSetting("float", None, None, self.center[0], "Center x", self.set_center_x_s),
+                        TOSetting("float", None, None, self.center[1], "Center y", self.set_center_y_s)]
         return settings_lst
+
+    def set_depth_s(self, setting):
+        self.depth = setting.new_value
+
+    def set_center_x_s(self, setting):
+        self.center[0] = setting.new_value
+
+    def set_center_y_s(self, setting):
+        self.center[1] = setting.new_value
 
     def get_gcode(self):
         print self.tool.diameter
