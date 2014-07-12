@@ -1,14 +1,17 @@
 from state import state
 from elements import *
 from calc_utils import pt_to_pt_dist
+from tool_operation import TOEnum
+from settings import settings
 
 
-class Path(object):
-    def __init__(self, elements, name):
+class Path(Element):
+    def __init__(self, elements, name, lt):
+        super(Path, self).__init__(lt)
         self.elements = elements
         self.name = name
-        self.order = None
         self.ordered_elements = []
+        self.operations[TOEnum.exact_follow] = True
 
     def add_element(self, e):
         self.elements.append(e)
@@ -60,7 +63,7 @@ class Path(object):
         #find first joinable
         self.order = [0]
         ce.append(available[0])
-        self.ordered_elements = [available[0]]
+        ordered_elements = [available[0]]
         del available[0]
 
         while True:
@@ -77,14 +80,14 @@ class Path(object):
                 ce.append(available[i])
                 if min_order["offset"] == 1:
                     if min_order["turnaround"] == False:
-                        self.ordered_elements.append(available[i])
+                        ordered_elements.append(available[i])
                     else:
-                        self.ordered_elements.append(available[i].turnaround())
+                        ordered_elements.append(available[i].turnaround())
                 else:
                     if min_order["turnaround"] == False:
-                        self.ordered_elements.insert(len(self.ordered_elements)-2, available[i])
+                        ordered_elements.insert(len(ordered_elements)-2, available[i])
                     else:
-                        self.ordered_elements.insert(len(self.ordered_elements)-2, available[i].turnaround())
+                        ordered_elements.insert(len(ordered_elements)-2, available[i].turnaround())
                 del available[i]
                 cont = True
             if not cont:
@@ -94,14 +97,14 @@ class Path(object):
                     ce.append(available[i])
                     if min_order["offset"] == 1:
                         if min_order["turnaround"] == False:
-                            self.ordered_elements.append(available[i])
+                            ordered_elements.append(available[i])
                         else:
-                            self.ordered_elements.append(available[i].turnaround())
+                            ordered_elements.append(available[i].turnaround())
                     else:
                         if min_order["turnaround"] == False:
-                            self.ordered_elements.insert(len(self.ordered_elements)-2, available[i])
+                            ordered_elements.insert(len(ordered_elements)-2, available[i])
                         else:
-                            self.ordered_elements.insert(len(self.ordered_elements)-2, available[i].turnaround())
+                            ordered_elements.insert(len(ordered_elements)-2, available[i].turnaround())
                     del available[i]
                     cont = True
 
@@ -114,8 +117,9 @@ class Path(object):
         print "available len", available_len, "len(ce):", len(ce)
         print available
         #if available_len == len(ce):
-        return Path(ce, self.name+".sub")
-        return None
+        p = Path(ce, self.name+".sub", settings.get_def_lt())
+        p.ordered_elements = ordered_elements
+        return p
 
     def set_closed(self):
         self.closed = True

@@ -25,7 +25,7 @@ class DXFLoader(loader.SourceLoader):
         de = DXFEnum()
         paths = []
         for b in blocks:
-            p = Path([], b.name)
+            p = Path([], b.name, settings.get_def_lt())
             for e in b:
                 if e.dxftype == de.line:
                     el = ELine(tuple(e.start[:2]), tuple(e.end[:2]), settings.get_def_lt())

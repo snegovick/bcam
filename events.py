@@ -191,7 +191,7 @@ class EventProcessor(object):
     def join_elements_click(self, args):
         if self.selected_elements!=None:
             print self.selected_elements
-            p = Path(self.selected_elements, "path")
+            p = Path(self.selected_elements, "path", settings.get_def_lt())
             connected = p.mk_connected_path()
             if connected != None:
                 self.deselect_all(None)
@@ -231,8 +231,9 @@ class EventProcessor(object):
         print "exact follow tool click:", args
         print "selected path:", self.selected_path
         if self.selected_path != None:
-            path_follow_op = TOExactFollow(settings, self.selected_path)
-            self.operations.append(path_follow_op)
+            path_follow_op = TOExactFollow(settings)
+            if path_follow_op.apply(self.selected_path):
+                self.operations.append(path_follow_op)
 
 ee = EVEnum()
 ep = EventProcessor()

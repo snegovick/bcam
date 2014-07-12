@@ -1,10 +1,11 @@
 import math
-from tool_operation import ToolOperation
+from tool_operation import ToolOperation, TOEnum
+from state import state
 
 class TODrill(ToolOperation):
     def __init__(self, settings, center=None, depth=None):
         super(TODrill, self).__init__(settings)
-        self.name = "drill"
+        self.name = TOEnum.drill
         self.center = center
         self.depth = depth
 
@@ -18,10 +19,10 @@ class TODrill(ToolOperation):
 
     def draw(self, ctx):
         self.set_lt(ctx)
-        ctx.arc(self.center[0], self.center[1], self.tool.diameter/2.0, 0, 2*math.pi);
+        ctx.arc(self.center[0], self.center[1], (self.tool.diameter/2.0), 0, 2*math.pi);
         ctx.stroke()
         self.set_fill_lt(ctx)
-        ctx.arc(self.center[0], self.center[1], self.tool.diameter/2.0, 0, 2*math.pi);
+        ctx.arc(self.center[0], self.center[1], (self.tool.diameter/2.0), 0, 2*math.pi);
         ctx.fill()
 
     def apply(self, element):

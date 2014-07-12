@@ -1,11 +1,13 @@
 import math
 from calc_utils import AABB, CircleUtils, LineUtils, ArcUtils
+from tool_operation import TOEnum
 
 class Element(object):
     def __init__(self, lt):
         self.selected = False
         self.lt = lt
-        self.operations = {"drill": False}
+        self.operations = {TOEnum.drill: False,
+                           TOEnum.exact_follow: False}
 
     def draw_element(self, ctx):
         pass
@@ -46,14 +48,18 @@ class ELine(Element):
         self.start = start
         self.end = end
         self.joinable = True
+        self.operations[TOEnum.exact_follow] = True
+
+    def draw_first(self, ctx):
+        ctx.move_to(self.start[0], self.start[1])
+        ctx.line_to(self.end[0], self.end[1])
 
     def draw_element(self, ctx):
-        ctx.move_to(self.start[0], self.start[1])
         ctx.line_to(self.end[0], self.end[1])
     
     def draw(self, ctx):
         self.set_lt(ctx)
-        self.draw_element(ctx)
+        self.draw_first(ctx)
         ctx.stroke()
 
     def distance_to_pt(self, pt):
@@ -82,6 +88,7 @@ class EArc(Element):
         self.end = (self.center[0]+math.cos(self.endangle)*self.radius, self.center[1]+math.sin(self.endangle)*self.radius)
 
         self.joinable = True
+        self.operations[TOEnum.exact_follow] = True
 
     def draw_element(self, ctx):
         ctx.arc(self.center[0], self.center[1], self.radius, self.startangle, self.endangle)
@@ -113,7 +120,7 @@ class ECircle(Element):
         self.start = None
         self.end = None
         self.joinable = False
-        self.operations["drill"] = True
+        self.operations[TOEnum.drill] = True
 
     def draw_element(self, ctx):
         ctx.arc(self.center[0], self.center[1], self.radius, 0, math.pi*2)
