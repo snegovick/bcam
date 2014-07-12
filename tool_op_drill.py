@@ -1,5 +1,5 @@
 import math
-from tool_operation import ToolOperation, TOEnum, TOSetting
+from tool_operation import ToolOperation, TOEnum, TOSetting, TOSettingsEnum
 from state import state
 from settings import settings
 
@@ -41,9 +41,9 @@ class TODrill(ToolOperation):
             self.center = args["center"]
 
     def get_settings_list(self):
-        settings_lst = [{"name": "depth", "type": "float", "min": 0, "max": settings.material.thickness, "default": self.depth, "setting_name": TOSetting.drill_depth},
-                        {"name": "center x", "type": "float", "default": self.center[0], "min": None, "max": None, "setting_name": TOSetting.drill_center_x},
-                        {"name": "center y", "type": "float", "default": self.center[1], "min": None, "max": None, "setting_name": TOSetting.drill_center_y}]
+        settings_lst = [TOSetting(TOSettingsEnum.drill_depth, "float", 0, settings.material.thickness, self.depth, "Depth", self),
+                       TOSetting(TOSettingsEnum.drill_center_x, "float", None, None, self.center[0], "Center x", self),
+                       TOSetting(TOSettingsEnum.drill_center_y, "float", None, None, self.center[1], "Center y", self)]
         return settings_lst
 
     def get_gcode(self):

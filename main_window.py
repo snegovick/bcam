@@ -45,8 +45,8 @@ class MainWindow(object):
         print settings_lst
         for s in settings_lst:
             dct = {}
-            if s["type"] == "float":
-                w = self.__mk_labeled_spin(dct, s["name"], s["setting_name"], None, s["default"], s["min"], s["max"])
+            if s.type == "float":
+                w = self.__mk_labeled_spin(dct, s.display_name, s, None, s.default, s.min, s.max)
                 self.settings_vb.pack_start(w, expand=False, fill=False, padding=0)
         self.right_vbox.pack_start(self.settings_vb, expand=False, fill=False, padding=0)
         self.settings_vb.show()
