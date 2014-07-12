@@ -4,7 +4,7 @@ from state import state
 from settings import settings
 
 class TODrill(ToolOperation):
-    def __init__(self, settings, center=None, depth=None):
+    def __init__(self, settings, center=None, depth=0):
         super(TODrill, self).__init__(settings)
         self.name = TOEnum.drill
         if center!=None:
@@ -37,16 +37,10 @@ class TODrill(ToolOperation):
             return True
         return False
 
-    def update(self, args):
-        if "depth" in args:
-            self.depth = args["depth"]
-        if "center" in args:
-            self.center = args["center"]
-
     def get_settings_list(self):
-        settings_lst = [TOSetting("float", 0, settings.material.thickness, self.depth, "Depth", self.set_depth_s),
-                        TOSetting("float", None, None, self.center[0], "Center x", self.set_center_x_s),
-                        TOSetting("float", None, None, self.center[1], "Center y", self.set_center_y_s)]
+        settings_lst = [TOSetting("float", 0, settings.material.thickness, self.depth, "Depth, mm: ", self.set_depth_s),
+                        TOSetting("float", None, None, self.center[0], "Center x, mm: ", self.set_center_x_s),
+                        TOSetting("float", None, None, self.center[1], "Center y, mm: ", self.set_center_y_s)]
         return settings_lst
 
     def set_depth_s(self, setting):

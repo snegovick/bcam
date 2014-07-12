@@ -39,17 +39,16 @@ class MainWindow(object):
         gtk.main()
 
     def new_settings_vbox(self, settings_lst):
+        for c in self.settings_vb.children():
+            self.settings_vb.remove(c)
         if settings_lst == None:
             return
-        self.settings_vb = gtk.VBox(homogeneous=False, spacing=0)
         print settings_lst
         for s in settings_lst:
             dct = {}
             if s.type == "float":
                 w = self.__mk_labeled_spin(dct, s.display_name, s, None, s.default, s.min, s.max)
                 self.settings_vb.pack_start(w, expand=False, fill=False, padding=0)
-        self.right_vbox.pack_start(self.settings_vb, expand=False, fill=False, padding=0)
-        self.settings_vb.show()
 
     def __mk_labeled_spin(self, dct, mlabel, data=None, callback=None, value=3.0, lower=-999.0, upper=999.0, step_incr=0.01, page_incr=0.5):
         if lower == None:
@@ -95,6 +94,9 @@ class MainWindow(object):
 
         self.tool_label = gtk.Label("Pocketing settings")
         self.right_vbox.pack_start(self.tool_label, expand=False, fill=False, padding=0)
+
+        self.settings_vb = gtk.VBox(homogeneous=False, spacing=0)
+        self.right_vbox.pack_start(self.settings_vb, expand=False, fill=False, padding=0)
 
     def __mk_left_vbox(self):
         self.left_vbox = gtk.VBox(homogeneous=False, spacing=0)

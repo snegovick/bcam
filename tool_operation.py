@@ -34,5 +34,5 @@ class ToolOperation(object):
     def update(self, args):
         pass
 
-    def get_settings_dict(self):
-        pass
+    def get_settings_list(self):
+        return []
