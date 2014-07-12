@@ -27,6 +27,7 @@ class EVEnum:
     path_list_selection_changed = "path_list_selection_changed"
     tool_operations_list_selection_changed = "tool_operations_list_selection_changed"
     exact_follow_tool_click = "exact_follow_tool_click"
+    update_settings = "update_settings"
 
 class EventProcessor(object):
     ee = EVEnum()
@@ -56,6 +57,7 @@ class EventProcessor(object):
             self.ee.exact_follow_tool_click: self.exact_follow_tool_click,
             self.ee.update_tool_operations_list: self.update_tool_operations_list,
             self.ee.tool_operations_list_selection_changed: self.tool_operations_list_selection_changed,
+            self.ee.update_settings: self.update_settings,
         }
 
     def push_event(self, event, *args):
@@ -255,6 +257,7 @@ class EventProcessor(object):
             for p in self.operations:
                 if p.name == name:
                     self.selected_tool_operation = p
+                    self.mw.new_settings_vbox(p.get_settings_list())
 
     def exact_follow_tool_click(self, args):
         print "exact follow tool click:", args
@@ -264,6 +267,9 @@ class EventProcessor(object):
             if path_follow_op.apply(self.selected_path):
                 self.operations.append(path_follow_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
+
+    def update_settings(self, args):
+        print "settings update:", args
 
 ee = EVEnum()
 ep = EventProcessor()

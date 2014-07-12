@@ -38,12 +38,37 @@ class MainWindow(object):
         self.window.present()
         gtk.main()
 
-    def __mk_labeled_spin(self, dct, mlabel, callback, value=3.0, lower=0, upper=999.0, step_incr=0.01, page_incr=0.5):
+    def new_settings_vbox(self, settings_lst):
+        if settings_lst == None:
+            return
+        self.settings_vb = gtk.VBox(homogeneous=False, spacing=0)
+        print settings_lst
+        for s in settings_lst:
+            dct = {}
+            if s["type"] == "float":
+                w = self.__mk_labeled_spin(dct, s["name"], s["setting_name"], None, s["default"], s["min"], s["max"])
+                self.settings_vb.pack_start(w, expand=False, fill=False, padding=0)
+        self.right_vbox.pack_start(self.settings_vb, expand=False, fill=False, padding=0)
+        self.settings_vb.show()
+
+    def __mk_labeled_spin(self, dct, mlabel, data=None, callback=None, value=3.0, lower=-999.0, upper=999.0, step_incr=0.01, page_incr=0.5):
+        if lower == None:
+            lower = -999.0
+        if upper == None:
+            upper = 999.0
+        if step_incr == None:
+            step_incr = 0.01
+        if page_incr == None:
+            page_incr = 0.5
         hbox = gtk.HBox(homogeneous=False, spacing=0)
+        hbox.show()
         dct["hbox"] = hbox
         label = gtk.Label(mlabel)
+        label.show()
         dct["label"] = label
         spin = gtk.SpinButton(adjustment=gtk.Adjustment(value=value, lower=lower, upper=upper, step_incr=step_incr, page_incr=page_incr, page_size=0), climb_rate=0.01, digits=3)
+        spin.connect("value-changed", lambda *args: ep.push_event(ee.update_settings, (data, args)))
+        spin.show()
         dct["spin"] = spin
         hbox.pack_start(label, expand=False, fill=False, padding=0)
         hbox.pack_start(spin, expand=True, fill=True, padding=0)
@@ -55,13 +80,13 @@ class MainWindow(object):
         self.tool_label = gtk.Label("Tool settings")
         self.right_vbox.pack_start(self.tool_label, expand=False, fill=False, padding=0)
 
-        self.tool_diameter_hbox = self.__mk_labeled_spin(self.tool_diameter_spin, "Diameter, mm: ", None)
+        self.tool_diameter_hbox = self.__mk_labeled_spin(self.tool_diameter_spin, "Diameter, mm: ", lambda *args: ep.push_event(ee.update_tool_settings, ("diameter", args)))
         self.right_vbox.pack_start(self.tool_diameter_hbox, expand=False, fill=False, padding=0)
 
-        self.tool_feedrate_hbox = self.__mk_labeled_spin(self.tool_feedrate_spin, "Feedrate, mm/s: ", None)
+        self.tool_feedrate_hbox = self.__mk_labeled_spin(self.tool_feedrate_spin, "Feedrate, mm/s: ", lambda *args: ep.push_event(ee.update_tool_settings, ("feedrate", args)))
         self.right_vbox.pack_start(self.tool_feedrate_hbox, expand=False, fill=False, padding=0)
 
-        self.tool_vertical_step_hbox = self.__mk_labeled_spin(self.tool_vert_step, "Vertical step, mm: ", None)
+        self.tool_vertical_step_hbox = self.__mk_labeled_spin(self.tool_vert_step, "Vertical step, mm: ", lambda *args: ep.push_event(ee.update_tool_settings, ("vertical step", args)))
         self.right_vbox.pack_start(self.tool_vertical_step_hbox, expand=False, fill=False, padding=0)
 
 
