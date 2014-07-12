@@ -33,7 +33,6 @@ class TODrill(ToolOperation):
         self.depth = depth
         if (element.operations[self.name]):
             self.center = list(element.center)
-            print self.get_gcode()
             return True
         return False
 

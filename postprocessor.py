@@ -3,8 +3,12 @@ class Postprocessor:
     def __init__(self):
         pass
 
-    def mk_arc(self, center, startangle, endangle):
-        print "mk_arc is not implemented"
+    def mk_cw_arc(self, r, end):
+        print "mk_cw_arc is not implemented"
+        return None
+
+    def mk_ccw_arc(self, r, end):
+        print "mk_ccw_arc is not implemented"
         return None
 
     def mk_line(self, start, end):

@@ -274,6 +274,5 @@ class EventProcessor(object):
         setting = args[0][0]
         setting.set_value(new_value)
         
-
 ee = EVEnum()
 ep = EventProcessor()
