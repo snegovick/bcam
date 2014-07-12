@@ -43,6 +43,11 @@ class Path(Element):
     def mk_connected_path(self):
         if len(self.elements)==0:
             return None
+
+        if not self.elements[0].joinable:
+            p = Path([self.elements[0]], self.name+".path", settings.get_def_lt())
+            p.ordered_elements = [self.elements[0]]
+            return p
         available = self.elements[:]
         ce = [] # connected elements go here
 

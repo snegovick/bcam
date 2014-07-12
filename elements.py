@@ -124,6 +124,9 @@ class ECircle(Element):
 
     def draw_element(self, ctx):
         ctx.arc(self.center[0], self.center[1], self.radius, 0, math.pi*2)
+
+    def draw_first(self, ctx):
+        self.draw_element(ctx)
         
     def draw(self, ctx):
         self.set_lt(ctx)
