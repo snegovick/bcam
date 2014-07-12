@@ -1,4 +1,6 @@
 from tool import Tool, ToolType
+from pp_grbl import PPGRBL
+
 class LineType:
     def __init__(self, lw, selected_lw, color, selected_color):
         self.lw = lw
@@ -20,11 +22,18 @@ class LineType:
             ctx.set_source_rgba(self.selected_color[0], self.selected_color[1], self.selected_color[2], self.selected_color[3])
         ctx.set_line_width(self.selected_lw)
 
+class Material:
+    def __init__(self):
+        self.material_name = "default"
+        self.thickness = 10
+
 class Settings:
     def __init__(self):
         self.line_types = {"default": LineType(0.08, 0.1, (0,0,0), (1,0,0))}
         self.tool = Tool("cylinder", ToolType.cylinder)
         self.select_box_lt = LineType(0.1, 0.1, (0, 1, 0, 0.2), (0, 1, 0, 0.2))
+        self.default_pp = PPGRBL()
+        self.material = Material()
 
     def get_lt(self, name):
         return self.line_types[name]

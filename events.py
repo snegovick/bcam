@@ -23,7 +23,9 @@ class EVEnum:
     shift_press = "shift_press"
     shift_release = "shift_release"
     update_paths_list = "update_paths_lilst"
+    update_tool_operations_list = "update_tool_operations_lilst"
     path_list_selection_changed = "path_list_selection_changed"
+    tool_operations_list_selection_changed = "tool_operations_list_selection_changed"
     exact_follow_tool_click = "exact_follow_tool_click"
 
 class EventProcessor(object):
@@ -52,6 +54,8 @@ class EventProcessor(object):
             self.ee.update_paths_list: self.update_paths_list,
             self.ee.path_list_selection_changed: self.path_list_selection_changed,
             self.ee.exact_follow_tool_click: self.exact_follow_tool_click,
+            self.ee.update_tool_operations_list: self.update_tool_operations_list,
+            self.ee.tool_operations_list_selection_changed: self.tool_operations_list_selection_changed,
         }
 
     def push_event(self, event, *args):
@@ -102,6 +106,21 @@ class EventProcessor(object):
                 list_item.show()
                 label.show()
                 self.mw.gtklist.add(list_item)
+
+    def update_tool_operations_list(self, args):
+        if self.operations != None:
+            children = self.mw.tp_gtklist.children()
+            for c in children:
+                self.mw.tp_gtklist.remove(c)
+            for p in self.operations:
+                if p.name[0] == '*':
+                    continue
+                label = gtk.Label(p.name)
+                list_item = gtk.ListItem()
+                list_item.add(label)
+                list_item.show()
+                label.show()
+                self.mw.tp_gtklist.add(list_item)
 
     def load_file(self, args):
         print "load file", args
@@ -186,6 +205,7 @@ class EventProcessor(object):
             drl_op = TODrill(settings)
             if drl_op.apply(e):
                 self.operations.append(drl_op)
+                self.push_event(self.ee.update_tool_operations_list, (None))
         print self.operations
 
     def join_elements_click(self, args):
@@ -227,6 +247,15 @@ class EventProcessor(object):
                             e.set_selected()
                             self.selected_elements.append(e)
 
+    def tool_operations_list_selection_changed(self, args):
+        selection = args[0][0].get_selection()
+        self.selected_tool_operation = None
+        for li in selection:
+            name = li.children()[0].get_text()
+            for p in self.operations:
+                if p.name == name:
+                    self.selected_tool_operation = p
+
     def exact_follow_tool_click(self, args):
         print "exact follow tool click:", args
         print "selected path:", self.selected_path
@@ -234,6 +263,7 @@ class EventProcessor(object):
             path_follow_op = TOExactFollow(settings)
             if path_follow_op.apply(self.selected_path):
                 self.operations.append(path_follow_op)
+                self.push_event(self.ee.update_tool_operations_list, (None))
 
 ee = EVEnum()
 ep = EventProcessor()

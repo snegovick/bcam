@@ -30,10 +30,6 @@ class MainWindow(object):
 
         self.__mk_right_vbox()
         self.hbox.pack_start(self.right_vbox, expand=False, fill=False, padding=0)
-        #widget.window = window
-        
-        #widget.paths = paths
-
         gobject.timeout_add(10, self.widget.periodic)
         self.window.add(self.hbox)
 
@@ -49,8 +45,6 @@ class MainWindow(object):
         dct["label"] = label
         spin = gtk.SpinButton(adjustment=gtk.Adjustment(value=value, lower=lower, upper=upper, step_incr=step_incr, page_incr=page_incr, page_size=0), climb_rate=0.01, digits=3)
         dct["spin"] = spin
-        #alignment = gtk.Alignment(1.0, 0.0, 1.0, 0.0)
-        #alignment.add(spin)
         hbox.pack_start(label, expand=False, fill=False, padding=0)
         hbox.pack_start(spin, expand=True, fill=True, padding=0)
         return hbox
@@ -90,6 +84,14 @@ class MainWindow(object):
         self.scrolled_window.add_with_viewport(self.gtklist)
         self.left_vbox.pack_start(self.paths_label, expand=False, fill=False, padding=0)
         self.left_vbox.pack_start(self.scrolled_window, expand=True, fill=True, padding=0)
+
+        self.tool_paths_label = gtk.Label("Tool paths")
+        self.tp_scrolled_window = gtk.ScrolledWindow()
+        self.tp_gtklist = gtk.List()
+        self.tp_gtklist.connect("selection_changed", lambda *args: ep.push_event(ee.tool_operations_list_selection_changed, args))
+        self.tp_scrolled_window.add_with_viewport(self.tp_gtklist)
+        self.left_vbox.pack_start(self.tool_paths_label, expand=False, fill=False, padding=0)
+        self.left_vbox.pack_start(self.tp_scrolled_window, expand=True, fill=True, padding=0)
 
         self.tool_ops_label = gtk.Label("Tool operations")
         self.drill_tool_button = gtk.Button("Drill")
