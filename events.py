@@ -96,33 +96,20 @@ class EventProcessor(object):
 
     def update_paths_list(self, args):
         if self.file_data != None:
-            children = self.mw.gtklist.children()
-            for c in children:
-                self.mw.gtklist.remove(c)
+            self.mw.clear_list(self.mw.gtklist)
             for p in self.file_data:
                 if p.name[0] == '*':
                     continue
-                label = gtk.Label(p.name)
-                list_item = gtk.ListItem()
-                list_item.add(label)
-                list_item.show()
-                label.show()
-                self.mw.gtklist.add(list_item)
+                self.mw.add_item_to_list(self.mw.gtklist, p.name)
+
 
     def update_tool_operations_list(self, args):
         if self.operations != None:
-            children = self.mw.tp_gtklist.children()
-            for c in children:
-                self.mw.tp_gtklist.remove(c)
+            self.mw.clear_list(self.mw.tp_gtklist)
             for p in self.operations:
                 if p.name[0] == '*':
                     continue
-                label = gtk.Label(p.name)
-                list_item = gtk.ListItem()
-                list_item.add(label)
-                list_item.show()
-                label.show()
-                self.mw.tp_gtklist.add(list_item)
+                self.mw.add_item_to_list(self.mw.tp_gtklist, p.name)
 
     def load_file(self, args):
         print "load file", args
