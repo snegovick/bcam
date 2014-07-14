@@ -72,27 +72,10 @@ class EventProcessor(object):
         self.event_list = []
 
     def load_click(self, args):
-        dialog = gtk.FileChooserDialog("Open..",
-                                       None,
-                                       gtk.FILE_CHOOSER_ACTION_OPEN,
-                                       (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                        gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-        dialog.set_default_response(gtk.RESPONSE_OK)
-
-        filter = gtk.FileFilter()
-        filter.set_name("Blueprints (*.dxf)")
-        filter.add_mime_type("Application/dxf")
-        filter.add_pattern("*.dxf")
-        dialog.add_filter(filter)
-
-        response = dialog.run()
-        if response == gtk.RESPONSE_OK:
-            #print dialog.get_filename(), 'selected'
-            self.push_event(self.ee.load_file, dialog.get_filename())
-        elif response == gtk.RESPONSE_CANCEL:
-            pass
-            #print 'Closed, no files selected'
-        dialog.destroy()
+        mimes = [("Blueprints (*.dxf)", "Application/dxf", "*.dxf")]
+        result = self.mw.mk_file_dialog("Open ...", mimes)
+        if result!=None:
+            self.push_event(self.ee.load_file, result)
 
     def update_paths_list(self, args):
         if self.file_data != None:

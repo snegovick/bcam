@@ -49,6 +49,31 @@ class MainWindow(object):
             if s.type == "float":
                 w = self.__mk_labeled_spin(dct, s.display_name, s, None, s.default, s.min, s.max)
                 self.settings_vb.pack_start(w, expand=False, fill=False, padding=0)
+
+    def mk_file_dialog(self, name, mimes):
+        ret = None
+        dialog = gtk.FileChooserDialog(name,
+                                       None,
+                                       gtk.FILE_CHOOSER_ACTION_OPEN,
+                                       (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                        gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        dialog.set_default_response(gtk.RESPONSE_OK)
+
+        for m in mimes:
+            filter = gtk.FileFilter()
+            filter.set_name(m[0])
+            filter.add_mime_type(m[1])
+            filter.add_pattern(m[2])
+            dialog.add_filter(filter)
+
+        response = dialog.run()
+        if response == gtk.RESPONSE_OK:
+            ret = dialog.get_filename()
+        elif response == gtk.RESPONSE_CANCEL:
+            pass
+        dialog.destroy()
+        return ret
+
                 
     def clear_list(self, lst):
         children = lst.children()
