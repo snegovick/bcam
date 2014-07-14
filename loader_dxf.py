@@ -37,9 +37,9 @@ class DXFLoader(loader.SourceLoader):
                     el = ECircle(tuple(e.center[:2]), e.radius, settings.get_def_lt())
                     p.add_element(el)
                 else:
-                    print e.dxftype
+                    print "Unknown type:", e.dxftype
             paths.append(p)
-            print "Trying to connect path:"
+            #print "Trying to connect path:"
             #print p.mk_connected_path()
-            print p.elements
+            #print p.elements
         return paths

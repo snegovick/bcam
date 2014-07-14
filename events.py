@@ -80,7 +80,7 @@ class EventProcessor(object):
         dialog.set_default_response(gtk.RESPONSE_OK)
 
         filter = gtk.FileFilter()
-        filter.set_name("Blueprints")
+        filter.set_name("Blueprints (*.dxf)")
         filter.add_mime_type("Application/dxf")
         filter.add_pattern("*.dxf")
         dialog.add_filter(filter)
