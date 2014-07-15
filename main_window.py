@@ -4,6 +4,7 @@ pygtk.require('2.0')
 import gtk, gobject, cairo
 import sys
 from events import EVEnum, EventProcessor, ee, ep
+from settings import settings
 
 class MainWindow(object):
     def __init__(self, w, h, Widget):
@@ -39,11 +40,14 @@ class MainWindow(object):
         self.window.present()
         gtk.main()
 
-    def new_settings_vbox(self, settings_lst):
+    def new_settings_vbox(self, settings_lst, label):
         for c in self.settings_vb.children():
             self.settings_vb.remove(c)
         if settings_lst == None:
             return
+        l = gtk.Label(label)
+        self.settings_vb.pack_start(l, expand=False, fill=False, padding=0)
+        l.show()
         print settings_lst
         for s in settings_lst:
             dct = {}
@@ -118,21 +122,28 @@ class MainWindow(object):
         self.tool_label = gtk.Label("Tool settings")
         self.right_vbox.pack_start(self.tool_label, expand=False, fill=False, padding=0)
 
-        self.tool_diameter_hbox = self.__mk_labeled_spin(self.tool_diameter_spin, "Diameter, mm: ", lambda *args: ep.push_event(ee.update_tool_settings, ("diameter", args)))
-        self.right_vbox.pack_start(self.tool_diameter_hbox, expand=False, fill=False, padding=0)
+        settings_lst = settings.tool.get_settings_list()
+        if settings_lst != None:
+            print settings_lst
+            for s in settings_lst:
+                dct = {}
+                if s.type == "float":
+                    w = self.__mk_labeled_spin(dct, s.display_name, s, None, s.default, s.min, s.max)
+                    self.right_vbox.pack_start(w, expand=False, fill=False, padding=0)
 
-        self.tool_feedrate_hbox = self.__mk_labeled_spin(self.tool_feedrate_spin, "Feedrate, mm/s: ", lambda *args: ep.push_event(ee.update_tool_settings, ("feedrate", args)))
-        self.right_vbox.pack_start(self.tool_feedrate_hbox, expand=False, fill=False, padding=0)
 
-        self.tool_vertical_step_hbox = self.__mk_labeled_spin(self.tool_vert_step, "Vertical step, mm: ", lambda *args: ep.push_event(ee.update_tool_settings, ("vertical step", args)))
-        self.right_vbox.pack_start(self.tool_vertical_step_hbox, expand=False, fill=False, padding=0)
+        # self.tool_diameter_hbox = self.__mk_labeled_spin(self.tool_diameter_spin, "Diameter, mm: ", lambda *args: ep.push_event(ee.update_tool_settings, ("diameter", args)))
+        # self.right_vbox.pack_start(self.tool_diameter_hbox, expand=False, fill=False, padding=0)
+
+        # self.tool_feedrate_hbox = self.__mk_labeled_spin(self.tool_feedrate_spin, "Feedrate, mm/s: ", lambda *args: ep.push_event(ee.update_tool_settings, ("feedrate", args)))
+        # self.right_vbox.pack_start(self.tool_feedrate_hbox, expand=False, fill=False, padding=0)
+
+        # self.tool_vertical_step_hbox = self.__mk_labeled_spin(self.tool_vert_step, "Vertical step, mm: ", lambda *args: ep.push_event(ee.update_tool_settings, ("vertical step", args)))
+        # self.right_vbox.pack_start(self.tool_vertical_step_hbox, expand=False, fill=False, padding=0)
 
 
-        self.tool_label = gtk.Label("Contour following settings")
-        self.right_vbox.pack_start(self.tool_label, expand=False, fill=False, padding=0)
-
-        self.tool_label = gtk.Label("Pocketing settings")
-        self.right_vbox.pack_start(self.tool_label, expand=False, fill=False, padding=0)
+        #self.tool_label = gtk.Label("Material settings")
+        #self.right_vbox.pack_start(self.tool_label, expand=False, fill=False, padding=0)
 
         self.settings_vb = gtk.VBox(homogeneous=False, spacing=0)
         self.right_vbox.pack_start(self.settings_vb, expand=False, fill=False, padding=0)

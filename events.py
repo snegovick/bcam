@@ -231,7 +231,7 @@ class EventProcessor(object):
             for p in self.operations:
                 if p.display_name == name:
                     self.selected_tool_operation = p
-                    self.mw.new_settings_vbox(p.get_settings_list())
+                    self.mw.new_settings_vbox(p.get_settings_list(), p.display_name+" settings")
 
     def exact_follow_tool_click(self, args):
         print "exact follow tool click:", args
