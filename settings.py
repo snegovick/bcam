@@ -1,4 +1,5 @@
 from tool import Tool, ToolType
+from generalized_setting import TOSetting
 from pp_grbl import PPGRBL
 
 class LineType:
@@ -26,6 +27,13 @@ class Material:
     def __init__(self):
         self.material_name = "default"
         self.thickness = 10
+
+    def get_settings_list(self):
+        settings_lst = [TOSetting("float", 0, None, self.thickness, "Thickness, mm: ", self.set_thickness_s),]
+        return settings_lst
+
+    def set_thickness_s(self, setting):
+        self.thickness = setting.new_value
 
 class Settings:
     def __init__(self):

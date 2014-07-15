@@ -132,18 +132,16 @@ class MainWindow(object):
                     self.right_vbox.pack_start(w, expand=False, fill=False, padding=0)
 
 
-        # self.tool_diameter_hbox = self.__mk_labeled_spin(self.tool_diameter_spin, "Diameter, mm: ", lambda *args: ep.push_event(ee.update_tool_settings, ("diameter", args)))
-        # self.right_vbox.pack_start(self.tool_diameter_hbox, expand=False, fill=False, padding=0)
-
-        # self.tool_feedrate_hbox = self.__mk_labeled_spin(self.tool_feedrate_spin, "Feedrate, mm/s: ", lambda *args: ep.push_event(ee.update_tool_settings, ("feedrate", args)))
-        # self.right_vbox.pack_start(self.tool_feedrate_hbox, expand=False, fill=False, padding=0)
-
-        # self.tool_vertical_step_hbox = self.__mk_labeled_spin(self.tool_vert_step, "Vertical step, mm: ", lambda *args: ep.push_event(ee.update_tool_settings, ("vertical step", args)))
-        # self.right_vbox.pack_start(self.tool_vertical_step_hbox, expand=False, fill=False, padding=0)
-
-
-        #self.tool_label = gtk.Label("Material settings")
-        #self.right_vbox.pack_start(self.tool_label, expand=False, fill=False, padding=0)
+        self.material_label = gtk.Label("Material settings")
+        self.right_vbox.pack_start(self.material_label, expand=False, fill=False, padding=0)
+        settings_lst = settings.material.get_settings_list()
+        if settings_lst != None:
+            print settings_lst
+            for s in settings_lst:
+                dct = {}
+                if s.type == "float":
+                    w = self.__mk_labeled_spin(dct, s.display_name, s, None, s.default, s.min, s.max)
+                    self.right_vbox.pack_start(w, expand=False, fill=False, padding=0)
 
         self.settings_vb = gtk.VBox(homogeneous=False, spacing=0)
         self.right_vbox.pack_start(self.settings_vb, expand=False, fill=False, padding=0)
