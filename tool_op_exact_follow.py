@@ -4,8 +4,9 @@ from settings import settings
 import cairo
 
 class TOExactFollow(ToolOperation):
-    def __init__(self, settings, depth=0):
+    def __init__(self, settings, depth=0, index=0):
         super(TOExactFollow, self).__init__(settings)
+        self.display_name = TOEnum.exact_follow+" "+str(index)
         self.name = TOEnum.exact_follow
         self.depth = depth
         self.path = None

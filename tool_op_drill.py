@@ -4,8 +4,9 @@ from state import state
 from settings import settings
 
 class TODrill(ToolOperation):
-    def __init__(self, settings, center=None, depth=0):
+    def __init__(self, settings, center=None, depth=0, index=0):
         super(TODrill, self).__init__(settings)
+        self.display_name = TOEnum.drill+" "+str(index)
         self.name = TOEnum.drill
         if center!=None:
             self.center = list(center)

@@ -28,6 +28,8 @@ class EVEnum:
     tool_operations_list_selection_changed = "tool_operations_list_selection_changed"
     exact_follow_tool_click = "exact_follow_tool_click"
     update_settings = "update_settings"
+    tool_operation_up_click = "tool_operation_up_click"
+    tool_operation_down_click = "tool_operation_down_click"
 
 class EventProcessor(object):
     ee = EVEnum()
@@ -35,6 +37,7 @@ class EventProcessor(object):
     event_list = []
     selected_elements = []
     selected_path = None
+    selected_tool_operation = None
     operations = []
     left_press_start = None
     pointer_position = None
@@ -58,6 +61,8 @@ class EventProcessor(object):
             self.ee.update_tool_operations_list: self.update_tool_operations_list,
             self.ee.tool_operations_list_selection_changed: self.tool_operations_list_selection_changed,
             self.ee.update_settings: self.update_settings,
+            self.ee.tool_operation_up_click: self.tool_operation_up_click,
+            self.ee.tool_operation_down_click: self.tool_operation_down_click,
         }
 
     def push_event(self, event, *args):
@@ -90,9 +95,7 @@ class EventProcessor(object):
         if self.operations != None:
             self.mw.clear_list(self.mw.tp_gtklist)
             for p in self.operations:
-                if p.name[0] == '*':
-                    continue
-                self.mw.add_item_to_list(self.mw.tp_gtklist, p.name)
+                self.mw.add_item_to_list(self.mw.tp_gtklist, p.display_name)
 
     def load_file(self, args):
         print "load file", args
@@ -174,7 +177,7 @@ class EventProcessor(object):
         print "drill tool click:", args
         print self.selected_elements
         for e in self.selected_elements:
-            drl_op = TODrill(settings)
+            drl_op = TODrill(settings, index=len(self.operations))
             if drl_op.apply(e):
                 self.operations.append(drl_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
@@ -225,7 +228,7 @@ class EventProcessor(object):
         for li in selection:
             name = li.children()[0].get_text()
             for p in self.operations:
-                if p.name == name:
+                if p.display_name == name:
                     self.selected_tool_operation = p
                     self.mw.new_settings_vbox(p.get_settings_list())
 
@@ -233,7 +236,7 @@ class EventProcessor(object):
         print "exact follow tool click:", args
         print "selected path:", self.selected_path
         if self.selected_path != None:
-            path_follow_op = TOExactFollow(settings)
+            path_follow_op = TOExactFollow(settings, index=len(self.operations))
             if path_follow_op.apply(self.selected_path):
                 self.operations.append(path_follow_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
@@ -243,6 +246,45 @@ class EventProcessor(object):
         new_value = args[0][1][0].get_value()
         setting = args[0][0]
         setting.set_value(new_value)
+
+    def tool_operation_up_click(self, args):
+        print "tool operation up"
+        if self.selected_tool_operation==None:
+            return
+        if len(self.operations)==0:
+            return
+        cur_idx = self.operations.index(self.selected_tool_operation)
+        print "cur idx:", cur_idx
+        if cur_idx == 0:
+            return
+        temp = self.selected_tool_operation
+        self.operations.remove(self.selected_tool_operation)
+        self.operations.insert(cur_idx-1, temp)
+
+        if self.operations != None:
+            self.mw.clear_list(self.mw.tp_gtklist)
+            for p in self.operations:
+                self.mw.add_item_to_list(self.mw.tp_gtklist, p.display_name)
+
+    def tool_operation_down_click(self, args):
+        print "tool operation down"
+        if self.selected_tool_operation==None:
+            return
+        if len(self.operations)==0:
+            return
+        cur_idx = self.operations.index(self.selected_tool_operation)
+        print "cur idx:", cur_idx
+        if cur_idx == len(self.operations)-1:
+            return
+        temp = self.selected_tool_operation
+        self.operations.remove(self.selected_tool_operation)
+        self.operations.insert(cur_idx+1, temp)
+
+        if self.operations != None:
+            self.mw.clear_list(self.mw.tp_gtklist)
+            for p in self.operations:
+                self.mw.add_item_to_list(self.mw.tp_gtklist, p.display_name)
+
         
 ee = EVEnum()
 ep = EventProcessor()

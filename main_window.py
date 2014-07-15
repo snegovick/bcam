@@ -1,3 +1,4 @@
+#-*- encoding: utf-8 -*-
 import pygtk
 pygtk.require('2.0')
 import gtk, gobject, cairo
@@ -155,8 +156,16 @@ class MainWindow(object):
         self.tp_gtklist = gtk.List()
         self.tp_gtklist.connect("selection_changed", lambda *args: ep.push_event(ee.tool_operations_list_selection_changed, args))
         self.tp_scrolled_window.add_with_viewport(self.tp_gtklist)
+        self.tp_updown_hbox = gtk.HBox(homogeneous=False, spacing=0)
+        self.tp_up_button = gtk.Button(u"▲")
+        self.tp_down_button = gtk.Button(u"▼")
+        self.tp_up_button.connect("clicked", lambda *args: ep.push_event(ee.tool_operation_up_click, args))
+        self.tp_down_button.connect("clicked", lambda *args: ep.push_event(ee.tool_operation_down_click, args))
+        self.tp_updown_hbox.pack_start(self.tp_up_button, expand=True, fill=True, padding=0)
+        self.tp_updown_hbox.pack_start(self.tp_down_button, expand=True, fill=True, padding=0)
         self.left_vbox.pack_start(self.tool_paths_label, expand=False, fill=False, padding=0)
         self.left_vbox.pack_start(self.tp_scrolled_window, expand=True, fill=True, padding=0)
+        self.left_vbox.pack_start(self.tp_updown_hbox, expand=False, fill=False, padding=0)
 
         self.tool_ops_label = gtk.Label("Tool operations")
         self.drill_tool_button = gtk.Button("Drill")
