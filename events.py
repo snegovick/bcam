@@ -18,7 +18,6 @@ class EVEnum:
     screen_left_release = "screen_left_release"
     pointer_motion = "pointer_motion"
     drill_tool_click = "drill_tool_click"
-    join_elements_click = "join_elements_click"
     deselect_all = "deselect_all"
     shift_press = "shift_press"
     shift_release = "shift_release"
@@ -51,7 +50,6 @@ class EventProcessor(object):
             self.ee.screen_left_release: self.screen_left_release,
             self.ee.pointer_motion: self.pointer_motion,
             self.ee.drill_tool_click: self.drill_tool_click,
-            self.ee.join_elements_click: self.join_elements_click,
             self.ee.deselect_all: self.deselect_all,
             self.ee.shift_press: self.shift_press,
             self.ee.shift_release: self.shift_release,
@@ -183,7 +181,7 @@ class EventProcessor(object):
                 self.push_event(self.ee.update_tool_operations_list, (None))
         print self.operations
 
-    def join_elements_click(self, args):
+    def join_elements(self, args):
         if self.selected_elements!=None:
             print self.selected_elements
             p = Path(self.selected_elements, "path", settings.get_def_lt())
@@ -197,6 +195,8 @@ class EventProcessor(object):
                             self.file_data[i].elements.remove(e)
                 self.file_data.append(connected)
                 self.push_event(self.ee.update_paths_list, (None))
+                return connected
+        return None
 
     def deselect_all(self, args):
         for e in self.selected_elements:
@@ -235,6 +235,8 @@ class EventProcessor(object):
 
     def exact_follow_tool_click(self, args):
         print "exact follow tool click:", args
+        connected = self.join_elements(None)
+        self.selected_path = connected
         print "selected path:", self.selected_path
         if self.selected_path != None:
             path_follow_op = TOExactFollow(settings, index=len(self.operations))
