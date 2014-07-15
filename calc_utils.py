@@ -89,15 +89,38 @@ class ArcUtils:
 
         return AABB(x_min, y_min, x_max, y_max)
 
+    def __angledist(self, s, e):
+        if s<0:
+            s+=2*math.pi
+        if e<0:
+            e+=2*math.pi
+
+        d = 0
+
+        if e<s:
+            d=(2*math.pi-s)+e
+        else:
+            d=e-s
+        return d
+
+    def check_angle_in_range(self, a):
+        s = self.sa
+        e = self.ea
+        se_dist = self.__angledist(s, e)
+        sa_dist = self.__angledist(s, a)
+        ae_dist = self.__angledist(a, e)
+
+        if sa_dist+ae_dist!=se_dist:
+            return False
+        return True
+
     def distance_to_pt(self, pt):
         a = math.atan2(pt[1]-self.center[1], pt[0]-self.center[0])
         print a, self.sa, self.ea
-        if a>=self.sa and a<=self.ea:
+        if self.check_angle_in_range(a):
             dist = pt_to_pt_dist(pt, self.center)-self.radius
-        elif a<self.sa:
-            dist = pt_to_pt_dist(pt, self.start)
-        elif a>self.ea:
-            dist = pt_to_pt_dist(pt, self.end)
+        else:
+            dist = 1000
         return abs(dist)
 
 class LineUtils:
@@ -137,3 +160,17 @@ class LineUtils:
 
     def __reproject_pt(self, pt, sina, cosa):
         return (pt[0]*cosa-pt[1]*sina, pt[0]*sina+pt[1]*cosa)
+
+if __name__=="__main__":
+    au = ArcUtils((0, 0), 1, -10*math.pi/180.0, 300*math.pi/180.0)
+    
+    angle = 90
+    print "checking angle", angle, au.check_angle_in_range(angle*math.pi/180.0)
+    angle = 190
+    print "checking angle", angle, au.check_angle_in_range(angle*math.pi/180.0)
+    angle = -15
+    print "checking angle", angle, au.check_angle_in_range(angle*math.pi/180.0)
+    angle = 290
+    print "checking angle", angle, au.check_angle_in_range(angle*math.pi/180.0)
+    angle = 301
+    print "checking angle", angle, au.check_angle_in_range(angle*math.pi/180.0)

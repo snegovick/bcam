@@ -98,8 +98,11 @@ class EArc(Element):
         self.draw_element(ctx)
         ctx.stroke()
 
+    def draw_first(self, ctx):
+        self.draw_element(ctx)
+
     def turnaround(self):
-        return ELine(self.center, self.radius, self.endangle, self.startangle, self.lt)
+        return EArc(self.center, self.radius, self.endangle, self.startangle, self.lt)
 
     def distance_to_pt(self, pt):
         au = ArcUtils(self.center, self.radius, self.startangle, self.endangle)
