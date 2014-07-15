@@ -189,6 +189,7 @@ class EventProcessor(object):
             p = Path(self.selected_elements, "path", settings.get_def_lt())
             connected = p.mk_connected_path()
             if connected != None:
+                connected.name = connected.name+" "+str(len(self.file_data))
                 self.deselect_all(None)
                 for e in connected.elements:
                     for i, p in enumerate(self.file_data):
