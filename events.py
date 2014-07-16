@@ -29,6 +29,8 @@ class EVEnum:
     update_settings = "update_settings"
     tool_operation_up_click = "tool_operation_up_click"
     tool_operation_down_click = "tool_operation_down_click"
+    scroll_up = "scroll_up"
+    scroll_down = "scroll_down"
 
 class EventProcessor(object):
     ee = EVEnum()
@@ -61,6 +63,8 @@ class EventProcessor(object):
             self.ee.update_settings: self.update_settings,
             self.ee.tool_operation_up_click: self.tool_operation_up_click,
             self.ee.tool_operation_down_click: self.tool_operation_down_click,
+            self.ee.scroll_up: self.scroll_up,
+            self.ee.scroll_down: self.scroll_down,
         }
 
     def push_event(self, event, *args):
@@ -288,6 +292,21 @@ class EventProcessor(object):
             for p in self.operations:
                 self.mw.add_item_to_list(self.mw.tp_gtklist, p.display_name)
 
+    def scroll_up(self, args):
+        print "scroll up"
+        if state.scale[0]<=1:
+            state.scale = (state.scale[0]+0.1, state.scale[1]+0.1)
+        else:
+            state.scale = (state.scale[0]+1, state.scale[1]+1)
+
+
+    def scroll_down(self, args):
+        print "scroll down"
+        if state.scale[0]>0.1:
+            if state.scale[0]<=1:
+                state.scale = (state.scale[0]-0.1, state.scale[1]-0.1)
+            else:
+                state.scale = (state.scale[0]-1, state.scale[1]-1)
         
 ee = EVEnum()
 ep = EventProcessor()

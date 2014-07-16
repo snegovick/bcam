@@ -19,6 +19,7 @@ class MainWindow(object):
         self.widget.connect("button_press_event", self.widget.button_press_event)
         self.widget.connect("button_release_event", self.widget.button_release_event)
         self.widget.connect("motion_notify_event", self.widget.motion_notify_event)
+        self.widget.connect("scroll_event", self.widget.scroll_event)
         self.window.connect("key_press_event", self.widget.key_press_event)
         self.window.connect("key_release_event", self.widget.key_release_event)
         self.window.set_events(gtk.gdk.KEY_PRESS_MASK | gtk.gdk.KEY_RELEASE_MASK)

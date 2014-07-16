@@ -22,13 +22,22 @@ class Screen(gtk.DrawingArea):
         self.queue_draw()
         ep.process()
         return True
+
+    def scroll_event(self, widget, event):
+        print "event:", event
+        if event.direction == gtk.gdk.SCROLL_UP:
+            ep.push_event(ee.scroll_up, (None))
+        elif event.direction == gtk.gdk.SCROLL_DOWN:
+            ep.push_event(ee.scroll_down, (None))
     
     def button_press_event(self, widget, event):
+        print "button press:", event.button
+
         if event.button == 1:
             ep.push_event(ee.screen_left_press, (event.x, event.y))
 
     def key_press_event(self, widget, event):
-        print event.keyval
+        print "key press:", event.keyval
         if event.keyval == 65307: # ESC
             ep.push_event(ee.deselect_all, (None))
         elif event.keyval == 65505: # shift
