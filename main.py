@@ -57,7 +57,8 @@ class Screen(gtk.DrawingArea):
     # Handle the expose-event by drawing
     def do_expose_event(self, event):
         # Create the cairo context
-        state.offset = (self.allocation.width/2,self.allocation.height/2)
+        #state.offset = (self.allocation.width/2,self.allocation.height/2)
+        offset = (state.offset[0]+self.allocation.width/2, state.offset[1]+self.allocation.height/2)
 
         cr_gdk = self.window.cairo_create()
         surface = cr_gdk.get_target()
@@ -74,10 +75,10 @@ class Screen(gtk.DrawingArea):
         
         if ep.file_data!=None:
             for p in ep.file_data:
-                p.draw(cr, state.offset)
+                p.draw(cr, offset)
 
         if ep.operations!=None:
-            cr.translate(state.offset[0], state.offset[1])
+            cr.translate(offset[0], offset[1])
             cr.scale(state.scale[0], state.scale[1])
             for o in ep.operations:
                 o.draw(cr)

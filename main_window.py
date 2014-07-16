@@ -29,7 +29,18 @@ class MainWindow(object):
 
         self.hbox = gtk.HBox(homogeneous=False, spacing=0)
         self.hbox.pack_start(self.left_vbox, expand=False, fill=False, padding=0)
-        self.hbox.pack_start(self.widget, expand=True, fill=True, padding=0)
+
+        self.widget_hbox = gtk.HBox(homogeneous=False, spacing=0)
+        self.widget_vbox = gtk.VBox(homogeneous=False, spacing=0)
+        self.widget_hscroll = gtk.HScrollbar(gtk.Adjustment(0.0, -1000.0, 1000.0, 0.1, 1.0, 1.0))
+        self.widget_hscroll.connect("value-changed", lambda *args: ep.push_event(ee.hscroll, (args)))
+        self.widget_vscroll = gtk.VScrollbar(gtk.Adjustment(0.0, -1000.0, 1000.0, 0.1, 1.0, 1.0))
+        self.widget_vscroll.connect("value-changed", lambda *args: ep.push_event(ee.vscroll, (args)))
+        self.widget_hbox.pack_start(self.widget, expand=True, fill=True, padding=0)
+        self.widget_hbox.pack_start(self.widget_vscroll, expand=False, fill=False, padding=0)
+        self.widget_vbox.pack_start(self.widget_hbox, expand=True, fill=True)
+        self.widget_vbox.pack_start(self.widget_hscroll, expand=False, fill=False, padding=0)
+        self.hbox.pack_start(self.widget_vbox, expand=True, fill=True, padding=0)
 
         self.__mk_right_vbox()
         self.hbox.pack_start(self.right_vbox, expand=False, fill=False, padding=0)

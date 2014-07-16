@@ -31,6 +31,8 @@ class EVEnum:
     tool_operation_down_click = "tool_operation_down_click"
     scroll_up = "scroll_up"
     scroll_down = "scroll_down"
+    hscroll = "hscroll"
+    vscroll = "vscroll"
 
 class EventProcessor(object):
     ee = EVEnum()
@@ -65,6 +67,8 @@ class EventProcessor(object):
             self.ee.tool_operation_down_click: self.tool_operation_down_click,
             self.ee.scroll_up: self.scroll_up,
             self.ee.scroll_down: self.scroll_down,
+            self.ee.hscroll: self.hscroll,
+            self.ee.vscroll: self.vscroll,
         }
 
     def push_event(self, event, *args):
@@ -307,6 +311,16 @@ class EventProcessor(object):
                 state.scale = (state.scale[0]-0.1, state.scale[1]-0.1)
             else:
                 state.scale = (state.scale[0]-1, state.scale[1]-1)
+
+    def hscroll(self, args):
+        print "hscroll:", args
+        print args[0][0].get_value()
+        state.offset=(-args[0][0].get_value(), state.offset[1])
+
+    def vscroll(self, args):
+        print "vscroll:", args
+        print args[0][0].get_value()
+        state.offset=(state.offset[0], -args[0][0].get_value())
         
 ee = EVEnum()
 ep = EventProcessor()
