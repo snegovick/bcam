@@ -5,16 +5,26 @@ def find_vect_normal(vect):
     return n
 
 def mk_vect(s, e):
+    if len(e) == 3 and len(s) == 3:
+        return [e[0]-s[0], e[1]-s[1], e[2]-s[2]]
     return [e[0]-s[0], e[1]-s[1], 0]
 
 def normalize(v):
+    if len(v) == 3:
+        l = math.sqrt(v[0]**2 + v[1]**2 + v[2]**2)
+        return [v[0]/l, v[1]/l, v[2]/l]
+
     l = math.sqrt(v[0]**2 + v[1]**2)
     return [v[0]/l, v[1]/l, 0]
 
 def vect_sum(v1, v2):
+    if len(v1) == 3 and len(v2) == 3:
+        return [v1[0]+v2[0], v1[1]+v2[1], v1[2]+v2[2]]
     return [v1[0]+v2[0], v1[1]+v2[1], 0]
 
 def vect_len(v):
+    if len(v) == 3:
+        return math.sqrt(v[0]**2+v[1]**2+v[2]**2)
     return math.sqrt(v[0]**2+v[1]**2)
 
 class OverlapEnum:
@@ -141,15 +151,19 @@ class ArcUtils:
         return abs(dist)
 
     def get_normalized_start_normal(self):
+        se_dir = mk_vect(self.start, self.end)
+        se_dir = normalize(se_dir)
         v = mk_vect(self.center, self.start)
-        vn = normalize(v)
-        return find_vect_normal(v)
+        v = normalize(v)
+        z_dir = [0, 0, se_dir[0]*v[1]-se_dir[1]*v[0]]
+        z_dir = normalize(z_dir)
+        v_dir = [z_dir[2]*v[1], -v[0]*z_dir[2], 0]
+        v_dir = normalize(v_dir)
+        
+        return find_vect_normal(v_dir)
 
     def get_normalized_end_normal(self):
-        v = mk_vect(self.center, self.end)
-        vn = normalize(v)
-        return find_vect_normal(v)
-
+        return self.get_normalized_start_normal()
 
 class LineUtils:
     def __init__(self, start, end):
@@ -190,12 +204,12 @@ class LineUtils:
     def get_normalized_start_normal(self):
         v = mk_vect(self.start, self.end)
         vn = normalize(v)
-        return find_vect_normal(v)
+        return find_vect_normal(vn)
 
     def get_normalized_end_normal(self):
         v = mk_vect(self.start, self.end)
         vn = normalize(v)
-        return find_vect_normal(v)
+        return find_vect_normal(vn)
 
     def __reproject_pt(self, pt, sina, cosa):
         return (pt[0]*cosa-pt[1]*sina, pt[0]*sina+pt[1]*cosa)
