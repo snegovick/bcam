@@ -40,11 +40,16 @@ class TOOffsetFollow(ToolOperation):
         ctx.stroke()
 
     def get_settings_list(self):
-        settings_lst = [TOSetting("float", 0, settings.material.thickness, self.depth, "Depth, mm: ", self.set_depth_s),]
+        settings_lst = [TOSetting("float", 0, settings.material.thickness, self.depth, "Depth, mm: ", self.set_depth_s),
+                        TOSetting("float", None, None, 0, "Offset, mm: ", self.set_offset_s)]
         return settings_lst
 
     def set_depth_s(self, setting):
         self.depth = setting.new_value
+
+    def set_offset_s(self, setting):
+        self.offset = setting.new_value
+        self.__build_offset_path(self.path)
         
     def __build_offset_path(self, p):
         if len(p.elements)==0:
@@ -70,9 +75,6 @@ class TOOffsetFollow(ToolOperation):
                 s_pt = [n[0]*self.offset+shift[0], n[1]*self.offset+shift[1], 0]
 
             if i<len(p.elements)-1:
-                sn = p.elements[i+1].start # next start
-                en = p.elements[i+1].end # next end
-
                 nnsn = p.elements[i+1].get_normalized_start_normal()
                 nen = e.get_normalized_end_normal()
                 n = normalize(vect_sum(nnsn, nen)) # sum of next start normal and current end normal
