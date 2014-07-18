@@ -41,6 +41,11 @@ class Element(object):
             else:
                 self.lt.set_lt(ctx)
 
+    def get_normalized_end_normal(self):
+        return None
+
+    def get_normalized_start_normal(self):
+        return None
 
 class ELine(Element):
     def __init__(self, start, end, lt):
@@ -49,6 +54,8 @@ class ELine(Element):
         self.end = end
         self.joinable = True
         self.operations[TOEnum.exact_follow] = True
+        self.start_normal = None
+        self.end_normal = None
 
     def draw_first(self, ctx):
         ctx.move_to(self.start[0], self.start[1])
@@ -73,22 +80,43 @@ class ELine(Element):
         lu = LineUtils(self.start, self.end)
         return lu.get_aabb()
 
+    def get_normalized_end_normal(self):
+        if self.end_normal == None:
+            lu = LineUtils(self.start, self.end)
+            self.end_normal = lu.get_normalized_end_normal()
+        return self.end_normal
+
+    def get_normalized_start_normal(self):
+        if self.start_normal == None:
+            lu = LineUtils(self.start, self.end)
+            self.start_normal = lu.get_normalized_start_normal()
+        return self.start_normal
+
     def __repr__(self):
         return "<ELine ("+str(self.start)+", "+str(self.end)+")>\r\n"
 
 class EArc(Element):
-    def __init__(self, center, radius, startangle, endangle, lt):
+    def __init__(self, center, radius=None, startangle=None, endangle=None, lt=None, start=None, end=None):
         super(EArc, self).__init__(lt)
         self.center = center
-        self.radius = radius
-        self.startangle = math.radians(startangle)
-        self.endangle = math.radians(endangle)
 
-        self.start = (self.center[0]+math.cos(self.startangle)*self.radius, self.center[1]+math.sin(self.startangle)*self.radius)
-        self.end = (self.center[0]+math.cos(self.endangle)*self.radius, self.center[1]+math.sin(self.endangle)*self.radius)
+        if start != None and end != None:
+            self.startangle = math.atan2(self.start[1]-self.center[1], self.start[0]-self.center[0])
+            self.endangle = math.atan2(self.end[1]-self.center[1], self.end[0]-self.center[0])
+            self.start = start
+            self.end = end
+            self.radius = vect_len(mk_vect(self.center, self.start))
+        else:
+            self.radius = radius
+            self.startangle = math.radians(startangle)
+            self.endangle = math.radians(endangle)
+            self.start = (self.center[0]+math.cos(self.startangle)*self.radius, self.center[1]+math.sin(self.startangle)*self.radius)
+            self.end = (self.center[0]+math.cos(self.endangle)*self.radius, self.center[1]+math.sin(self.endangle)*self.radius)
 
         self.joinable = True
         self.operations[TOEnum.exact_follow] = True
+        self.start_normal = None
+        self.end_normal = None
 
     def draw_element(self, ctx):
         ctx.arc(self.center[0], self.center[1], self.radius, self.startangle, self.endangle)
@@ -111,6 +139,18 @@ class EArc(Element):
     def get_aabb(self):
         au = ArcUtils(self.center, self.radius, self.startangle, self.endangle)
         return au.get_aabb()
+
+    def get_normalized_end_normal(self):
+        if self.end_normal == None:
+            au = ArcUtils(self.start, self.end)
+            self.end_normal = au.get_normalized_end_normal()
+        return self.end_normal
+
+    def get_normalized_start_normal(self):
+        if self.start_normal == None:
+            au = ArcUtils(self.start, self.end)
+            self.start_normal = au.get_normalized_start_normal()
+        return self.start_normal
 
     def __repr__(self):
         return "<EArc ("+str(self.start)+", "+str(self.end)+")>\r\n"

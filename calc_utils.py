@@ -1,5 +1,22 @@
 import math
 
+def find_vect_normal(vect):
+    n = [vect[1], -vect[0], 0]
+    return n
+
+def mk_vect(s, e):
+    return [e[0]-s[0], e[1]-s[1], 0]
+
+def normalize(v):
+    l = math.sqrt(v[0]**2 + v[1]**2)
+    return [v[0]/l, v[1]/l, 0]
+
+def vect_sum(v1, v2):
+    return [v1[0]+v2[0], v1[1]+v2[1], 0]
+
+def vect_len(v):
+    return math.sqrt(v[0]**2+v[1]**2)
+
 class OverlapEnum:
     fully_covers = 1
     partially_overlap = 2
@@ -123,6 +140,17 @@ class ArcUtils:
             dist = 1000
         return abs(dist)
 
+    def get_normalized_start_normal(self):
+        v = mk_vect(self.center, self.start)
+        vn = self.normalize(v)
+        return self.find_vect_normal(v)
+
+    def get_normalized_end_normal(self):
+        v = self.mk_vect(self.center, self.end)
+        vn = self.normalize(v)
+        return self.find_vect_normal(v)
+
+
 class LineUtils:
     def __init__(self, start, end):
         self.start = start
@@ -157,6 +185,17 @@ class LineUtils:
         dist = abs(math.sqrt(p*(p-a)*(p-b)*(p-c))*2/a)
         #print "dist:" , dist
         return dist
+
+
+    def get_normalized_start_normal(self):
+        v = mk_vect(self.start, self.end)
+        vn = normalize(v)
+        return find_vect_normal(v)
+
+    def get_normalized_end_normal(self):
+        v = self.mk_vect(self.start, self.end)
+        vn = self.normalize(v)
+        return self.find_vect_normal(v)
 
     def __reproject_pt(self, pt, sina, cosa):
         return (pt[0]*cosa-pt[1]*sina, pt[0]*sina+pt[1]*cosa)

@@ -6,11 +6,13 @@ import cairo
 
 class TOOffsetFollow(ToolOperation):
     def __init__(self, settings, depth=0, index=0, offset=0):
-        super(TOExactFollow, self).__init__(settings)
-        self.display_name = TOEnum.exact_follow+" "+str(index)
-        self.name = TOEnum.exact_follow
+        super(ToolOffsetFollow, self).__init__(settings)
+        self.display_name = TOEnum.offset_follow+" "+str(index)
+        self.name = TOEnum.offset_follow
         self.depth = depth
+        self.offset = 0
         self.path = None
+        self.offset_path = None
 
     def set_lt(self, ctx):
         ctx.set_source_rgba(1, 0, 0, 0.5)
@@ -21,8 +23,8 @@ class TOOffsetFollow(ToolOperation):
         ctx.set_line_width(self.tool.diameter*0.7)
 
     def __draw_elements(self, ctx):
-        self.path.ordered_elements[0].draw_first(ctx)
-        for e in self.path.ordered_elements[1:]:
+        self.offset_path[0].draw_first(ctx)
+        for e in self.offset_path[1:]:
             #class_name = type(e).__name__
             e.draw_element(ctx)
 
@@ -41,12 +43,57 @@ class TOOffsetFollow(ToolOperation):
 
     def set_depth_s(self, setting):
         self.depth = setting.new_value
+        
+    def __build_offset_path(self, p):
+        if len(p.elements)==0:
+            return False
+        if len(p.elements)==1:
+            #check for circle here
+            return
+        
+        new_elements = []
+        s = p.elements[0].start
+        e = p.elements[0].end
+        nsn = p.elements[0].get_normalized_start_normal()
+        s_pt = [nsn[0]*self.offset+s[0], nsn[1]*self.offset+s[1], 0]
+        for i, e in enumerate(p.elements):
+            sc = e.start # current start
+            ec = e.end # current end
+            
+
+            if s_pt == None:
+                nsn = e.get_normalized_start_normal()
+                n = normalize(vect_sum(nsn, nen)) # sum of new start normal and prev end normal
+                shift = sc
+                s_pt = [n[0]*self.offset+shift[0], n[1]*self.offset+shift[1], 0]
+
+            if i<len(p.elements)-1:
+                sn = p.elements[i+1].start # next start
+                en = p.elements[i+1].end # next end
+
+                nnsn = p.elements[i+1].get_normalized_start_normal()
+                nen = e.get_normalized_end_normal()                                            n = normalize(vect_sum(nnsn, nen)) # sum of next start normal and current end normal
+                shift = ec
+                e_pt = [n[0]*self.offset+shift[0], n[1]*self.offset+shift[1], 0]
+            else:
+                nen = e.get_normalized_end_normal()
+                n = nen
+                shift = ec
+                e_pt = [n[0]*self.offset+shift[0], n[1]*self.offset+shift[1], 0]
+            if type(e).__class__ == "ELine":
+                ne = ELine(s_pt, e_pt, e.lt)
+            elif type(e).__class__ == "EArc":
+                ne = EArc(center=e.center, lt=e.lt, start=s_pt, end=e_pt)
+
+            new_elements.append(ne)
+        self.offset_path = new_elements
+        
 
     def apply(self, path):
         if path.operations[self.name]:
             if path.ordered_elements!=None:
-                print "settings path"
                 self.path = path
+                self.__build_offset_path(path)
                 return True
         return False
 

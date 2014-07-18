@@ -3,6 +3,7 @@ from tool import Tool
 class TOEnum:
     drill = "drill"
     exact_follow = "exact follow"
+    offset_follow = "offset follow"
 
 
 class ToolOperation(object):
