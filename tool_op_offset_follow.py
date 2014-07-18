@@ -112,14 +112,14 @@ class TOOffsetFollow(ToolOperation):
         out+= settings.default_pp.move_to_rapid(new_pos)
         self.tool.current_position = new_pos
 
-        start = self.path.ordered_elements[0].start
+        start = self.offset_path[0].start
 
         new_pos = [self.start[0], self.start[1], new_pos[2]]
         out+= settings.default_pp.move_to_rapid(new_pos)
         self.tool.current_position = new_pos
 
         for step in range(int(self.depth/(self.tool.diameter/2.0))+1):
-            for e in self.path.ordered_elements[0]:
+            for e in self.offset_path:
                 if type(e).__name__ == "ELine":
                     new_pos = [e.start[0], e.start[1], -step*self.tool.diameter/2.0]
                     out+= settings.default_pp.move_to(new_pos)
