@@ -193,6 +193,10 @@ class MainWindow(object):
         self.drill_tool_button.connect("clicked", lambda *args: ep.push_event(ee.drill_tool_click, args))
         self.exact_follow_tool_button = gtk.Button("Exact follow")
         self.exact_follow_tool_button.connect("clicked", lambda *args: ep.push_event(ee.exact_follow_tool_click, args))
+        self.offset_follow_tool_button = gtk.Button("Offset follow")
+        self.offset_follow_tool_button.connect("clicked", lambda *args: ep.push_event(ee.offset_follow_tool_click, args))
+
         self.left_vbox.pack_start(self.tool_ops_label, expand=False, fill=False, padding=0)
         self.left_vbox.pack_start(self.drill_tool_button, expand=False, fill=False, padding=0)
         self.left_vbox.pack_start(self.exact_follow_tool_button, expand=False, fill=False, padding=0)
+        self.left_vbox.pack_start(self.offset_follow_tool_button, expand=False, fill=False, padding=0)

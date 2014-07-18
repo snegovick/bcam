@@ -142,13 +142,13 @@ class ArcUtils:
 
     def get_normalized_start_normal(self):
         v = mk_vect(self.center, self.start)
-        vn = self.normalize(v)
-        return self.find_vect_normal(v)
+        vn = normalize(v)
+        return find_vect_normal(v)
 
     def get_normalized_end_normal(self):
-        v = self.mk_vect(self.center, self.end)
-        vn = self.normalize(v)
-        return self.find_vect_normal(v)
+        v = mk_vect(self.center, self.end)
+        vn = normalize(v)
+        return find_vect_normal(v)
 
 
 class LineUtils:
@@ -193,9 +193,9 @@ class LineUtils:
         return find_vect_normal(v)
 
     def get_normalized_end_normal(self):
-        v = self.mk_vect(self.start, self.end)
-        vn = self.normalize(v)
-        return self.find_vect_normal(v)
+        v = mk_vect(self.start, self.end)
+        vn = normalize(v)
+        return find_vect_normal(v)
 
     def __reproject_pt(self, pt, sina, cosa):
         return (pt[0]*cosa-pt[1]*sina, pt[0]*sina+pt[1]*cosa)

@@ -12,6 +12,7 @@ class Path(Element):
         self.name = name
         self.ordered_elements = []
         self.operations[TOEnum.exact_follow] = True
+        self.operations[TOEnum.offset_follow] = True
 
     def add_element(self, e):
         self.elements.append(e)

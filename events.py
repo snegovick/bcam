@@ -7,6 +7,7 @@ from loader_dxf import DXFLoader
 from state import state
 from tool_op_drill import TODrill
 from tool_op_exact_follow import TOExactFollow
+from tool_op_offset_follow import TOOffsetFollow
 from settings import settings
 from calc_utils import AABB, OverlapEnum
 from path import Path
@@ -26,6 +27,7 @@ class EVEnum:
     path_list_selection_changed = "path_list_selection_changed"
     tool_operations_list_selection_changed = "tool_operations_list_selection_changed"
     exact_follow_tool_click = "exact_follow_tool_click"
+    offset_follow_tool_click = "offset_follow_tool_click"
     update_settings = "update_settings"
     tool_operation_up_click = "tool_operation_up_click"
     tool_operation_down_click = "tool_operation_down_click"
@@ -60,6 +62,7 @@ class EventProcessor(object):
             self.ee.update_paths_list: self.update_paths_list,
             self.ee.path_list_selection_changed: self.path_list_selection_changed,
             self.ee.exact_follow_tool_click: self.exact_follow_tool_click,
+            self.ee.offset_follow_tool_click: self.offset_follow_tool_click,
             self.ee.update_tool_operations_list: self.update_tool_operations_list,
             self.ee.tool_operations_list_selection_changed: self.tool_operations_list_selection_changed,
             self.ee.update_settings: self.update_settings,
@@ -248,6 +251,17 @@ class EventProcessor(object):
         print "selected path:", self.selected_path
         if self.selected_path != None:
             path_follow_op = TOExactFollow(settings, index=len(self.operations))
+            if path_follow_op.apply(self.selected_path):
+                self.operations.append(path_follow_op)
+                self.push_event(self.ee.update_tool_operations_list, (None))
+
+    def offset_follow_tool_click(self, args):
+        print "offset follow tool click:", args
+        connected = self.join_elements(None)
+        self.selected_path = connected
+        print "selected path:", self.selected_path
+        if self.selected_path != None:
+            path_follow_op = TOOffsetFollow(settings, index=len(self.operations))
             if path_follow_op.apply(self.selected_path):
                 self.operations.append(path_follow_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))

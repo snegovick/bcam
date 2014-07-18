@@ -3,10 +3,12 @@ from tool_operation import ToolOperation, TOEnum
 from generalized_setting import TOSetting
 from settings import settings
 import cairo
+from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len
+from elements import ELine, EArc
 
 class TOOffsetFollow(ToolOperation):
     def __init__(self, settings, depth=0, index=0, offset=0):
-        super(ToolOffsetFollow, self).__init__(settings)
+        super(TOOffsetFollow, self).__init__(settings)
         self.display_name = TOEnum.offset_follow+" "+str(index)
         self.name = TOEnum.offset_follow
         self.depth = depth
@@ -72,7 +74,8 @@ class TOOffsetFollow(ToolOperation):
                 en = p.elements[i+1].end # next end
 
                 nnsn = p.elements[i+1].get_normalized_start_normal()
-                nen = e.get_normalized_end_normal()                                            n = normalize(vect_sum(nnsn, nen)) # sum of next start normal and current end normal
+                nen = e.get_normalized_end_normal()
+                n = normalize(vect_sum(nnsn, nen)) # sum of next start normal and current end normal
                 shift = ec
                 e_pt = [n[0]*self.offset+shift[0], n[1]*self.offset+shift[1], 0]
             else:
@@ -80,12 +83,14 @@ class TOOffsetFollow(ToolOperation):
                 n = nen
                 shift = ec
                 e_pt = [n[0]*self.offset+shift[0], n[1]*self.offset+shift[1], 0]
-            if type(e).__class__ == "ELine":
+            if type(e).__name__ == "ELine":
                 ne = ELine(s_pt, e_pt, e.lt)
-            elif type(e).__class__ == "EArc":
+            elif type(e).__name__ == "EArc":
                 ne = EArc(center=e.center, lt=e.lt, start=s_pt, end=e_pt)
 
             new_elements.append(ne)
+            s_pt = None
+            e_pt = None
         self.offset_path = new_elements
         
 
