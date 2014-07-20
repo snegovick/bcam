@@ -74,10 +74,6 @@ class Screen(gtk.DrawingArea):
         cr.set_source_rgb(1.0,1.0,1.0)
         cr.rectangle(0, 0, self.allocation.width, self.allocation.height)
         cr.fill()
-        
-        if ep.file_data!=None:
-            for p in ep.file_data:
-                p.draw(cr, offset)
 
         if ep.operations!=None:
             cr.translate(offset[0], offset[1])
@@ -85,6 +81,10 @@ class Screen(gtk.DrawingArea):
             for o in ep.operations:
                 o.draw(cr)
             cr.identity_matrix()
+        
+        if ep.file_data!=None:
+            for p in ep.file_data:
+                p.draw(cr, offset)
 
         # draw selection box
         if ep.left_press_start != None:

@@ -64,7 +64,9 @@ class ELine(Element):
         ctx.line_to(self.end[0], self.end[1])
 
     def draw_element(self, ctx):
+        ctx.move_to(self.start[0], self.start[1])
         ctx.line_to(self.end[0], self.end[1])
+        ctx.stroke()
     
     def draw(self, ctx):
         self.set_lt(ctx)
@@ -123,6 +125,7 @@ class EArc(Element):
 
     def draw_element(self, ctx):
         ctx.arc(self.center[0], self.center[1], self.radius, self.startangle, self.endangle)
+        ctx.stroke()
     
     def draw(self, ctx):
         self.set_lt(ctx)
@@ -133,7 +136,7 @@ class EArc(Element):
         self.draw_element(ctx)
 
     def turnaround(self):
-        return EArc(self.center, self.radius, self.endangle, self.startangle, self.lt)
+        return EArc(self.center, self.radius, math.degrees(self.endangle), math.degrees(self.startangle), self.lt)
 
     def distance_to_pt(self, pt):
         au = ArcUtils(self.center, self.radius, self.startangle, self.endangle)

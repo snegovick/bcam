@@ -17,17 +17,19 @@ class TOExactFollow(ToolOperation):
         ctx.set_line_width(self.tool.diameter)
 
     def set_fill_lt(self, ctx):
-        ctx.set_source_rgba(0.8, 0.1, 0.1, 0.5)
+        ctx.set_source_rgba(0.8, 0.1, 0.1, 1.0)
         ctx.set_line_width(self.tool.diameter*0.7)
 
     def __draw_elements(self, ctx):
+        #print self.path.ordered_elements
         self.path.ordered_elements[0].draw_first(ctx)
         for e in self.path.ordered_elements[1:]:
             #class_name = type(e).__name__
             e.draw_element(ctx)
 
     def draw(self, ctx):
-        ctx.set_line_join(cairo.LINE_JOIN_ROUND); 
+        ctx.set_line_join(cairo.LINE_JOIN_ROUND)
+        ctx.set_line_cap(cairo.LINE_CAP_ROUND)
         self.set_lt(ctx)
         self.__draw_elements(ctx)
         ctx.stroke()

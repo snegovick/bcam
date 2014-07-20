@@ -250,22 +250,20 @@ class EventProcessor(object):
     def exact_follow_tool_click(self, args):
         print "exact follow tool click:", args
         connected = self.join_elements(None)
-        self.selected_path = connected
         print "selected path:", self.selected_path
-        if self.selected_path != None:
+        if connected != None:
             path_follow_op = TOExactFollow(settings, index=len(self.operations))
-            if path_follow_op.apply(self.selected_path):
+            if path_follow_op.apply(connected):
                 self.operations.append(path_follow_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
 
     def offset_follow_tool_click(self, args):
         print "offset follow tool click:", args
         connected = self.join_elements(None)
-        self.selected_path = connected
         print "selected path:", self.selected_path
-        if self.selected_path != None:
+        if connected != None:
             path_follow_op = TOOffsetFollow(settings, index=len(self.operations))
-            if path_follow_op.apply(self.selected_path):
+            if path_follow_op.apply(connected):
                 self.operations.append(path_follow_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
 
