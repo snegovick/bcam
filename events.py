@@ -114,15 +114,17 @@ class EventProcessor(object):
 
     def screen_left_press(self, args):
         print "press at", args
-        cx = (args[0][0]-state.offset[0])/state.scale[0]
-        cy = (args[0][1]-state.offset[1])/state.scale[1]
+        offset = state.get_offset()
+        cx = (args[0][0]-offset[0])/state.scale[0]
+        cy = (args[0][1]-offset[1])/state.scale[1]
         self.left_press_start = (cx, cy)
         self.pointer_position = (cx, cy)
 
     def screen_left_release(self, args):
         print "release at", args
-        cx = (args[0][0]-state.offset[0])/state.scale[0]
-        cy = (args[0][1]-state.offset[1])/state.scale[1]
+        offset = state.get_offset()
+        cx = (args[0][0]-offset[0])/state.scale[0]
+        cy = (args[0][1]-offset[1])/state.scale[1]
         self.pointer_position = (cx, cy)
         if (self.left_press_start!=None):
             if self.file_data == None:
@@ -178,8 +180,9 @@ class EventProcessor(object):
         self.left_press_start=None
         
     def pointer_motion(self, args):
-        cx = (args[0][0]-state.offset[0])/state.scale[0]
-        cy = (args[0][1]-state.offset[1])/state.scale[1]
+        offset = state.get_offset()
+        cx = (args[0][0]-offset[0])/state.scale[0]
+        cy = (args[0][1]-offset[1])/state.scale[1]
         self.pointer_position = (cx, cy)
 
     def drill_tool_click(self, args):
@@ -329,12 +332,15 @@ class EventProcessor(object):
     def hscroll(self, args):
         print "hscroll:", args
         print args[0][0].get_value()
-        state.offset=(-args[0][0].get_value(), state.offset[1])
+        offset = state.get_base_offset()
+        state.set_base_offset((-args[0][0].get_value(), offset[1]))
 
     def vscroll(self, args):
         print "vscroll:", args
         print args[0][0].get_value()
-        state.offset=(state.offset[0], -args[0][0].get_value())
+        offset = state.get_base_offset()
+        state.set_base_offset((offset[0], -args[0][0].get_value()))
+
         
 ee = EVEnum()
 ep = EventProcessor()

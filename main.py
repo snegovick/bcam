@@ -58,7 +58,9 @@ class Screen(gtk.DrawingArea):
     def do_expose_event(self, event):
         # Create the cairo context
         #state.offset = (self.allocation.width/2,self.allocation.height/2)
-        offset = (state.offset[0]+self.allocation.width/2, state.offset[1]+self.allocation.height/2)
+        state.set_screen_offset((self.allocation.width/2, self.allocation.height/2))
+        
+        offset = state.get_offset()
 
         cr_gdk = self.window.cairo_create()
         surface = cr_gdk.get_target()
@@ -86,7 +88,7 @@ class Screen(gtk.DrawingArea):
 
         # draw selection box
         if ep.left_press_start != None:
-            cr.translate(state.offset[0], state.offset[1])
+            cr.translate(offset[0], offset[1])
             cr.scale(state.scale[0], state.scale[1])
             settings.select_box_lt.set_lt(cr)
             w = ep.pointer_position[0] - ep.left_press_start[0]
