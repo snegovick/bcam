@@ -109,10 +109,10 @@ class ArcUtils:
         self.end = (self.center[0]+math.cos(self.ea)*self.radius, self.center[1]+math.sin(self.ea)*self.radius)
 
     def get_aabb(self):
-        x_min = min(self.start[0], self.end[0], self.center[0])
-        y_min = min(self.start[1], self.end[1], self.center[1])
-        x_max = max(self.start[0], self.end[0], self.center[0])
-        y_max = max(self.start[1], self.end[1], self.center[1])
+        x_min = min(self.start[0], self.end[0])
+        y_min = min(self.start[1], self.end[1])
+        x_max = max(self.start[0], self.end[0])
+        y_max = max(self.start[1], self.end[1])
 
         return AABB(x_min, y_min, x_max, y_max)
 
