@@ -100,8 +100,9 @@ class ELine(Element):
         return "<ELine ("+str(self.start)+", "+str(self.end)+")>\r\n"
 
 class EArc(Element):
-    def __init__(self, center, radius=None, startangle=None, endangle=None, lt=None, start=None, end=None):
+    def __init__(self, center, radius=None, startangle=None, endangle=None, lt=None, start=None, end=None, turnaround=False):
         super(EArc, self).__init__(lt)
+        self.is_turnaround = turnaround
         self.center = center
 
         if start != None and end != None:
@@ -124,7 +125,10 @@ class EArc(Element):
         self.end_normal = None
 
     def draw_element(self, ctx):
-        ctx.arc(self.center[0], self.center[1], self.radius, self.startangle, self.endangle)
+        if self.is_turnaround:
+            ctx.arc(self.center[0], self.center[1], self.radius, self.endangle, self.startangle)
+        else:
+            ctx.arc(self.center[0], self.center[1], self.radius, self.startangle, self.endangle)
         ctx.stroke()
     
     def draw(self, ctx):
@@ -136,7 +140,7 @@ class EArc(Element):
         self.draw_element(ctx)
 
     def turnaround(self):
-        return EArc(self.center, self.radius, math.degrees(self.endangle), math.degrees(self.startangle), self.lt)
+        return EArc(self.center, self.radius, math.degrees(self.endangle), math.degrees(self.startangle), self.lt, turnaround = not self.is_turnaround)
 
     def distance_to_pt(self, pt):
         au = ArcUtils(self.center, self.radius, self.startangle, self.endangle)
