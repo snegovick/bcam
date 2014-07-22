@@ -200,6 +200,31 @@ class LineUtils:
         #print "dist:" , dist
         return dist
 
+    def find_intersection(self, other_element):
+        oe = other_element
+        if type(other_element).__name__ == "LineUtils":
+            # line to line intersection
+            ma = self.end[1]-self.start[1]
+            mb = self.start[0]-self.end[0]
+            mc = ma*self.start[0]+mb*self.start[1]
+
+            oa = oe.end[1]-oe.start[1]
+            ob = oe.start[0]-oe.end[0]
+            oc = oa*oe.start[0]+ob*oe.start[1]
+
+            det = ma*ob - oa*mb
+            if det == 0:
+                # lines are parallel
+                return None
+            else:
+                x_i = (ob*mc-mb*oc)/det
+                y_i = (ma*oc-oa*mc)/det
+                if x_i>=min(self.start[0], self.end[0]) and x_i<=max(self.start[0], self.end[0]):
+                    if x_i>=min(oe.start[0], oe.end[0]) and x_i<=max(oe.start[0], oe.end[0]):
+                        if y_i>=min(self.start[1], self.end[1]) and y_i<=max(self.start[1], self.end[1]):
+                            if y_i>=min(oe.start[1], oe.end[1]) and y_i<=max(oe.start[1], oe.end[1]):
+                                return (x_i, y_i)
+        return None
 
     def get_normalized_start_normal(self):
         v = mk_vect(self.start, self.end)
