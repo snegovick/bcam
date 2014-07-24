@@ -1,5 +1,8 @@
 import math
 
+def sign(val):
+    return (-1 if val<0 else 1)
+
 def find_vect_normal(vect):
     n = [vect[1], -vect[0], 0]
     return n
@@ -168,33 +171,28 @@ class ArcUtils:
     def find_intersection(self, other_element):
         oe = other_element
         if other_element.__class__.__name__ == "LineUtils":
-            print "arc to line"
-            # arc to line intersection
-            ma = self.end[1]-self.start[1]
-            mb = self.start[0]-self.end[0]
-            mc = ma*self.start[0]+mb*self.start[1]
-
-            oa = oe.end[1]-oe.start[1]
-            ob = oe.start[0]-oe.end[0]
-            oc = oa*oe.start[0]+ob*oe.start[1]
-
-            det = ma*ob - oa*mb
-            if det == 0:
-                # lines are parallel
-                print "parallel"
-                return None
+            dx = oe.end[0] - oe.start[0]
+            dy = oe.end[1] - oe.start[1]
+            dr = math.sqrt(dx**2 + dy**2)
+            d = oe.start[0]*oe.end[1] - oe.start[1]*oe.end[0]
+            desc = ((self.diameter/2.0)**2)*dr**2 - d**2
+            if desc == 0:
+                #single point
+                x_i = (d*dy+sign(dy)*dx*math.sqrt(desc))/(dr**2)
+                y_i = (-d*dx+math.abs(dy)*math.sqrt(desc))/(dr**2)
+            elif desc > 0:
+                #intersection
+                x_i1 = (d*dy+sign(dy)*dx*math.sqrt(desc))/(dr**2)
+                y_i1 = (-d*dx+math.abs(dy)*math.sqrt(desc))/(dr**2)
+                x_i2 = (d*dy-sign(dy)*dx*math.sqrt(desc))/(dr**2)
+                y_i2 = (-d*dx-math.abs(dy)*math.sqrt(desc))/(dr**2)
             else:
-                x_i = (ob*mc-mb*oc)/det
-                y_i = (ma*oc-oa*mc)/det
-                print "int:", x_i, y_i
-                if x_i>=min(self.start[0], self.end[0]) and x_i<=max(self.start[0], self.end[0]):
-                    if x_i>=min(oe.start[0], oe.end[0]) and x_i<=max(oe.start[0], oe.end[0]):
-                        if y_i>=min(self.start[1], self.end[1]) and y_i<=max(self.start[1], self.end[1]):
-                            if y_i>=min(oe.start[1], oe.end[1]) and y_i<=max(oe.start[1], oe.end[1]):
-                                return (x_i, y_i)
+                #no intersection
+                return None
+            #check whether intersections are on existing element sections
+            pass
         else:
             print "Not calc util:", other_element.__class__.__name__
-        print "outside"
         return None
 
 
