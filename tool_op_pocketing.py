@@ -1,43 +1,20 @@
 import math
 from tool_operation import ToolOperation, TOEnum
+from tool_abstract_follow import TOAbstractFollow
 from generalized_setting import TOSetting
 from settings import settings
-import cairo
 from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len
 from elements import ELine, EArc
 
-class TOPocketing(ToolOperation):
+class TOPocketing(TOAbstractFollow):
     def __init__(self, settings, depth=0, index=0, offset=0):
-        super(TOPocketing, self).__init__(settings)
+        super(TOAbstractFollow, self).__init__(settings)
         self.display_name = TOEnum.pocket+" "+str(index)
         self.name = TOEnum.pocket
         self.depth = depth
         self.offset = 0
         self.path = None
         self.offset_path = None
-
-    def set_lt(self, ctx):
-        ctx.set_source_rgba(1, 0, 0, 0.5)
-        ctx.set_line_width(self.tool.diameter)
-
-    def set_fill_lt(self, ctx):
-        ctx.set_source_rgba(0.8, 0.1, 0.1, 0.5)
-        ctx.set_line_width(self.tool.diameter*0.7)
-
-    def __draw_elements(self, ctx):
-        self.offset_path[0].draw_first(ctx)
-        for e in self.offset_path[1:]:
-            #class_name = type(e).__name__
-            e.draw_element(ctx)
-
-    def draw(self, ctx):
-        ctx.set_line_join(cairo.LINE_JOIN_ROUND); 
-        self.set_lt(ctx)
-        self.__draw_elements(ctx)
-        ctx.stroke()
-        self.set_fill_lt(ctx)
-        self.__draw_elements(ctx)
-        ctx.stroke()
 
     def get_settings_list(self):
         settings_lst = [TOSetting("float", 0, settings.material.thickness, self.depth, "Depth, mm: ", self.set_depth_s),
@@ -50,6 +27,7 @@ class TOPocketing(ToolOperation):
     def set_offset_s(self, setting):
         self.offset = setting.new_value
         self.__build_offset_path(self.path)
+        self.draw_list = self.offset_path+self.pocket_pattern
         
     def __build_offset_path(self, p):
         if len(p.elements)==0:
@@ -119,14 +97,20 @@ class TOPocketing(ToolOperation):
         radius = self.tool.diameter/2.0
         for i in range(int(dy/radius)):
             line = ELine((left, top-i*radius), (right, top-i*radius), settings.get_def_lt())
-            print "line:", line
             # try to find limiting element
             intersections = []
             for e in self.offset_path:
-                print "line start, end:", line.start, line.end
-                intersection = e.get_cu().find_intersection(line.get_cu())
-                if intersection != None:
-                    intersections.append(intersection)
+                #print "line start, end:", line.start, line.end
+                lcu = line.get_cu()
+                res = e.get_cu().find_intersection(lcu)
+
+                if res != None:
+                    if lcu.distance_to_pt(e.start) < 0.1:
+                        res.append(e.start)
+                    if lcu.distance_to_pt(e.end) < 0.1:
+                        res.append(e.end)
+
+                    intersections+=res
             if len(intersections)>0:
                 if len(intersections) == 1:
                     nleft = intersections[0]
@@ -134,25 +118,21 @@ class TOPocketing(ToolOperation):
                 else:
                     while int(len(intersections)/2) > 0:
                         # find leftmost
-                        print "intersections:", intersections
-                        print "min:", min(intersections, key=lambda pt: pt[0])
                         nleft = min(intersections, key=lambda pt: pt[0])
-                        print "nleft:", nleft
                         intersections.remove(nleft)
                         nright = min(intersections, key=lambda pt: pt[0])
-                        print "nright:", nright
                         intersections.remove(nright)
                         linear_pattern.append(ELine(nleft, nright, settings.get_def_lt()))
         print "linear_pattern:", linear_pattern
-        self.offset_path += linear_pattern
+        self.pocket_pattern = linear_pattern
 
-        
     def apply(self, path):
         if path.operations[self.name]:
             if path.ordered_elements!=None:
                 self.path = path
                 self.__build_offset_path(path)
                 self.__build_pocket_path()
+                self.draw_list = self.offset_path+self.pocket_pattern
                 return True
         return False
 

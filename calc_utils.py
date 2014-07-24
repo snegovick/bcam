@@ -169,29 +169,38 @@ class ArcUtils:
         return self.get_normalized_start_normal()
 
     def check_if_pt_belongs(self, pt):
-        pass
+        v = mk_vect(pt, self.center)
+        if abs((self.radius) - vect_len(v))>0.001:
+            return False
+
+        a = math.atan2(pt[1]-self.center[1], pt[0]-self.center[0])
+        if (self.check_angle_in_range(a)):
+            return True
+        return False
 
     def find_intersection(self, other_element):
         oe = other_element
         if other_element.__class__.__name__ == "LineUtils":
+            print "line to arc"
             dx = oe.end[0] - oe.start[0]
             dy = oe.end[1] - oe.start[1]
             dr = math.sqrt(dx**2 + dy**2)
             d = oe.start[0]*oe.end[1] - oe.start[1]*oe.end[0]
-            desc = ((self.diameter/2.0)**2)*dr**2 - d**2
+            desc = ((self.radius)**2)*dr**2 - d**2
             intersections = []
             if desc == 0:
                 #single point
                 x_i = (d*dy+sign(dy)*dx*math.sqrt(desc))/(dr**2)
-                y_i = (-d*dx+math.abs(dy)*math.sqrt(desc))/(dr**2)
+                y_i = (-d*dx+abs(dy)*math.sqrt(desc))/(dr**2)
                 intersections.append((x_i, y_i))
             elif desc > 0:
                 #intersection
                 x_i1 = (d*dy+sign(dy)*dx*math.sqrt(desc))/(dr**2)
-                y_i1 = (-d*dx+math.abs(dy)*math.sqrt(desc))/(dr**2)
+                y_i1 = (-d*dx+abs(dy)*math.sqrt(desc))/(dr**2)
                 x_i2 = (d*dy-sign(dy)*dx*math.sqrt(desc))/(dr**2)
-                y_i2 = (-d*dx-math.abs(dy)*math.sqrt(desc))/(dr**2)
-                intersections.append((x_i1, y_i1), (x_i2, y_i2))
+                y_i2 = (-d*dx-abs(dy)*math.sqrt(desc))/(dr**2)
+                intersections.append((x_i1, y_i1))
+                intersections.append((x_i2, y_i2))
             else:
                 #no intersection
                 return None
@@ -204,7 +213,7 @@ class ArcUtils:
             if len(checked_intersections)>0:
                 return checked_intersections
         else:
-            print "Not calc util:", other_element.__class__.__name__
+            print "A: Not calc util:", other_element.__class__.__name__
         return None
 
 
@@ -252,7 +261,7 @@ class LineUtils:
 
     def find_intersection(self, other_element):
         oe = other_element
-        print oe
+        #print oe
         if other_element.__class__.__name__ == "LineUtils":
             print "line to line"
             # line to line intersection
@@ -261,25 +270,28 @@ class LineUtils:
             mc = ma*self.start[0]+mb*self.start[1]
 
             oa = oe.end[1]-oe.start[1]
-            print oe.start
-            print oe.end
+            #print oe.start
+            #print oe.end
             ob = oe.start[0]-oe.end[0]
             oc = oa*oe.start[0]+ob*oe.start[1]
 
             det = ma*ob - oa*mb
             if det == 0:
                 # lines are parallel
-                print "parallel"
+                #print "parallel"
                 return None
             else:
                 x_i = (ob*mc-mb*oc)/det
                 y_i = (ma*oc-oa*mc)/det
-                print "int:", x_i, y_i
+                #print "int:", x_i, y_i
                 if self.check_if_pt_belongs((x_i, y_i)):
                     if oe.check_if_pt_belongs((x_i, y_i)):
-                        return (x_i, y_i)
+                        return [(x_i, y_i),]
+        elif other_element.__class__.__name__ == "ArcUtils":
+            print "arc to line"
+            return oe.find_intersection(self)
         else:
-            print "Not calc util:", other_element.__class__.__name__
+            print "L: Not calc util:", other_element.__class__.__name__
 
         return None
 

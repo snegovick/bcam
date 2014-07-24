@@ -1,43 +1,21 @@
 import math
 from tool_operation import ToolOperation, TOEnum
+from tool_abstract_follow import TOAbstractFollow
 from generalized_setting import TOSetting
 from settings import settings
 import cairo
 from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len
 from elements import ELine, EArc
 
-class TOOffsetFollow(ToolOperation):
+class TOOffsetFollow(TOAbstractFollow):
     def __init__(self, settings, depth=0, index=0, offset=0):
-        super(TOOffsetFollow, self).__init__(settings)
+        super(TOAbstractFollow, self).__init__(settings)
         self.display_name = TOEnum.offset_follow+" "+str(index)
         self.name = TOEnum.offset_follow
         self.depth = depth
         self.offset = 0
         self.path = None
         self.offset_path = None
-
-    def set_lt(self, ctx):
-        ctx.set_source_rgba(1, 0, 0, 0.5)
-        ctx.set_line_width(self.tool.diameter)
-
-    def set_fill_lt(self, ctx):
-        ctx.set_source_rgba(0.8, 0.1, 0.1, 0.5)
-        ctx.set_line_width(self.tool.diameter*0.7)
-
-    def __draw_elements(self, ctx):
-        self.offset_path[0].draw_first(ctx)
-        for e in self.offset_path[1:]:
-            #class_name = type(e).__name__
-            e.draw_element(ctx)
-
-    def draw(self, ctx):
-        ctx.set_line_join(cairo.LINE_JOIN_ROUND); 
-        self.set_lt(ctx)
-        self.__draw_elements(ctx)
-        ctx.stroke()
-        self.set_fill_lt(ctx)
-        self.__draw_elements(ctx)
-        ctx.stroke()
 
     def get_settings_list(self):
         settings_lst = [TOSetting("float", 0, settings.material.thickness, self.depth, "Depth, mm: ", self.set_depth_s),
@@ -50,6 +28,7 @@ class TOOffsetFollow(ToolOperation):
     def set_offset_s(self, setting):
         self.offset = setting.new_value
         self.__build_offset_path(self.path)
+        self.draw_list = self.offset_path
         
     def __build_offset_path(self, p):
         if len(p.elements)==0:
@@ -101,6 +80,7 @@ class TOOffsetFollow(ToolOperation):
             if path.ordered_elements!=None:
                 self.path = path
                 self.__build_offset_path(path)
+                self.draw_list = self.offset_path
                 return True
         return False
 
