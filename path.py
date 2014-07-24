@@ -42,6 +42,26 @@ class Path(Element):
                 #print "md, i:", md, i
         return min_dist, min_dist_id, min_order
 
+    def __append_element(self, min_dist_id, min_order, available, ordered_elements, ce):
+        i = min_dist_id
+        ce.append(available[i])
+        if min_order["offset"] == 1:
+            if min_order["turnaround"] == False:
+                available[i].start = ordered_elements[-1].end
+                ordered_elements.append(available[i])
+            else:
+                available[i].end = ordered_elements[-1].end
+                ordered_elements.append(available[i].turnaround())
+        else:
+            if min_order["turnaround"] == False:
+                available[i].end = ordered_elements.start
+                ordered_elements.insert(len(ordered_elements)-2, available[i])
+            else:
+                available[i].start = ordered_elements.start
+                ordered_elements.insert(len(ordered_elements)-2, available[i].turnaround())
+        del available[i]
+
+
     def mk_connected_path(self):
         if len(self.elements)==0:
             return None
@@ -78,41 +98,15 @@ class Path(Element):
                 break
             cont = False
             current = (ce[-1], ce[0])
-            #print ce
-            #print "available[0]:", available[0]
-            #print "current:", current
             min_dist, min_dist_id, min_order = self.__find_adjacent_element(current[0], available)
             if (min_dist<0.001):
-                i = min_dist_id
-                ce.append(available[i])
-                if min_order["offset"] == 1:
-                    if min_order["turnaround"] == False:
-                        ordered_elements.append(available[i])
-                    else:
-                        ordered_elements.append(available[i].turnaround())
-                else:
-                    if min_order["turnaround"] == False:
-                        ordered_elements.insert(len(ordered_elements)-2, available[i])
-                    else:
-                        ordered_elements.insert(len(ordered_elements)-2, available[i].turnaround())
-                del available[i]
+                
+                self.__append_element(min_dist_id, min_order, available, ordered_elements, ce)
                 cont = True
             if not cont:
                 min_dist, min_dist_id, min_order = self.__find_adjacent_element(current[1], available)
                 if (min_dist<0.001):
-                    i = min_dist_id
-                    ce.append(available[i])
-                    if min_order["offset"] == 1:
-                        if min_order["turnaround"] == False:
-                            ordered_elements.append(available[i])
-                        else:
-                            ordered_elements.append(available[i].turnaround())
-                    else:
-                        if min_order["turnaround"] == False:
-                            ordered_elements.insert(len(ordered_elements)-2, available[i])
-                        else:
-                            ordered_elements.insert(len(ordered_elements)-2, available[i].turnaround())
-                    del available[i]
+                    self.__append_element(min_dist_id, min_order, available, ordered_elements, ce)
                     cont = True
 
             if not cont:

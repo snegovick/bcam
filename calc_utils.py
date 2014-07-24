@@ -254,10 +254,18 @@ class LineUtils:
 
     def check_if_pt_belongs(self, pt):
         x_i, y_i = pt
+        print "x:", (min(self.start[0], self.end[0]), max(self.start[0], self.end[0])), "y:", (min(self.start[1], self.end[1]), max(self.start[1], self.end[1]))
         if x_i>=min(self.start[0], self.end[0]) and x_i<=max(self.start[0], self.end[0]):
             if y_i>=min(self.start[1], self.end[1]) and y_i<=max(self.start[1], self.end[1]):
                 return True
         return False
+
+    def __mk_proper_line(self, s, e):
+        ms = (min(e[0], s[0]), min(e[1], s[1]))
+        me = (max(e[0], s[0]), max(e[1], s[1]))
+        #ms = s
+        #me = e
+        return ms, me
 
     def find_intersection(self, other_element):
         oe = other_element
@@ -265,25 +273,26 @@ class LineUtils:
         if other_element.__class__.__name__ == "LineUtils":
             print "line to line"
             # line to line intersection
-            ma = self.end[1]-self.start[1]
-            mb = self.start[0]-self.end[0]
-            mc = ma*self.start[0]+mb*self.start[1]
+            ms, me = self.__mk_proper_line(self.start, self.end)
 
-            oa = oe.end[1]-oe.start[1]
-            #print oe.start
-            #print oe.end
-            ob = oe.start[0]-oe.end[0]
-            oc = oa*oe.start[0]+ob*oe.start[1]
+            ma = me[1]-ms[1]
+            mb = ms[0]-me[0]
+            mc = ma*ms[0]+mb*ms[1]
+
+            ms, me = self.__mk_proper_line(oe.start, oe.end)
+            oa = me[1]-ms[1]
+            ob = ms[0]-me[0]
+            oc = oa*ms[0]+ob*ms[1]
 
             det = ma*ob - oa*mb
             if det == 0:
                 # lines are parallel
-                #print "parallel"
+                print "parallel"
                 return None
             else:
                 x_i = (ob*mc-mb*oc)/det
                 y_i = (ma*oc-oa*mc)/det
-                #print "int:", x_i, y_i
+                print "int:", x_i, y_i
                 if self.check_if_pt_belongs((x_i, y_i)):
                     if oe.check_if_pt_belongs((x_i, y_i)):
                         return [(x_i, y_i),]

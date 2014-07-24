@@ -83,10 +83,10 @@ class TOPocketing(TOAbstractFollow):
             points_y.append(e.start[1])
             points_y.append(e.end[1])
 
-        left = min(points_x)
-        right = max(points_x)
-        top = max(points_y)
-        bottom = min(points_y)
+        left = min(points_x) - 10.0
+        right = max(points_x) + 10.0
+        top = max(points_y) + 10.0
+        bottom = min(points_y) - 10.0
 
         
         #generate linear fill pattern
@@ -95,23 +95,26 @@ class TOPocketing(TOAbstractFollow):
         dx = right - left
         print "dx:", dx, "dy:", dy
         radius = self.tool.diameter/2.0
-        for i in range(int(dy/radius)):
+        #for i in range(int(dy/radius)):
+        if True:
+            i = int(dy/radius/2)
             line = ELine((left, top-i*radius), (right, top-i*radius), settings.get_def_lt())
             # try to find limiting element
             intersections = []
             for e in self.offset_path:
-                #print "line start, end:", line.start, line.end
                 lcu = line.get_cu()
                 res = e.get_cu().find_intersection(lcu)
+                print res
+
+                # if lcu.distance_to_pt(e.start) < 0.1:
+                #     res.append(e.start)
+                # if lcu.distance_to_pt(e.end) < 0.1:
+                #     res.append(e.end)
 
                 if res != None:
-                    if lcu.distance_to_pt(e.start) < 0.1:
-                        res.append(e.start)
-                    if lcu.distance_to_pt(e.end) < 0.1:
-                        res.append(e.end)
-
                     intersections+=res
             if len(intersections)>0:
+                print "intersections:", intersections
                 if len(intersections) == 1:
                     nleft = intersections[0]
                     linear_pattern.append(ELine(nleft, line.end, settings.get_def_lt()))
