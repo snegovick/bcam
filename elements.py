@@ -165,6 +165,10 @@ class EArc(Element):
             self.start_normal = au.get_normalized_start_normal()
         return self.start_normal
 
+    def get_cu(self):
+        return ArcUtils(self.center, self.radius, self.startangle, self.endangle)
+
+
     def __repr__(self):
         return "<EArc ("+str(self.start)+", "+str(self.end)+")>\r\n"
 

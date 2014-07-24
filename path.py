@@ -13,6 +13,7 @@ class Path(Element):
         self.ordered_elements = []
         self.operations[TOEnum.exact_follow] = True
         self.operations[TOEnum.offset_follow] = True
+        self.operations[TOEnum.pocket] = True
 
     def add_element(self, e):
         self.elements.append(e)

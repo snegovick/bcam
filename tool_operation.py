@@ -4,7 +4,7 @@ class TOEnum:
     drill = "drill"
     exact_follow = "exact follow"
     offset_follow = "offset follow"
-
+    pocket = "pocket"
 
 class ToolOperation(object):
     def __init__(self, settings_dispatcher):

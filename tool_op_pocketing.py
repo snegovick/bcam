@@ -9,8 +9,8 @@ from elements import ELine, EArc
 class TOPocketing(ToolOperation):
     def __init__(self, settings, depth=0, index=0, offset=0):
         super(TOPocketing, self).__init__(settings)
-        self.display_name = TOEnum.offset_follow+" "+str(index)
-        self.name = TOEnum.pocketing
+        self.display_name = TOEnum.pocket+" "+str(index)
+        self.name = TOEnum.pocket
         self.depth = depth
         self.offset = 0
         self.path = None
@@ -98,6 +98,7 @@ class TOPocketing(ToolOperation):
     def __build_pocket_path(self):
         # find bounding box
         points_x = []
+        points_y = []
         for e in self.offset_path:
             points_x.append(e.start[0])
             points_x.append(e.end[0])
@@ -108,33 +109,41 @@ class TOPocketing(ToolOperation):
         right = max(points_x)
         top = max(points_y)
         bottom = min(points_y)
+
         
         #generate linear fill pattern
         linear_pattern = []
         dy = top - bottom
         dx = right - left
+        print "dx:", dx, "dy:", dy
         radius = self.tool.diameter/2.0
         for i in range(int(dy/radius)):
-            line = ELine((left, bottom+dy), (right, bottom+dy), settings.get_def_lt())
+            line = ELine((left, top-i*radius), (right, top-i*radius), settings.get_def_lt())
+            print "line:", line
             # try to find limiting element
             intersections = []
             for e in self.offset_path:
-                intersection = e.get_cu().find_intersection(line)
+                print "line start, end:", line.start, line.end
+                intersection = e.get_cu().find_intersection(line.get_cu())
                 if intersection != None:
                     intersections.append(intersection)
             if len(intersections)>0:
                 if len(intersections) == 1:
-                    left = min(intersections, lambda pt: pt[0])
-                    linear_pattern.append(ELine(left, line.end, settings.get_def_lt()))
+                    nleft = intersections[0]
+                    linear_pattern.append(ELine(nleft, line.end, settings.get_def_lt()))
                 else:
                     while int(len(intersections)/2) > 0:
                         # find leftmost
-                        left = min(intersections, lambda pt: pt[0])
-                        intersections.remove(intersections.index(left))
-                        right = min(intersections, lambda pt: pt[0])
-                        intersections.remove(intersections.index(right))
-                        linear_pattern.append(ELine(left, right, settings.get_def_lt()))
-        
+                        print "intersections:", intersections
+                        print "min:", min(intersections, key=lambda pt: pt[0])
+                        nleft = min(intersections, key=lambda pt: pt[0])
+                        print "nleft:", nleft
+                        intersections.remove(nleft)
+                        nright = min(intersections, key=lambda pt: pt[0])
+                        print "nright:", nright
+                        intersections.remove(nright)
+                        linear_pattern.append(ELine(nleft, nright, settings.get_def_lt()))
+        print "linear_pattern:", linear_pattern
         self.offset_path += linear_pattern
 
         
@@ -143,6 +152,7 @@ class TOPocketing(ToolOperation):
             if path.ordered_elements!=None:
                 self.path = path
                 self.__build_offset_path(path)
+                self.__build_pocket_path()
                 return True
         return False
 

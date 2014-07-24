@@ -8,6 +8,7 @@ from state import state
 from tool_op_drill import TODrill
 from tool_op_exact_follow import TOExactFollow
 from tool_op_offset_follow import TOOffsetFollow
+from tool_op_pocketing import TOPocketing
 from settings import settings
 from calc_utils import AABB, OverlapEnum
 from path import Path
@@ -28,6 +29,7 @@ class EVEnum:
     tool_operations_list_selection_changed = "tool_operations_list_selection_changed"
     exact_follow_tool_click = "exact_follow_tool_click"
     offset_follow_tool_click = "offset_follow_tool_click"
+    pocket_tool_click = "pocket_tool_click"
     update_settings = "update_settings"
     tool_operation_up_click = "tool_operation_up_click"
     tool_operation_down_click = "tool_operation_down_click"
@@ -63,6 +65,7 @@ class EventProcessor(object):
             self.ee.path_list_selection_changed: self.path_list_selection_changed,
             self.ee.exact_follow_tool_click: self.exact_follow_tool_click,
             self.ee.offset_follow_tool_click: self.offset_follow_tool_click,
+            self.ee.pocket_tool_click: self.pocket_tool_click,
             self.ee.update_tool_operations_list: self.update_tool_operations_list,
             self.ee.tool_operations_list_selection_changed: self.tool_operations_list_selection_changed,
             self.ee.update_settings: self.update_settings,
@@ -266,6 +269,17 @@ class EventProcessor(object):
             if path_follow_op.apply(connected):
                 self.operations.append(path_follow_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
+
+    def pocket_tool_click(self, args):
+        print "pocket tool click:", args
+        connected = self.join_elements(None)
+        print "selected path:", self.selected_path
+        if connected != None:
+            pocket_op = TOPocketing(settings, index=len(self.operations))
+            if pocket_op.apply(connected):
+                self.operations.append(pocket_op)
+                self.push_event(self.ee.update_tool_operations_list, (None))
+
 
     def update_settings(self, args):
         print "settings update:", args

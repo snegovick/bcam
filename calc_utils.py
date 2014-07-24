@@ -165,6 +165,39 @@ class ArcUtils:
     def get_normalized_end_normal(self):
         return self.get_normalized_start_normal()
 
+    def find_intersection(self, other_element):
+        oe = other_element
+        if other_element.__class__.__name__ == "LineUtils":
+            print "arc to line"
+            # arc to line intersection
+            ma = self.end[1]-self.start[1]
+            mb = self.start[0]-self.end[0]
+            mc = ma*self.start[0]+mb*self.start[1]
+
+            oa = oe.end[1]-oe.start[1]
+            ob = oe.start[0]-oe.end[0]
+            oc = oa*oe.start[0]+ob*oe.start[1]
+
+            det = ma*ob - oa*mb
+            if det == 0:
+                # lines are parallel
+                print "parallel"
+                return None
+            else:
+                x_i = (ob*mc-mb*oc)/det
+                y_i = (ma*oc-oa*mc)/det
+                print "int:", x_i, y_i
+                if x_i>=min(self.start[0], self.end[0]) and x_i<=max(self.start[0], self.end[0]):
+                    if x_i>=min(oe.start[0], oe.end[0]) and x_i<=max(oe.start[0], oe.end[0]):
+                        if y_i>=min(self.start[1], self.end[1]) and y_i<=max(self.start[1], self.end[1]):
+                            if y_i>=min(oe.start[1], oe.end[1]) and y_i<=max(oe.start[1], oe.end[1]):
+                                return (x_i, y_i)
+        else:
+            print "Not calc util:", other_element.__class__.__name__
+        print "outside"
+        return None
+
+
 class LineUtils:
     def __init__(self, start, end):
         self.start = start
@@ -202,28 +235,37 @@ class LineUtils:
 
     def find_intersection(self, other_element):
         oe = other_element
-        if type(other_element).__name__ == "LineUtils":
+        print oe
+        if other_element.__class__.__name__ == "LineUtils":
+            print "line to line"
             # line to line intersection
             ma = self.end[1]-self.start[1]
             mb = self.start[0]-self.end[0]
             mc = ma*self.start[0]+mb*self.start[1]
 
             oa = oe.end[1]-oe.start[1]
+            print oe.start
+            print oe.end
             ob = oe.start[0]-oe.end[0]
             oc = oa*oe.start[0]+ob*oe.start[1]
 
             det = ma*ob - oa*mb
             if det == 0:
                 # lines are parallel
+                print "parallel"
                 return None
             else:
                 x_i = (ob*mc-mb*oc)/det
                 y_i = (ma*oc-oa*mc)/det
+                print "int:", x_i, y_i
                 if x_i>=min(self.start[0], self.end[0]) and x_i<=max(self.start[0], self.end[0]):
                     if x_i>=min(oe.start[0], oe.end[0]) and x_i<=max(oe.start[0], oe.end[0]):
                         if y_i>=min(self.start[1], self.end[1]) and y_i<=max(self.start[1], self.end[1]):
                             if y_i>=min(oe.start[1], oe.end[1]) and y_i<=max(oe.start[1], oe.end[1]):
                                 return (x_i, y_i)
+        else:
+            print "Not calc util:", other_element.__class__.__name__
+
         return None
 
     def get_normalized_start_normal(self):
