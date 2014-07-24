@@ -168,6 +168,9 @@ class ArcUtils:
     def get_normalized_end_normal(self):
         return self.get_normalized_start_normal()
 
+    def check_if_pt_belongs(self, pt):
+        pass
+
     def find_intersection(self, other_element):
         oe = other_element
         if other_element.__class__.__name__ == "LineUtils":
@@ -176,21 +179,30 @@ class ArcUtils:
             dr = math.sqrt(dx**2 + dy**2)
             d = oe.start[0]*oe.end[1] - oe.start[1]*oe.end[0]
             desc = ((self.diameter/2.0)**2)*dr**2 - d**2
+            intersections = []
             if desc == 0:
                 #single point
                 x_i = (d*dy+sign(dy)*dx*math.sqrt(desc))/(dr**2)
                 y_i = (-d*dx+math.abs(dy)*math.sqrt(desc))/(dr**2)
+                intersections.append((x_i, y_i))
             elif desc > 0:
                 #intersection
                 x_i1 = (d*dy+sign(dy)*dx*math.sqrt(desc))/(dr**2)
                 y_i1 = (-d*dx+math.abs(dy)*math.sqrt(desc))/(dr**2)
                 x_i2 = (d*dy-sign(dy)*dx*math.sqrt(desc))/(dr**2)
                 y_i2 = (-d*dx-math.abs(dy)*math.sqrt(desc))/(dr**2)
+                intersections.append((x_i1, y_i1), (x_i2, y_i2))
             else:
                 #no intersection
                 return None
-            #check whether intersections are on existing element sections
-            pass
+            #check whether intersections are inside existing element sections
+            checked_intersections = []
+            for pt in intersections:
+                if oe.check_if_pt_belongs(pt):
+                    if self.check_if_pt_belongs(pt):
+                        checked_intersections.append(pt)
+            if len(checked_intersections)>0:
+                return checked_intersections
         else:
             print "Not calc util:", other_element.__class__.__name__
         return None
@@ -231,6 +243,13 @@ class LineUtils:
         #print "dist:" , dist
         return dist
 
+    def check_if_pt_belongs(self, pt):
+        x_i, y_i = pt
+        if x_i>=min(self.start[0], self.end[0]) and x_i<=max(self.start[0], self.end[0]):
+            if y_i>=min(self.start[1], self.end[1]) and y_i<=max(self.start[1], self.end[1]):
+                return True
+        return False
+
     def find_intersection(self, other_element):
         oe = other_element
         print oe
@@ -256,11 +275,9 @@ class LineUtils:
                 x_i = (ob*mc-mb*oc)/det
                 y_i = (ma*oc-oa*mc)/det
                 print "int:", x_i, y_i
-                if x_i>=min(self.start[0], self.end[0]) and x_i<=max(self.start[0], self.end[0]):
-                    if x_i>=min(oe.start[0], oe.end[0]) and x_i<=max(oe.start[0], oe.end[0]):
-                        if y_i>=min(self.start[1], self.end[1]) and y_i<=max(self.start[1], self.end[1]):
-                            if y_i>=min(oe.start[1], oe.end[1]) and y_i<=max(oe.start[1], oe.end[1]):
-                                return (x_i, y_i)
+                if self.check_if_pt_belongs((x_i, y_i)):
+                    if oe.check_if_pt_belongs((x_i, y_i)):
+                        return (x_i, y_i)
         else:
             print "Not calc util:", other_element.__class__.__name__
 
