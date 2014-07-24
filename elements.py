@@ -96,6 +96,9 @@ class ELine(Element):
             self.start_normal = lu.get_normalized_start_normal()
         return self.start_normal
 
+    def get_cu(self):
+        return LineUtils(self.start, self.end)
+
     def __repr__(self):
         return "<ELine ("+str(self.start)+", "+str(self.end)+")>\r\n"
 

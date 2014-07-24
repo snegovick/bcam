@@ -115,10 +115,27 @@ class TOPocketing(ToolOperation):
         dx = right - left
         radius = self.tool.diameter/2.0
         for i in range(int(dy/radius)):
+            line = ELine((left, bottom+dy), (right, bottom+dy), settings.get_def_lt())
             # try to find limiting element
+            intersections = []
             for e in self.offset_path:
-                pass
-            # try to find limiting point
+                intersection = e.get_cu().find_intersection(line)
+                if intersection != None:
+                    intersections.append(intersection)
+            if len(intersections)>0:
+                if len(intersections) == 1:
+                    left = min(intersections, lambda pt: pt[0])
+                    linear_pattern.append(ELine(left, line.end, settings.get_def_lt()))
+                else:
+                    while int(len(intersections)/2) > 0:
+                        # find leftmost
+                        left = min(intersections, lambda pt: pt[0])
+                        intersections.remove(intersections.index(left))
+                        right = min(intersections, lambda pt: pt[0])
+                        intersections.remove(intersections.index(right))
+                        linear_pattern.append(ELine(left, right, settings.get_def_lt()))
+        
+        self.offset_path += linear_pattern
 
         
     def apply(self, path):
