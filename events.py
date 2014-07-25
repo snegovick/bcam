@@ -187,6 +187,7 @@ class EventProcessor(object):
         cx = (args[0][0]-offset[0])/state.scale[0]
         cy = (args[0][1]-offset[1])/state.scale[1]
         self.pointer_position = (cx, cy)
+        self.mw.cursor_pos_label.set_text("%.3f:%.3f"%(cx, cy))
 
     def drill_tool_click(self, args):
         print "drill tool click:", args

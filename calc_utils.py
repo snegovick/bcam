@@ -171,17 +171,19 @@ class ArcUtils:
     def check_if_pt_belongs(self, pt):
         v = mk_vect(pt, self.center)
         if abs((self.radius) - vect_len(v))>0.001:
+            #print "radius check failed"
             return False
 
         a = math.atan2(pt[1]-self.center[1], pt[0]-self.center[0])
         if (self.check_angle_in_range(a)):
+            #print "radius and angle ok"
             return True
         return False
 
     def find_intersection(self, other_element):
         oe = other_element
         if other_element.__class__.__name__ == "LineUtils":
-            print "line to arc"
+            #print "line to arc"
             dx = oe.end[0] - oe.start[0]
             dy = oe.end[1] - oe.start[1]
             dr = math.sqrt(dx**2 + dy**2)
@@ -190,11 +192,13 @@ class ArcUtils:
             intersections = []
             if desc == 0:
                 #single point
+                #print "single point"
                 x_i = (d*dy+sign(dy)*dx*math.sqrt(desc))/(dr**2)
                 y_i = (-d*dx+abs(dy)*math.sqrt(desc))/(dr**2)
                 intersections.append((x_i, y_i))
             elif desc > 0:
                 #intersection
+                #print "intersection"
                 x_i1 = (d*dy+sign(dy)*dx*math.sqrt(desc))/(dr**2)
                 y_i1 = (-d*dx+abs(dy)*math.sqrt(desc))/(dr**2)
                 x_i2 = (d*dy-sign(dy)*dx*math.sqrt(desc))/(dr**2)
@@ -203,13 +207,22 @@ class ArcUtils:
                 intersections.append((x_i2, y_i2))
             else:
                 #no intersection
+                #print "no intersection"
                 return None
             #check whether intersections are inside existing element sections
             checked_intersections = []
             for pt in intersections:
                 if oe.check_if_pt_belongs(pt):
+                    #print "oe belongs"
                     if self.check_if_pt_belongs(pt):
+                        #print "self belongs"
                         checked_intersections.append(pt)
+                    else:
+                        #print "self failed"
+                        pass
+                else:
+                    #print "oe failed"
+                    pass
             if len(checked_intersections)>0:
                 return checked_intersections
         else:
@@ -254,86 +267,81 @@ class LineUtils:
 
     def check_if_pt_belongs(self, pt):
         x_i, y_i = pt
-        #print "x:", (min(self.start[0], self.end[0]), max(self.start[0], self.end[0])), "y:", (min(self.start[1], self.end[1]), max(self.start[1], self.end[1]))
+
         minx = min(self.start[0], self.end[0])
         maxx = max(self.start[0], self.end[0])
         miny = min(self.start[1], self.end[1])
         maxy = max(self.start[1], self.end[1])
 
+        #print "s:", (minx, miny), "e:", (maxx, maxy)
+
         x_intersects = False
         y_intersects = False
 
-        if abs(minx-maxx)<0.0001:
-            if abs(x_i-minx)<0.0001:
+        if abs(minx-maxx)<0.001:
+            if abs(x_i-minx)<0.001:
                 x_intersects = True
+                #print "dx=0"
             else:
                 return False
+        elif x_i>=minx and x_i<=maxx:
+            x_intersects = True
         
-        if abs(miny-maxy)<0.0001:
-            if abs(y_i-miny)<0.0001:
+        if abs(miny-maxy)<0.001:
+            if abs(y_i-miny)<0.001:
                 y_intersects = True
+                #print "dy=0"
             else:
                 return False
-
-
-        if not x_intersects:
-            if x_i>=minx and x_i<=maxx:
-                x_intersects = True
-        if not y_intersects:
-            if y_i>=miny and y_i<=maxy:
-                y_intersects = True
+        elif y_i>=miny and y_i<=maxy:
+            y_intersects = True
 
         if x_intersects and y_intersects:
             return True
 
         return False
 
-    def __mk_proper_line(self, s, e):
-        ms = (min(e[0], s[0]), min(e[1], s[1]))
-        me = (max(e[0], s[0]), max(e[1], s[1]))
-        #ms = s
-        #me = e
-        return ms, me
-
     def find_intersection(self, other_element):
         oe = other_element
         #print oe
         if other_element.__class__.__name__ == "LineUtils":
-            print "line to line"
+            #print "line to line"
             # line to line intersection
-            ms, me = self.__mk_proper_line(self.start, self.end)
+            ms, me = self.start, self.end
 
             ma = me[1]-ms[1]
             mb = ms[0]-me[0]
             mc = ma*ms[0]+mb*ms[1]
 
-            ms, me = self.__mk_proper_line(oe.start, oe.end)
+            ms, me = oe.start, oe.end
             oa = me[1]-ms[1]
             ob = ms[0]-me[0]
             oc = oa*ms[0]+ob*ms[1]
 
-            det = ma*ob - oa*mb
+            det = float(ma*ob - oa*mb)
             if det == 0:
                 # lines are parallel
-                print "parallel"
+                #print "parallel"
                 return None
             else:
                 x_i = (ob*mc-mb*oc)/det
                 y_i = (ma*oc-oa*mc)/det
                 #print "int:", x_i, y_i
                 if self.check_if_pt_belongs((x_i, y_i)):
-                    print "on self"
+                    #print "on self"
                     if oe.check_if_pt_belongs((x_i, y_i)):
-                        print "on oe"
+                        #print "on oe"
                         return [(x_i, y_i),]
                     else:
-                        print "not on oe"
-                        print "int:", x_i, y_i
-                        print "oe:", oe.start, oe.end
+                        #print "not on oe"
+                        #print "int:", x_i, y_i
+                        #print "oe:", oe.start, oe.end
+                        pass
                 else:
-                    print "not on self"
+                    pass
+                    #print "not on self"
         elif other_element.__class__.__name__ == "ArcUtils":
-            print "arc to line"
+            #print "arc to line"
             return oe.find_intersection(self)
         else:
             print "L: Not calc util:", other_element.__class__.__name__

@@ -75,6 +75,8 @@ class Screen(gtk.DrawingArea):
         cr.rectangle(0, 0, self.allocation.width, self.allocation.height)
         cr.fill()
 
+        cr.stroke()
+
         if ep.operations!=None:
             cr.translate(offset[0], offset[1])
             cr.scale(state.scale[0], state.scale[1])

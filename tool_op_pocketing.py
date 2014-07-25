@@ -27,6 +27,7 @@ class TOPocketing(TOAbstractFollow):
     def set_offset_s(self, setting):
         self.offset = setting.new_value
         self.__build_offset_path(self.path)
+        self.__build_pocket_path()
         self.draw_list = self.offset_path+self.pocket_pattern
         
     def __build_offset_path(self, p):
@@ -96,13 +97,15 @@ class TOPocketing(TOAbstractFollow):
         print "dx:", dx, "dy:", dy
         radius = self.tool.diameter/2.0
         for i in range(int(dy/radius)):
+        #if True:
+            #i = float(int(dy/radius)-10)
             line = ELine((left, top-i*radius), (right, top-i*radius), settings.get_def_lt())
             # try to find limiting element
             intersections = []
             lcu = line.get_cu()
             for e in self.offset_path:
                 res = e.get_cu().find_intersection(lcu)
-                print res
+                #print res
 
                 if res != None:
                     intersections+=res
