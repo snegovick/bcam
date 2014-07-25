@@ -254,10 +254,38 @@ class LineUtils:
 
     def check_if_pt_belongs(self, pt):
         x_i, y_i = pt
-        print "x:", (min(self.start[0], self.end[0]), max(self.start[0], self.end[0])), "y:", (min(self.start[1], self.end[1]), max(self.start[1], self.end[1]))
-        if x_i>=min(self.start[0], self.end[0]) and x_i<=max(self.start[0], self.end[0]):
-            if y_i>=min(self.start[1], self.end[1]) and y_i<=max(self.start[1], self.end[1]):
-                return True
+        #print "x:", (min(self.start[0], self.end[0]), max(self.start[0], self.end[0])), "y:", (min(self.start[1], self.end[1]), max(self.start[1], self.end[1]))
+        minx = min(self.start[0], self.end[0])
+        maxx = max(self.start[0], self.end[0])
+        miny = min(self.start[1], self.end[1])
+        maxy = max(self.start[1], self.end[1])
+
+        x_intersects = False
+        y_intersects = False
+
+        if abs(minx-maxx)<0.0001:
+            if abs(x_i-minx)<0.0001:
+                x_intersects = True
+            else:
+                return False
+        
+        if abs(miny-maxy)<0.0001:
+            if abs(y_i-miny)<0.0001:
+                y_intersects = True
+            else:
+                return False
+
+
+        if not x_intersects:
+            if x_i>=minx and x_i<=maxx:
+                x_intersects = True
+        if not y_intersects:
+            if y_i>=miny and y_i<=maxy:
+                y_intersects = True
+
+        if x_intersects and y_intersects:
+            return True
+
         return False
 
     def __mk_proper_line(self, s, e):
@@ -292,10 +320,18 @@ class LineUtils:
             else:
                 x_i = (ob*mc-mb*oc)/det
                 y_i = (ma*oc-oa*mc)/det
-                print "int:", x_i, y_i
+                #print "int:", x_i, y_i
                 if self.check_if_pt_belongs((x_i, y_i)):
+                    print "on self"
                     if oe.check_if_pt_belongs((x_i, y_i)):
+                        print "on oe"
                         return [(x_i, y_i),]
+                    else:
+                        print "not on oe"
+                        print "int:", x_i, y_i
+                        print "oe:", oe.start, oe.end
+                else:
+                    print "not on self"
         elif other_element.__class__.__name__ == "ArcUtils":
             print "arc to line"
             return oe.find_intersection(self)

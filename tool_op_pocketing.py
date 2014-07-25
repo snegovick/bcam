@@ -95,29 +95,23 @@ class TOPocketing(TOAbstractFollow):
         dx = right - left
         print "dx:", dx, "dy:", dy
         radius = self.tool.diameter/2.0
-        #for i in range(int(dy/radius)):
-        if True:
-            i = int(dy/radius/2)
+        for i in range(int(dy/radius)):
             line = ELine((left, top-i*radius), (right, top-i*radius), settings.get_def_lt())
             # try to find limiting element
             intersections = []
+            lcu = line.get_cu()
             for e in self.offset_path:
-                lcu = line.get_cu()
                 res = e.get_cu().find_intersection(lcu)
                 print res
-
-                # if lcu.distance_to_pt(e.start) < 0.1:
-                #     res.append(e.start)
-                # if lcu.distance_to_pt(e.end) < 0.1:
-                #     res.append(e.end)
 
                 if res != None:
                     intersections+=res
             if len(intersections)>0:
                 print "intersections:", intersections
                 if len(intersections) == 1:
-                    nleft = intersections[0]
-                    linear_pattern.append(ELine(nleft, line.end, settings.get_def_lt()))
+                    pass
+                    # nleft = intersections[0]
+                    # linear_pattern.append(ELine(nleft, line.end, settings.get_def_lt()))
                 else:
                     while int(len(intersections)/2) > 0:
                         # find leftmost
