@@ -13,9 +13,11 @@ class State:
 
     def set_base_offset(self, offset):
         self.__base_offset = offset
+        self.__total_offset = (self.__base_offset[0]+self.__screen_offset[0], self.__base_offset[1]+self.__screen_offset[1])
 
     def set_offset(self, offset):
         self.__base_offset = offset
+        self.__total_offset = (self.__base_offset[0]+self.__screen_offset[0], self.__base_offset[1]+self.__screen_offset[1])
 
     def set_screen_offset(self, offset):
         if self.__screen_offset != offset:
