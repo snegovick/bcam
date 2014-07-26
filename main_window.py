@@ -15,6 +15,21 @@ class MainWindow(object):
         self.window = gtk.Window()
         self.window.resize(w, h)
         self.window.connect("delete-event", gtk.main_quit)
+
+        self.menu_bar = gtk.MenuBar()
+        self.file_menu = gtk.Menu()
+        self.file_item = gtk.MenuItem("File")
+        self.file_item.set_submenu(self.file_menu)
+        self.menu_bar.append(self.file_item)
+
+        self.open_item = gtk.MenuItem("Open ...")
+        self.file_menu.append(self.open_item)
+        self.open_item.connect("activate", lambda *args: ep.push_event(ee.load_click, args))
+
+        self.window_vbox = gtk.VBox(homogeneous=False, spacing=0)
+        self.window_vbox.pack_start(self.menu_bar, expand=False, fill=False, padding=0)
+        self.window.add(self.window_vbox)
+
         self.widget = Widget()
         self.widget.connect("button_press_event", self.widget.button_press_event)
         self.widget.connect("button_release_event", self.widget.button_release_event)
@@ -48,7 +63,7 @@ class MainWindow(object):
         self.__mk_right_vbox()
         self.hbox.pack_start(self.right_vbox, expand=False, fill=False, padding=0)
         gobject.timeout_add(10, self.widget.periodic)
-        self.window.add(self.hbox)
+        self.window_vbox.pack_start(self.hbox, expand=True, fill=True, padding=0)
 
     def run(self):
         self.window.show_all()
@@ -163,10 +178,6 @@ class MainWindow(object):
 
     def __mk_left_vbox(self):
         self.left_vbox = gtk.VBox(homogeneous=False, spacing=0)
-        self.load_dxf = gtk.Button(label="Load...")
-        self.load_dxf.connect("clicked", lambda *args: ep.push_event(ee.load_click, args))
-        self.left_vbox.pack_start(self.load_dxf, expand=False, fill=False, padding=0)
-
         self.paths_label = gtk.Label("Paths")
         self.scrolled_window = gtk.ScrolledWindow()
         self.gtklist = gtk.List()
