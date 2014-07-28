@@ -23,8 +23,11 @@ class MainWindow(object):
         self.menu_bar.append(self.file_item)
 
         self.open_item = gtk.MenuItem("Open ...")
+        self.save_item = gtk.MenuItem("Save ...")
         self.file_menu.append(self.open_item)
+        self.file_menu.append(self.save_item)
         self.open_item.connect("activate", lambda *args: ep.push_event(ee.load_click, args))
+        self.save_item.connect("activate", lambda *args: ep.push_event(ee.save_click, args))
 
         self.window_vbox = gtk.VBox(homogeneous=False, spacing=0)
         self.window_vbox.pack_start(self.menu_bar, expand=False, fill=False, padding=0)
@@ -109,6 +112,29 @@ class MainWindow(object):
         dialog.destroy()
         return ret
 
+    def mk_file_save_dialog(self, name, mimes):
+        ret = None
+        dialog = gtk.FileChooserDialog(name,
+                                       None,
+                                       gtk.FILE_CHOOSER_ACTION_SAVE,
+                                       (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                        gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        dialog.set_default_response(gtk.RESPONSE_OK)
+
+        for m in mimes:
+            filter = gtk.FileFilter()
+            filter.set_name(m[0])
+            filter.add_mime_type(m[1])
+            filter.add_pattern(m[2])
+            dialog.add_filter(filter)
+
+        response = dialog.run()
+        if response == gtk.RESPONSE_OK:
+            ret = dialog.get_filename()
+        elif response == gtk.RESPONSE_CANCEL:
+            pass
+        dialog.destroy()
+        return ret
                 
     def clear_list(self, lst):
         children = lst.children()

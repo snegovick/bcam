@@ -15,7 +15,9 @@ from path import Path
 
 class EVEnum:
     load_click = "load_click"
+    save_click = "save_click"
     load_file = "load_file"
+    save_file = "save_file"
     screen_left_press = "screen_left_press"
     screen_left_release = "screen_left_release"
     pointer_motion = "pointer_motion"
@@ -53,6 +55,7 @@ class EventProcessor(object):
     def __init__(self):
         self.events = {
             self.ee.load_click: self.load_click,
+            self.ee.save_click: self.save_click,
             self.ee.load_file: self.load_file,
             self.ee.screen_left_press: self.screen_left_press,
             self.ee.screen_left_release: self.screen_left_release,
@@ -93,6 +96,12 @@ class EventProcessor(object):
         result = self.mw.mk_file_dialog("Open ...", mimes)
         if result!=None:
             self.push_event(self.ee.load_file, result)
+
+    def save_click(self, args):
+        mimes = [("GCode (*.ngc)", "Application/dxf", "*.dxf")]
+        result = self.mw.mk_file_save_dialog("Save ...", mimes)
+        #if result!=None:
+        #    self.push_event(self.ee.save_file, result)
 
     def update_paths_list(self, args):
         if self.file_data != None:
