@@ -57,6 +57,7 @@ class EventProcessor(object):
             self.ee.load_click: self.load_click,
             self.ee.save_click: self.save_click,
             self.ee.load_file: self.load_file,
+            self.ee.save_file: self.save_file,
             self.ee.screen_left_press: self.screen_left_press,
             self.ee.screen_left_release: self.screen_left_release,
             self.ee.pointer_motion: self.pointer_motion,
@@ -100,8 +101,8 @@ class EventProcessor(object):
     def save_click(self, args):
         mimes = [("GCode (*.ngc)", "Application/dxf", "*.dxf")]
         result = self.mw.mk_file_save_dialog("Save ...", mimes)
-        #if result!=None:
-        #    self.push_event(self.ee.save_file, result)
+        if result!=None:
+            self.push_event(self.ee.save_file, result)
 
     def update_paths_list(self, args):
         if self.file_data != None:
@@ -123,6 +124,18 @@ class EventProcessor(object):
         dxfloader = DXFLoader()
         self.file_data = dxfloader.load(args[0])
         self.push_event(self.ee.update_paths_list, (None))
+
+    def save_file(self, args):
+        print "save file", args
+        file_path = args[0]
+        out = ""
+        for p in self.operations:
+            out+=p.get_gcode()
+        f = open(file_path, "w")
+        f.write(out)
+        f.close()
+            #self.mw.add_item_to_list(self.mw.tp_gtklist, p.display_name)
+
 
     def screen_left_press(self, args):
         print "press at", args
