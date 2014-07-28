@@ -136,7 +136,7 @@ class TOPocketing(TOAbstractFollow):
                 return True
         return False
 
-    def __process_el_to_gcode(self, e):
+    def __process_el_to_gcode(self, e, step):
         out = ""
         if type(e).__name__ == "ELine":
             new_pos = [e.start[0], e.start[1], -step*self.tool.diameter/2.0]
@@ -152,7 +152,7 @@ class TOPocketing(TOAbstractFollow):
                 out+= settings.default_pp.move_to(new_pos)
                 self.tool.current_position = new_pos
                 new_pos = [e.end[0], e.end[1], -step*self.tool.diameter/2.0]
-                out+= settings.default_pp.mk_ccw_arc(e.diameter/2.0, new_pos)
+                out+= settings.default_pp.mk_ccw_arc(e.radius, new_pos)
                 self.tool.current_position = new_pos
 
             else:
@@ -160,7 +160,7 @@ class TOPocketing(TOAbstractFollow):
                 out+= settings.default_pp.move_to(new_pos)
                 self.tool.current_position = new_pos
                 new_pos = [e.end[0], e.end[1], -step*self.tool.diameter/2.0]
-                out+= settings.default_pp.mk_cw_arc(e.diameter/2.0, new_pos)
+                out+= settings.default_pp.mk_cw_arc(e.radius, new_pos)
                 self.tool.current_position = new_pos
         else:
             print "unsuported element type:", type(e).__name__
@@ -177,15 +177,15 @@ class TOPocketing(TOAbstractFollow):
 
         start = self.offset_path[0].start
 
-        new_pos = [self.start[0], self.start[1], new_pos[2]]
+        new_pos = [start[0], start[1], new_pos[2]]
         out+= settings.default_pp.move_to_rapid(new_pos)
         self.tool.current_position = new_pos
 
         for step in range(int(self.depth/(self.tool.diameter/2.0))+1):
             for e in self.offset_path:
-                out += self.__process_el_to_gcode(e)
+                out += self.__process_el_to_gcode(e, step)
             for e in self.pocket_pattern:
-                out += self.__process_el_to_gcode(e)
+                out += self.__process_el_to_gcode(e, step)
                 
 
         new_pos = [new_pos[0], new_pos[1], self.tool.default_height]
