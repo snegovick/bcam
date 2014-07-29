@@ -9,28 +9,32 @@ class DXFEnum:
     arc = "ARC"
     circle = "CIRCLE"
     insert = "INSERT"
+    polyline = "POLYLINE"
 
 class DXFLoader(loader.SourceLoader):
     def __init__(self):
         pass
 
+    def __mk_line(self, s, e, offset):
+        if offset !=None:
+            start = [offset[0], offset[1]]
+            end = [offset[0], offset[1]]
+        else:
+            start = [0,0]
+            end = [0,0]
+            
+        start[0]+=s[0]
+        start[1]+=s[1]
+        end[0]+=e[0]
+        end[1]+=e[1]
+
+        return ELine(tuple(start), tuple(end), settings.get_def_lt())
+
     def __basic_el(self, e, p, offset):
 
         if e.dxftype == DXFEnum.line:
             #print "line"
-            if offset !=None:
-                start = [offset[0], offset[1]]
-                end = [offset[0], offset[1]]
-            else:
-                start = [0,0]
-                end = [0,0]
-
-            start[0]+=e.start[0]
-            start[1]+=e.start[1]
-            end[0]+=e.end[0]
-            end[1]+=e.end[1]
-
-            el = ELine(tuple(start), tuple(end), settings.get_def_lt())
+            el = self.__mk_line(e.start, e.end, offset)
             p.add_element(el)
         elif e.dxftype == DXFEnum.arc:
             #print "arc"
@@ -53,12 +57,24 @@ class DXFLoader(loader.SourceLoader):
 
             el = ECircle(tuple(center[:2]), e.radius, settings.get_def_lt())
             p.add_element(el)
+        elif e.dxftype == DXFEnum.polyline:
+            start = None
+            for pt in e.points:
+                end = pt
+                if start == None:
+                    start = pt
+
+                else:
+                    el = self.__mk_line(start, end, offset)
+                    p.add_element(el)
+                start = end
+                
         else:
             return False
         return True
 
     def __is_basic(self, e):
-        if e.dxftype == DXFEnum.line or e.dxftype == DXFEnum.arc or e.dxftype == DXFEnum.circle:
+        if e.dxftype == DXFEnum.line or e.dxftype == DXFEnum.arc or e.dxftype == DXFEnum.circle or e.dxftype == DXFEnum.polyline:
             return True
         return False
 
