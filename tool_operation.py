@@ -9,6 +9,7 @@ class TOEnum:
 class ToolOperation(object):
     def __init__(self, settings_dispatcher):
         self.tool=settings_dispatcher.tool
+        self.display = True
 
     def draw(self, ctx):
         pass

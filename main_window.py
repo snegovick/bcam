@@ -141,12 +141,24 @@ class MainWindow(object):
         for c in children:
             lst.remove(c)
 
-    def add_item_to_list(self, lst, label_text):
+    def add_item_to_list(self, lst, label_text, event):
+        check_button = gtk.CheckButton("")
+        check_button.set_active(True)
+        check_button.unset_flags(gtk.CAN_FOCUS)
+        check_button.show()
+        check_button.connect("clicked", lambda *args: ep.push_event(event, (label_text, args)))
+
         label = gtk.Label(label_text)
-        list_item = gtk.ListItem()
-        list_item.add(label)
-        list_item.show()
         label.show()
+
+        hbox = gtk.HBox(homogeneous=False, spacing=0)
+        hbox.pack_start(check_button, expand=False, fill=False, padding=0)
+        hbox.pack_start(label, expand=False, fill=False, padding=0)
+        hbox.show()
+
+        list_item = gtk.ListItem()
+        list_item.show()
+        list_item.add(hbox)
         lst.add(list_item)
 
     def __mk_labeled_spin(self, dct, mlabel, data=None, callback=None, value=3.0, lower=-999.0, upper=999.0, step_incr=0.01, page_incr=0.5):

@@ -24,12 +24,13 @@ class TODrill(ToolOperation):
         ctx.set_line_width(0.0)
 
     def draw(self, ctx):
-        self.set_lt(ctx)
-        ctx.arc(self.center[0], self.center[1], (self.tool.diameter/2.0), 0, 2*math.pi);
-        ctx.stroke()
-        self.set_fill_lt(ctx)
-        ctx.arc(self.center[0], self.center[1], (self.tool.diameter/2.0), 0, 2*math.pi);
-        ctx.fill()
+        if self.display:
+            self.set_lt(ctx)
+            ctx.arc(self.center[0], self.center[1], (self.tool.diameter/2.0), 0, 2*math.pi);
+            ctx.stroke()
+            self.set_fill_lt(ctx)
+            ctx.arc(self.center[0], self.center[1], (self.tool.diameter/2.0), 0, 2*math.pi);
+            ctx.fill()
 
     def apply(self, element, depth=0):
         self.depth = depth

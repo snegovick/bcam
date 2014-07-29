@@ -8,6 +8,7 @@ from settings import settings
 class Path(Element):
     def __init__(self, elements, name, lt):
         super(Path, self).__init__(lt)
+        self.display = True
         self.elements = elements
         self.name = name
         self.ordered_elements = []
@@ -129,8 +130,9 @@ class Path(Element):
         return self.closed
 
     def draw(self, ctx, offset):
-        ctx.translate(offset[0], offset[1])
-        ctx.scale(state.scale[0], state.scale[1])
-        for e in self.elements:
-            e.draw(ctx)
-        ctx.identity_matrix()
+        if self.display:
+            ctx.translate(offset[0], offset[1])
+            ctx.scale(state.scale[0], state.scale[1])
+            for e in self.elements:
+                e.draw(ctx)
+            ctx.identity_matrix()

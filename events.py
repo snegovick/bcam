@@ -39,6 +39,8 @@ class EVEnum:
     scroll_down = "scroll_down"
     hscroll = "hscroll"
     vscroll = "vscroll"
+    tool_paths_check_button_click = "tool_paths_check_button_click"
+    paths_check_button_click = "paths_check_button_click"
 
 class EventProcessor(object):
     ee = EVEnum()
@@ -79,6 +81,8 @@ class EventProcessor(object):
             self.ee.scroll_down: self.scroll_down,
             self.ee.hscroll: self.hscroll,
             self.ee.vscroll: self.vscroll,
+            self.ee.tool_paths_check_button_click: self.tool_paths_check_button_click,
+            self.ee.paths_check_button_click: self.paths_check_button_click,
         }
 
     def push_event(self, event, *args):
@@ -110,14 +114,14 @@ class EventProcessor(object):
             for p in self.file_data:
                 if p.name[0] == '*':
                     continue
-                self.mw.add_item_to_list(self.mw.gtklist, p.name)
+                self.mw.add_item_to_list(self.mw.gtklist, p.name, self.ee.paths_check_button_click)
 
 
     def update_tool_operations_list(self, args):
         if self.operations != None:
             self.mw.clear_list(self.mw.tp_gtklist)
             for p in self.operations:
-                self.mw.add_item_to_list(self.mw.tp_gtklist, p.display_name)
+                self.mw.add_item_to_list(self.mw.tp_gtklist, p.display_name, self.ee.tool_paths_check_button_click)
 
     def load_file(self, args):
         print "load file", args
@@ -254,7 +258,7 @@ class EventProcessor(object):
         self.deselect_all(None)
         self.selected_path = None
         for li in selection:
-            name = li.children()[0].get_text()
+            name = li.children()[0].children()[1].get_text()
             for p in self.file_data:
                 if p.name == name:
                     self.selected_path = p
@@ -267,7 +271,7 @@ class EventProcessor(object):
         selection = args[0][0].get_selection()
         self.selected_tool_operation = None
         for li in selection:
-            name = li.children()[0].get_text()
+            name = li.children()[0].children()[1].get_text()
             for p in self.operations:
                 if p.display_name == name:
                     self.selected_tool_operation = p
@@ -375,6 +379,21 @@ class EventProcessor(object):
         print args[0][0].get_value()
         offset = state.get_base_offset()
         state.set_base_offset((offset[0], -args[0][0].get_value()))
+
+    def tool_paths_check_button_click(self, args):
+        name = args[0][0]
+        for o in self.operations:
+            if o.display_name == name:
+                o.display = not o.display
+                break
+
+    def paths_check_button_click(self, args):
+        name = args[0][0]
+        for p in self.file_data:
+            if p.name == name:
+                p.display = not p.display
+                break
+
 
         
 ee = EVEnum()

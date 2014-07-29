@@ -20,11 +20,12 @@ class TOAbstractFollow(ToolOperation):
             e.draw_element(ctx)
 
     def draw(self, ctx):
-        ctx.set_line_join(cairo.LINE_JOIN_ROUND)
-        ctx.set_line_cap(cairo.LINE_CAP_ROUND)
-        self.set_lt(ctx)
-        self.__draw_elements(ctx)
-        ctx.stroke()
-        self.set_fill_lt(ctx)
-        self.__draw_elements(ctx)
-        ctx.stroke()
+        if self.display:
+            ctx.set_line_join(cairo.LINE_JOIN_ROUND)
+            ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+            self.set_lt(ctx)
+            self.__draw_elements(ctx)
+            ctx.stroke()
+            self.set_fill_lt(ctx)
+            self.__draw_elements(ctx)
+            ctx.stroke()
