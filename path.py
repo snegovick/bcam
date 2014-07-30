@@ -55,10 +55,10 @@ class Path(Element):
                 ordered_elements.append(available[i].turnaround())
         else:
             if min_order["turnaround"] == False:
-                available[i].end = ordered_elements.start
+                available[i].end = ordered_elements[0].start
                 ordered_elements.insert(len(ordered_elements)-2, available[i])
             else:
-                available[i].start = ordered_elements.start
+                available[i].start = ordered_elements[0].start
                 ordered_elements.insert(len(ordered_elements)-2, available[i].turnaround())
         del available[i]
 

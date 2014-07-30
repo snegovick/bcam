@@ -404,9 +404,9 @@ class EventProcessor(object):
             self.push_event(self.ee.update_paths_list, (None))
 
     def tool_operation_delete_button_click(self, args):
-        if self.selected_tool_operation in self.file_data:
+        if self.selected_tool_operation in self.operations:
             self.operations.remove(self.selected_tool_operation)
-            self.selected_path = None
+            self.selected_tool_operation = None
             self.push_event(self.ee.update_tool_operations_list, (None))
         
 ee = EVEnum()
