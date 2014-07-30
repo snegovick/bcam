@@ -223,6 +223,9 @@ class MainWindow(object):
         self.scrolled_window.add_with_viewport(self.gtklist)
         self.left_vbox.pack_start(self.paths_label, expand=False, fill=False, padding=0)
         self.left_vbox.pack_start(self.scrolled_window, expand=True, fill=True, padding=0)
+        self.path_delete_button = gtk.Button("Delete path")
+        self.path_delete_button.connect("clicked", lambda *args: ep.push_event(ee.path_delete_button_click, None))
+        self.left_vbox.pack_start(self.path_delete_button, expand=False, fill=False, padding=0)
 
         self.tool_paths_label = gtk.Label("Tool paths")
         self.tp_scrolled_window = gtk.ScrolledWindow()
@@ -239,6 +242,9 @@ class MainWindow(object):
         self.left_vbox.pack_start(self.tool_paths_label, expand=False, fill=False, padding=0)
         self.left_vbox.pack_start(self.tp_scrolled_window, expand=True, fill=True, padding=0)
         self.left_vbox.pack_start(self.tp_updown_hbox, expand=False, fill=False, padding=0)
+        self.tool_operation_delete_button = gtk.Button("Delete tool path")
+        self.tool_operation_delete_button.connect("clicked", lambda *args: ep.push_event(ee.tool_operation_delete_button_click, None))
+        self.left_vbox.pack_start(self.tool_operation_delete_button, expand=False, fill=False, padding=0)
 
         self.tool_ops_label = gtk.Label("Tool operations")
         self.left_vbox.pack_start(self.tool_ops_label, expand=False, fill=False, padding=0)

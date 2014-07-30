@@ -41,6 +41,8 @@ class EVEnum:
     vscroll = "vscroll"
     tool_paths_check_button_click = "tool_paths_check_button_click"
     paths_check_button_click = "paths_check_button_click"
+    path_delete_button_click = "path_delete_button_click"
+    tool_operation_delete_button_click = "tool_operation_delete_button_click"
 
 class EventProcessor(object):
     ee = EVEnum()
@@ -83,6 +85,8 @@ class EventProcessor(object):
             self.ee.vscroll: self.vscroll,
             self.ee.tool_paths_check_button_click: self.tool_paths_check_button_click,
             self.ee.paths_check_button_click: self.paths_check_button_click,
+            self.ee.path_delete_button_click: self.path_delete_button_click,
+            self.ee.tool_operation_delete_button_click: self.tool_operation_delete_button_click,
         }
 
     def push_event(self, event, *args):
@@ -115,7 +119,6 @@ class EventProcessor(object):
                 if p.name[0] == '*':
                     continue
                 self.mw.add_item_to_list(self.mw.gtklist, p.name, self.ee.paths_check_button_click)
-
 
     def update_tool_operations_list(self, args):
         if self.operations != None:
@@ -394,7 +397,17 @@ class EventProcessor(object):
                 p.display = not p.display
                 break
 
+    def path_delete_button_click(self, args):
+        if self.selected_path in self.file_data:
+            self.file_data.remove(self.selected_path)
+            self.selected_path = None
+            self.push_event(self.ee.update_paths_list, (None))
 
+    def tool_operation_delete_button_click(self, args):
+        if self.selected_tool_operation in self.file_data:
+            self.operations.remove(self.selected_tool_operation)
+            self.selected_path = None
+            self.push_event(self.ee.update_tool_operations_list, (None))
         
 ee = EVEnum()
 ep = EventProcessor()
