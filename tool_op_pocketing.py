@@ -136,39 +136,7 @@ class TOPocketing(TOAbstractFollow):
                 return True
         return False
 
-    def __process_el_to_gcode(self, e, step):
-        out = ""
-        if type(e).__name__ == "ELine":
-            new_pos = [e.start[0], e.start[1], -step*self.tool.diameter/2.0]
-            out+= settings.default_pp.move_to(new_pos)
-            self.tool.current_position = new_pos
-
-            new_pos = [e.end[0], e.end[1], -step*self.tool.diameter/2.0]
-            out+= settings.default_pp.move_to(new_pos)
-            self.tool.current_position = new_pos
-        elif type(e).__name__ == "EArc":
-            if e.turnaround:
-                new_pos = [e.start[0], e.start[1], -step*self.tool.diameter/2.0]
-                out+= settings.default_pp.move_to(new_pos)
-                self.tool.current_position = new_pos
-                new_pos = [e.end[0], e.end[1], -step*self.tool.diameter/2.0]
-                out+= settings.default_pp.mk_ccw_arc(e.radius, new_pos)
-                self.tool.current_position = new_pos
-
-            else:
-                new_pos = [e.start[0], e.start[1], -step*self.tool.diameter/2.0]
-                out+= settings.default_pp.move_to(new_pos)
-                self.tool.current_position = new_pos
-                new_pos = [e.end[0], e.end[1], -step*self.tool.diameter/2.0]
-                out+= settings.default_pp.mk_cw_arc(e.radius, new_pos)
-                self.tool.current_position = new_pos
-        else:
-            print "unsuported element type:", type(e).__name__
-        return out
-
-
     def get_gcode(self):
-        print self.tool.diameter
         cp = self.tool.current_position
         out = ""
         new_pos = [cp[0], cp[1], self.tool.default_height]
@@ -183,9 +151,9 @@ class TOPocketing(TOAbstractFollow):
 
         for step in range(int(self.depth/(self.tool.diameter/2.0))+1):
             for e in self.offset_path:
-                out += self.__process_el_to_gcode(e, step)
+                out += self.process_el_to_gcode(e, step)
             for e in self.pocket_pattern:
-                out += self.__process_el_to_gcode(e, step)
+                out += self.process_el_to_gcode(e, step)
                 
 
         new_pos = [new_pos[0], new_pos[1], self.tool.default_height]

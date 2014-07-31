@@ -1,4 +1,6 @@
 from tool_operation import ToolOperation
+from settings import settings
+
 import cairo
 
 class TOAbstractFollow(ToolOperation):
@@ -29,3 +31,33 @@ class TOAbstractFollow(ToolOperation):
             self.set_fill_lt(ctx)
             self.__draw_elements(ctx)
             ctx.stroke()
+
+    def process_el_to_gcode(self, e, step):
+        out = ""
+        if type(e).__name__ == "ELine":
+            new_pos = [e.start[0], e.start[1], -step*self.tool.diameter/2.0]
+            out+= settings.default_pp.move_to(new_pos)
+            self.tool.current_position = new_pos
+
+            new_pos = [e.end[0], e.end[1], -step*self.tool.diameter/2.0]
+            out+= settings.default_pp.move_to(new_pos)
+            self.tool.current_position = new_pos
+        elif type(e).__name__ == "EArc":
+            if e.turnaround:
+                new_pos = [e.start[0], e.start[1], -step*self.tool.diameter/2.0]
+                out+= settings.default_pp.move_to(new_pos)
+                self.tool.current_position = new_pos
+                new_pos = [e.end[0], e.end[1], -step*self.tool.diameter/2.0]
+                out+= settings.default_pp.mk_ccw_arc(e.radius, new_pos)
+                self.tool.current_position = new_pos
+
+            else:
+                new_pos = [e.start[0], e.start[1], -step*self.tool.diameter/2.0]
+                out+= settings.default_pp.move_to(new_pos)
+                self.tool.current_position = new_pos
+                new_pos = [e.end[0], e.end[1], -step*self.tool.diameter/2.0]
+                out+= settings.default_pp.mk_cw_arc(e.radius, new_pos)
+                self.tool.current_position = new_pos
+        else:
+            print "unsuported element type:", type(e).__name__
+        return out

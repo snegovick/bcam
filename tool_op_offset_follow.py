@@ -85,7 +85,6 @@ class TOOffsetFollow(TOAbstractFollow):
         return False
 
     def get_gcode(self):
-        print self.tool.diameter
         cp = self.tool.current_position
         out = ""
         new_pos = [cp[0], cp[1], self.tool.default_height]
@@ -94,31 +93,13 @@ class TOOffsetFollow(TOAbstractFollow):
 
         start = self.offset_path[0].start
 
-        new_pos = [self.start[0], self.start[1], new_pos[2]]
+        new_pos = [start[0], start[1], new_pos[2]]
         out+= settings.default_pp.move_to_rapid(new_pos)
         self.tool.current_position = new_pos
 
         for step in range(int(self.depth/(self.tool.diameter/2.0))+1):
             for e in self.offset_path:
-                if type(e).__name__ == "ELine":
-                    new_pos = [e.start[0], e.start[1], -step*self.tool.diameter/2.0]
-                    out+= settings.default_pp.move_to(new_pos)
-                    self.tool.current_position = new_pos
-
-                    new_pos = [e.end[0], e.end[1], -step*self.tool.diameter/2.0]
-                    out+= settings.default_pp.move_to(new_pos)
-                    self.tool.current_position = new_pos
-                elif type(e).__name__ == "EArc":
-                    if e.startangle>e.endangle:
-                        new_pos = [e.start[0], e.start[1], -step*self.tool.diameter/2.0]
-                        out+= settings.default_pp.move_to(new_pos)
-                        self.tool.current_position = new_pos
-
-                        new_pos = [e.end[0], e.end[1], -step*self.tool.diameter/2.0]
-                        out+= settings.default_pp.mk_cw_arc(e.diameter/2.0, new_pos)
-                        self.tool.current_position = new_pos
-                else:
-                    print "unsuported element type:", type(e).__name__
+                out += self.process_el_to_gcode(e, step)
 
         new_pos = [new_pos[0], new_pos[1], self.tool.default_height]
         out+= settings.default_pp.move_to_rapid(new_pos)

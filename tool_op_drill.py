@@ -55,7 +55,6 @@ class TODrill(ToolOperation):
         self.center[1] = setting.new_value
 
     def get_gcode(self):
-        print self.tool.diameter
         cp = self.tool.current_position
         out = ""
         new_pos = [cp[0], cp[1], self.tool.default_height]
