@@ -17,9 +17,11 @@ class TOAbstractFollow(ToolOperation):
         ctx.set_line_width(self.tool.diameter*0.7)
 
     def __draw_elements(self, ctx):
-        self.draw_list[0].draw_first(ctx)
-        for e in self.draw_list[1:]:
-            e.draw_element(ctx)
+        if self.draw_list != None:
+            print "draw list:", self.draw_list
+            self.draw_list[0].draw_first(ctx)
+            for e in self.draw_list[1:]:
+                e.draw_element(ctx)
 
     def draw(self, ctx):
         if self.display:

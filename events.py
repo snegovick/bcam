@@ -12,6 +12,7 @@ from tool_op_pocketing import TOPocketing
 from settings import settings
 from calc_utils import AABB, OverlapEnum
 from path import Path
+from project import project
 
 class EVEnum:
     load_click = "load_click"
@@ -119,12 +120,14 @@ class EventProcessor(object):
                 if p.name[0] == '*':
                     continue
                 self.mw.add_item_to_list(self.mw.gtklist, p.name, self.ee.paths_check_button_click)
+        project.push_state(self.file_data, self.operations, settings, state)
 
     def update_tool_operations_list(self, args):
         if self.operations != None:
             self.mw.clear_list(self.mw.tp_gtklist)
             for p in self.operations:
                 self.mw.add_item_to_list(self.mw.tp_gtklist, p.display_name, self.ee.tool_paths_check_button_click)
+        project.push_state(self.file_data, self.operations, settings, state)
 
     def load_file(self, args):
         print "load file", args
@@ -294,6 +297,7 @@ class EventProcessor(object):
         print "offset follow tool click:", args
         connected = self.join_elements(None)
         print "selected path:", self.selected_path
+        print "connected:", connected
         if connected != None:
             path_follow_op = TOOffsetFollow(settings, index=len(self.operations))
             if path_follow_op.apply(connected):
@@ -316,6 +320,7 @@ class EventProcessor(object):
         new_value = args[0][1][0].get_value()
         setting = args[0][0]
         setting.set_value(new_value)
+        project.push_state(self.file_data, self.operations, settings, state)
 
     def tool_operation_up_click(self, args):
         print "tool operation up"
@@ -330,11 +335,7 @@ class EventProcessor(object):
         temp = self.selected_tool_operation
         self.operations.remove(self.selected_tool_operation)
         self.operations.insert(cur_idx-1, temp)
-
-        if self.operations != None:
-            self.mw.clear_list(self.mw.tp_gtklist)
-            for p in self.operations:
-                self.mw.add_item_to_list(self.mw.tp_gtklist, p.display_name)
+        self.push_event(self.ee.update_tool_operations_list, (None))
 
     def tool_operation_down_click(self, args):
         print "tool operation down"
@@ -349,11 +350,7 @@ class EventProcessor(object):
         temp = self.selected_tool_operation
         self.operations.remove(self.selected_tool_operation)
         self.operations.insert(cur_idx+1, temp)
-
-        if self.operations != None:
-            self.mw.clear_list(self.mw.tp_gtklist)
-            for p in self.operations:
-                self.mw.add_item_to_list(self.mw.tp_gtklist, p.display_name)
+        self.push_event(self.ee.update_tool_operations_list, (None))
 
     def scroll_up(self, args):
         print "scroll up"
@@ -361,7 +358,7 @@ class EventProcessor(object):
             state.scale = (state.scale[0]+0.1, state.scale[1]+0.1)
         else:
             state.scale = (state.scale[0]+1, state.scale[1]+1)
-
+        #project.push_state(self.file_data, self.operations, settings, state)
 
     def scroll_down(self, args):
         print "scroll down"
@@ -370,6 +367,7 @@ class EventProcessor(object):
                 state.scale = (state.scale[0]-0.1, state.scale[1]-0.1)
             else:
                 state.scale = (state.scale[0]-1, state.scale[1]-1)
+        #project.push_state(self.file_data, self.operations, settings, state)
 
     def hscroll(self, args):
         print "hscroll:", args

@@ -2,6 +2,8 @@ import math
 from calc_utils import AABB, CircleUtils, LineUtils, ArcUtils, vect_len, mk_vect
 from tool_operation import TOEnum
 
+import json
+
 class Element(object):
     def __init__(self, lt):
         self.selected = False
@@ -11,6 +13,9 @@ class Element(object):
                            TOEnum.offset_follow: False}
 
     def draw_element(self, ctx):
+        pass
+
+    def draw_first(self, ctx):
         pass
 
     def draw(self, ctx):
@@ -24,6 +29,12 @@ class Element(object):
 
     def turnaround(self):
         return None
+
+    def serialize(self):
+        return ''
+
+    def deserialize(self, data):
+        pass
 
     def set_selected(self):
         self.selected = True
@@ -58,6 +69,9 @@ class ELine(Element):
         self.operations[TOEnum.offset_follow] = True
         self.start_normal = None
         self.end_normal = None
+
+    def serialize(self):
+        return json.dumps({'type': 'eline', 'start': self.start, 'end': self.end})
 
     def draw_first(self, ctx):
         ctx.move_to(self.start[0], self.start[1])
@@ -127,6 +141,9 @@ class EArc(Element):
         self.start_normal = None
         self.end_normal = None
 
+    def serialize(self):
+        return json.dumps({'type': 'earc', 'radius': self.radius, 'center': self.center, 'startangle': self.startangle, 'endangle': self.endangle})
+
     def draw_element(self, ctx):
         if self.is_turnaround:
             ctx.arc(self.center[0], self.center[1], self.radius, self.endangle, self.startangle)
@@ -181,6 +198,9 @@ class ECircle(Element):
         self.end = None
         self.joinable = False
         self.operations[TOEnum.drill] = True
+
+    def serialize(self):
+        return json.dumps({'type': 'ecircle', 'radius': self.radius, 'center': self.center})
 
     def draw_element(self, ctx):
         ctx.arc(self.center[0], self.center[1], self.radius, 0, math.pi*2)

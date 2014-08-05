@@ -74,7 +74,6 @@ class TOOffsetFollow(TOAbstractFollow):
             e_pt = None
         self.offset_path = new_elements
         
-
     def apply(self, path):
         if path.operations[self.name]:
             if path.ordered_elements!=None:

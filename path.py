@@ -4,6 +4,7 @@ from calc_utils import pt_to_pt_dist
 from tool_operation import TOEnum
 from settings import settings
 
+import json
 
 class Path(Element):
     def __init__(self, elements, name, lt):
@@ -15,6 +16,15 @@ class Path(Element):
         self.operations[TOEnum.exact_follow] = True
         self.operations[TOEnum.offset_follow] = True
         self.operations[TOEnum.pocket] = True
+
+    def serialize(self):
+        elements = [e.serialize for e in self.elements]
+        ordered_elements = [e.serialize for e in self.ordered_elements]
+        return json.dumps({'type': 'path', 'name': str(self.name), 
+                    'display': self.display, 'elements': elements, 'ordered_elements': ordered_elements})
+
+    def deserialize(self, data):
+        pass
 
     def add_element(self, e):
         self.elements.append(e)
@@ -138,3 +148,6 @@ class Path(Element):
             for e in self.elements:
                 e.draw(ctx)
             ctx.identity_matrix()
+
+    def __repr__(self):
+        return "<Path "+str(self.elements)+">"
