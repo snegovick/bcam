@@ -3,9 +3,11 @@ from tool_operation import ToolOperation, TOEnum
 from tool_abstract_follow import TOAbstractFollow
 from generalized_setting import TOSetting
 from settings import settings
-import cairo
 from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len
 from elements import ELine, EArc
+
+import cairo
+import json
 
 class TOOffsetFollow(TOAbstractFollow):
     def __init__(self, settings, depth=0, index=0, offset=0):
@@ -16,6 +18,12 @@ class TOOffsetFollow(TOAbstractFollow):
         self.offset = 0
         self.path = None
         self.offset_path = None
+
+    def serialize(self):
+        return json.dumps({'type': 'tooffsetfollow', 'path_ref': self.path.name, 'depth': self.depth, 'index': self.index, 'offset': self.offset})
+
+    def deserialize(self, data):
+        pass
 
     def get_settings_list(self):
         settings_lst = [TOSetting("float", 0, settings.material.thickness, self.depth, "Depth, mm: ", self.set_depth_s),

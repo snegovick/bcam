@@ -24,10 +24,17 @@ class MainWindow(object):
 
         self.open_item = gtk.MenuItem("Open ...")
         self.save_item = gtk.MenuItem("Save ...")
+        self.open_project_item = gtk.MenuItem("Open project ...")
+        self.save_project_item = gtk.MenuItem("Save project ...")
+
         self.file_menu.append(self.open_item)
         self.file_menu.append(self.save_item)
+        self.file_menu.append(self.open_project_item)
+        self.file_menu.append(self.save_project_item)
         self.open_item.connect("activate", lambda *args: ep.push_event(ee.load_click, args))
         self.save_item.connect("activate", lambda *args: ep.push_event(ee.save_click, args))
+        self.open_project_item.connect("activate", lambda *args: ep.push_event(ee.load_project_click, args))
+        self.save_project_item.connect("activate", lambda *args: ep.push_event(ee.save_project_click, args))
 
         self.window_vbox = gtk.VBox(homogeneous=False, spacing=0)
         self.window_vbox.pack_start(self.menu_bar, expand=False, fill=False, padding=0)

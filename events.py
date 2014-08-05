@@ -19,6 +19,10 @@ class EVEnum:
     save_click = "save_click"
     load_file = "load_file"
     save_file = "save_file"
+    load_project_click = "load_project_click"
+    save_project_click = "save_project_click"
+    load_project = "load_project"
+    save_project = "save_project"
     screen_left_press = "screen_left_press"
     screen_left_release = "screen_left_release"
     pointer_motion = "pointer_motion"
@@ -63,6 +67,10 @@ class EventProcessor(object):
             self.ee.save_click: self.save_click,
             self.ee.load_file: self.load_file,
             self.ee.save_file: self.save_file,
+            self.ee.load_project_click: self.load_project_click,
+            self.ee.save_project_click: self.save_project_click,
+            self.ee.load_project: self.load_project,
+            self.ee.save_project: self.save_project,
             self.ee.screen_left_press: self.screen_left_press,
             self.ee.screen_left_release: self.screen_left_release,
             self.ee.pointer_motion: self.pointer_motion,
@@ -113,6 +121,18 @@ class EventProcessor(object):
         if result!=None:
             self.push_event(self.ee.save_file, result)
 
+    def load_project_click(self, args):
+        mimes = [("BCam projects (*.bcam)", "Application/bcam", "*.bcam")]
+        result = self.mw.mk_file_dialog("Open project ...", mimes)
+        if result!=None:
+            self.push_event(self.ee.load_project, result)
+
+    def save_project_click(self, args):
+        mimes = [("BCam project (*.bcam)", "Application/bcam", "*.bcam")]
+        result = self.mw.mk_file_save_dialog("Save project ...", mimes)
+        if result!=None:
+            self.push_event(self.ee.save_project, result)
+
     def update_paths_list(self, args):
         if self.file_data != None:
             self.mw.clear_list(self.mw.gtklist)
@@ -144,8 +164,15 @@ class EventProcessor(object):
         f = open(file_path, "w")
         f.write(out)
         f.close()
-            #self.mw.add_item_to_list(self.mw.tp_gtklist, p.display_name)
 
+    def load_project(self, args):
+        print "load project", args
+        pass
+
+    def save_project(self, args):
+        print "save project", args
+        project_path = args[0]
+        project.save(project_path)
 
     def screen_left_press(self, args):
         print "press at", args

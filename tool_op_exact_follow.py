@@ -3,7 +3,9 @@ from tool_operation import ToolOperation, TOEnum
 from tool_abstract_follow import TOAbstractFollow
 from generalized_setting import TOSetting
 from settings import settings
+
 import cairo
+import json
 
 class TOExactFollow(TOAbstractFollow):
     def __init__(self, settings, depth=0, index=0):
@@ -11,7 +13,14 @@ class TOExactFollow(TOAbstractFollow):
         self.display_name = TOEnum.exact_follow+" "+str(index)
         self.name = TOEnum.exact_follow
         self.depth = depth
+        self.index = index
         self.path = None
+
+    def serialize(self):
+        return json.dumps({'type': 'toexactfollow', 'path_ref': self.path.name, 'depth': self.depth, 'index': self.index})
+
+    def deserialize(self, data):
+        pass
 
     def get_settings_list(self):
         settings_lst = [TOSetting("float", 0, settings.material.thickness, self.depth, "Depth, mm: ", self.set_depth_s),]

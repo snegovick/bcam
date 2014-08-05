@@ -6,6 +6,8 @@ from settings import settings
 from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len
 from elements import ELine, EArc
 
+import json
+
 class TOPocketing(TOAbstractFollow):
     def __init__(self, settings, depth=0, index=0, offset=0):
         super(TOAbstractFollow, self).__init__(settings)
@@ -15,6 +17,12 @@ class TOPocketing(TOAbstractFollow):
         self.offset = 0
         self.path = None
         self.offset_path = None
+
+    def serialize(self):
+        return json.dumps({'type': 'topocketing', 'path_ref': self.path.name, 'depth': self.depth, 'index': self.index, 'offset': self.offset})
+
+    def deserialize(self, data):
+        pass
 
     def get_settings_list(self):
         settings_lst = [TOSetting("float", 0, settings.material.thickness, self.depth, "Depth, mm: ", self.set_depth_s),

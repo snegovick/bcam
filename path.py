@@ -18,10 +18,13 @@ class Path(Element):
         self.operations[TOEnum.pocket] = True
 
     def serialize(self):
-        elements = [e.serialize for e in self.elements]
-        ordered_elements = [e.serialize for e in self.ordered_elements]
-        return json.dumps({'type': 'path', 'name': str(self.name), 
-                    'display': self.display, 'elements': elements, 'ordered_elements': ordered_elements})
+        elements = [e.serialize() for e in self.elements]
+        ordered_elements = [e.serialize() for e in self.ordered_elements]
+        return json.dumps({'type': 'path', 
+                           'name': str(self.name), 
+                           'display': self.display, 
+                           'elements': elements,
+                           'ordered_elements': ordered_elements})
 
     def deserialize(self, data):
         pass

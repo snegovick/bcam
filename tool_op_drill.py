@@ -4,6 +4,8 @@ from generalized_setting import TOSetting
 from state import state
 from settings import settings
 
+import json
+
 class TODrill(ToolOperation):
     def __init__(self, settings, center=None, depth=0, index=0):
         super(TODrill, self).__init__(settings)
@@ -14,6 +16,9 @@ class TODrill(ToolOperation):
         else:
             self.center = None
         self.depth = depth
+
+    def serialize(self):
+        return json.dumps({'type': 'todrill', 'center': self.center, 'depth': self.depth, 'index': self.index})
 
     def set_lt(self, ctx):
         ctx.set_source_rgb(1, 0, 0)

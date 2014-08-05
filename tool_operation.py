@@ -25,3 +25,9 @@ class ToolOperation(object):
 
     def get_settings_list(self):
         return []
+
+    def serialize(self):
+        return ''
+
+    def deserialize(self, data):
+        pass
