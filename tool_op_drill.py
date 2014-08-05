@@ -20,6 +20,9 @@ class TODrill(ToolOperation):
     def serialize(self):
         return json.dumps({'type': 'todrill', 'center': self.center, 'depth': self.depth, 'index': self.index})
 
+    def deserialize(self, data):
+        pass
+
     def set_lt(self, ctx):
         ctx.set_source_rgb(1, 0, 0)
         ctx.set_line_width(0.1)

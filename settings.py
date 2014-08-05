@@ -23,6 +23,13 @@ class LineType:
             ctx.set_source_rgba(self.selected_color[0], self.selected_color[1], self.selected_color[2], self.selected_color[3])
         ctx.set_line_width(self.selected_lw)
 
+    def serialize(self):
+        return 'LineType serialization is not implemented'
+
+    def deserialize(self):
+        pass
+
+
 class Material:
     def __init__(self):
         self.material_name = "default"
@@ -34,6 +41,13 @@ class Material:
 
     def set_thickness_s(self, setting):
         self.thickness = setting.new_value
+
+    def serialize(self):
+        return 'Material serialization is not implemented'
+
+    def deserialize(self):
+        pass
+
 
 class Settings:
     def __init__(self):
@@ -48,5 +62,11 @@ class Settings:
         
     def get_def_lt(self):
         return self.line_types["default"]
+
+    def serialize(self):
+        return 'Settings serialization is not implemented'
+
+    def deserialize(self):
+        pass
 
 settings = Settings()

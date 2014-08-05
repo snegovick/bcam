@@ -18,7 +18,6 @@ class TOAbstractFollow(ToolOperation):
 
     def __draw_elements(self, ctx):
         if self.draw_list != None:
-            print "draw list:", self.draw_list
             self.draw_list[0].draw_first(ctx)
             for e in self.draw_list[1:]:
                 e.draw_element(ctx)

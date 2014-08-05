@@ -24,4 +24,12 @@ class State:
             self.__screen_offset = offset
             self.__total_offset = (self.__base_offset[0]+self.__screen_offset[0], self.__base_offset[1]+self.__screen_offset[1])
 
+    def serialize(self):
+        return 'State serialization is not implemented'
+
+    def deserialize(self):
+        pass
+
+
 state = State()
+
