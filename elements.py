@@ -160,7 +160,10 @@ class EArc(Element):
         self.draw_element(ctx)
 
     def turnaround(self):
-        return EArc(self.center, self.radius, math.degrees(self.endangle), math.degrees(self.startangle), self.lt, turnaround = not self.is_turnaround)
+        print "arc turnaround, start:", self.start, "end:", self.end
+        arc = EArc(self.center, self.radius, start = self.end, end = self.start, lt = self.lt, turnaround = not self.is_turnaround)
+        print "new arc, start:", arc.start, "end:", arc.end
+        return arc
 
     def distance_to_pt(self, pt):
         au = ArcUtils(self.center, self.radius, self.startangle, self.endangle)

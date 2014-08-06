@@ -36,18 +36,19 @@ class Path(Element):
         min_dist = pt_to_pt_dist(available[0].start, current.end)
         min_dist_id = 0
         min_order = {"turnaround": False, "offset": 1}
+        #print "current:", current
         for i, e in enumerate(available):
             orders = []
             dists = []
             if direction_fwd:
                 dists.append(pt_to_pt_dist(e.start, current.end))
                 orders.append({"turnaround": False, "offset": 1})
+                dists.append(pt_to_pt_dist(e.end, current.end))
                 orders.append({"turnaround": True, "offset": 1})
-                dists.append(pt_to_pt_dist(e.start, current.start))
             else:
                 dists.append(pt_to_pt_dist(e.end, current.start))
                 orders.append({"turnaround": False, "offset": -1})
-                dists.append(pt_to_pt_dist(e.end, current.end))
+                dists.append(pt_to_pt_dist(e.start, current.start))
                 orders.append({"turnaround": True, "offset": -1})
             md = min(dists)
             #print dists
@@ -113,16 +114,22 @@ class Path(Element):
             if len(available)==0:
                 break
             cont = False
-            current = (ce[-1], ce[0])
+            current = (ordered_elements[-1], ordered_elements[0])
+            #print "ordered_elements:", ordered_elements
+            #print "current:", current
+            #print "available:", available
             min_dist, min_dist_id, min_order = self.__find_adjacent_element(current[0], available)
+            #print "md, mdi, mo:", min_dist, min_dist_id, min_order
             if (min_dist<0.001):
                 
                 self.__append_element(min_dist_id, min_order, available, ordered_elements, ce)
+                #print "append, turnaround:", min_order["turnaround"]
                 cont = True
             if not cont:
                 min_dist, min_dist_id, min_order = self.__find_adjacent_element(current[1], available, False)
                 if (min_dist<0.001):
                     self.__append_element(min_dist_id, min_order, available, ordered_elements, ce)
+                    #print "prepend, turnaround:", min_order["turnaround"]
                     cont = True
 
             if not cont:
