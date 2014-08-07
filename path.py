@@ -2,20 +2,27 @@ from state import state
 from elements import *
 from calc_utils import pt_to_pt_dist
 from tool_operation import TOEnum
-from settings import settings
 
 import json
 
 class Path(Element):
-    def __init__(self, elements, name, lt):
-        super(Path, self).__init__(lt)
-        self.display = True
-        self.elements = elements
-        self.name = name
-        self.ordered_elements = []
+    def __init__(self, state, elements=None, name=None, lt_name=None, data=None):
+
+        self.state = state
+        if data == None:
+            self.display = True
+            self.elements = elements
+            self.name = name
+            self.ordered_elements = []
+            self.lt_name = lt_name
+        else:
+            self.deserialize(data)
+        
+        super(Path, self).__init__(state.settings.get_lt(self.lt_name))
         self.operations[TOEnum.exact_follow] = True
         self.operations[TOEnum.offset_follow] = True
         self.operations[TOEnum.pocket] = True
+
 
     def serialize(self):
         elements = [e.serialize() for e in self.elements]
@@ -24,10 +31,34 @@ class Path(Element):
                 'name': str(self.name), 
                 'display': self.display, 
                 'elements': elements,
-                'ordered_elements': ordered_elements}
+                'ordered_elements': ordered_elements,
+                'lt_name': self.lt.name}
 
     def deserialize(self, data):
-        pass
+        self.lt_name = data["lt_name"]
+        self.elements = []
+        for e in data["elements"]:
+            #replace with factory
+            if e["type"] == "eline":
+                self.add_element(ELine(e))
+            if e["type"] == "earc":
+                self.add_element(EArc(e))
+            if e["type"] == "ecircle":
+                self.add_element(ECircle(e))
+
+        self.display = data["display"]
+        self.name = data["name"]
+        self.ordered_elements = []
+
+        for e in data["ordered_elements"]:
+            #replace with factory
+            if e["type"] == "eline":
+                self.ordered_elements.append(ELine(e))
+            if e["type"] == "earc":
+                self.ordered_elements.append(EArc(e))
+            if e["type"] == "ecircle":
+                self.ordered_elements.append(ECircle(e))
+
 
     def add_element(self, e):
         self.elements.append(e)
@@ -84,7 +115,7 @@ class Path(Element):
             return None
 
         if not self.elements[0].joinable:
-            p = Path([self.elements[0]], self.name+".path", settings.get_def_lt())
+            p = Path([self.elements[0]], self.name+".path", self.state.settings.get_def_lt())
             p.ordered_elements = [self.elements[0]]
             return p
         available = self.elements[:]
@@ -141,7 +172,7 @@ class Path(Element):
         print "available len", available_len, "len(ce):", len(ce)
         print available
         #if available_len == len(ce):
-        p = Path(ce, self.name+".sub", settings.get_def_lt())
+        p = Path(state, ce, self.name+".sub", self.state.settings.get_def_lt().name)
         p.ordered_elements = ordered_elements
         return p
 
@@ -154,7 +185,7 @@ class Path(Element):
     def draw(self, ctx, offset):
         if self.display:
             ctx.translate(offset[0], offset[1])
-            ctx.scale(state.scale[0], state.scale[1])
+            ctx.scale(self.state.scale[0], self.state.scale[1])
             for e in self.elements:
                 e.draw(ctx)
             ctx.identity_matrix()

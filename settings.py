@@ -3,12 +3,15 @@ from generalized_setting import TOSetting
 from pp_grbl import PPGRBL
 
 class LineType:
-    def __init__(self, lw, selected_lw, color, selected_color, name):
-        self.lw = lw
-        self.selected_lw = selected_lw
-        self.color = color
-        self.selected_color = selected_color
-        self.name = name
+    def __init__(self, lw=None, selected_lw=None, color=None, selected_color=None, name=None, data=None):
+        if data == None:
+            self.lw = lw
+            self.selected_lw = selected_lw
+            self.color = color
+            self.selected_color = selected_color
+            self.name = name
+        else:
+            self.deserialize(data)
 
     def set_lt(self, ctx):
         if len(self.color) == 3:
@@ -27,14 +30,20 @@ class LineType:
     def serialize(self):
         return {"type": "linetype", "color": self.color, "selected_color": self.selected_color, "lw": self.lw, "selected_lw": self.selected_lw}
 
-    def deserialize(self):
-        pass
+    def deserialize(self, data):
+        self.color = data["color"]
+        self.selected_color = data["selected_color"]
+        self.lw = data["lw"]
+        self.selected_lw = data["selected_lw"]
 
 
 class Material:
-    def __init__(self):
-        self.material_name = "default"
-        self.thickness = 10
+    def __init__(self, data=None):
+        if data == None:
+            self.material_name = "default"
+            self.thickness = 10
+        else:
+            self.deserialize(data)
 
     def get_settings_list(self):
         settings_lst = [TOSetting("float", 0, None, self.thickness, "Thickness, mm: ", self.set_thickness_s),]
@@ -46,20 +55,29 @@ class Material:
     def serialize(self):
         return {"type": "material", "material_name": self.material_name, "thickness": self.thickness}
 
-    def deserialize(self):
-        pass
+    def deserialize(self, data):
+        self.thickness = data["thickness"]
+        self.material_name = data["material_name"]
 
 
 class Settings:
-    def __init__(self):
-        self.line_types = {"default": LineType(0.08, 0.1, (0,0,0), (1,0,0), "default")}
-        self.tool = Tool("cylinder", ToolType.cylinder)
+    def __init__(self, data=None):
+        if data == None:
+            self.line_types = {"default": LineType(0.08, 0.1, (0,0,0), (1,0,0), "default")}
+            self.tool = Tool("cylinder", ToolType.cylinder)
+            self.material = Material()
+        else:
+            self.deserialize(data)
+
+
         self.select_box_lt = LineType(0.1, 0.1, (0, 1, 0, 0.2), (0, 1, 0, 0.2), "select box lt")
         self.default_pp = PPGRBL()
-        self.material = Material()
+            
 
     def get_lt(self, name):
-        return self.line_types[name]
+        if name in self.line_types:
+            return self.line_types[name]
+        return self.get_def_lt()
         
     def get_def_lt(self):
         return self.line_types["default"]
@@ -67,7 +85,9 @@ class Settings:
     def serialize(self):
         return {"type": "settings", "material": self.material.serialize(), "linetypes": [l.serialize() for k, l in self.line_types.iteritems()], "tool": self.tool.serialize()}
 
-    def deserialize(self):
-        pass
-
-settings = Settings()
+    def deserialize(self, data):
+        self.material = Material(data["material"])
+        self.line_types = {}
+        for lt in data["line_types"]:
+            self.line_types[lt["name"]] = LineType(lt)
+        self.tool = Tool(data["tool"])

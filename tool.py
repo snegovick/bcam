@@ -27,7 +27,12 @@ class Tool(object):
         self.feedrate = setting.new_value
 
     def serialize(self):
-        return {"type": "tool", "diameter": self.diameter, "feedrate": self.feedrate, "default_height": self.default_height, "name": self.name, "type": self.type, "step": self.step}
+        return {"type": "tool", "diameter": self.diameter, "feedrate": self.feedrate, "default_height": self.default_height, "name": self.name, "tool_type": self.type, "step": self.step}
 
     def deserialize(self, data):
-        pass
+        self.diameter = data["diameter"]
+        self.feedrate = data["feedrate"]
+        self.default_height = data["default_height"]
+        self.name = data["name"]
+        self.type = data["tool_type"]
+        self.step = data["step"]

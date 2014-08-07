@@ -9,7 +9,6 @@ from tool_op_drill import TODrill
 from tool_op_exact_follow import TOExactFollow
 from tool_op_offset_follow import TOOffsetFollow
 from tool_op_pocketing import TOPocketing
-from settings import settings
 from calc_utils import AABB, OverlapEnum
 from path import Path
 from project import project
@@ -30,8 +29,8 @@ class EVEnum:
     deselect_all = "deselect_all"
     shift_press = "shift_press"
     shift_release = "shift_release"
-    update_paths_list = "update_paths_lilst"
-    update_tool_operations_list = "update_tool_operations_lilst"
+    update_paths_list = "update_paths_list"
+    update_tool_operations_list = "update_tool_operations_list"
     path_list_selection_changed = "path_list_selection_changed"
     tool_operations_list_selection_changed = "tool_operations_list_selection_changed"
     exact_follow_tool_click = "exact_follow_tool_click"
@@ -51,12 +50,10 @@ class EVEnum:
 
 class EventProcessor(object):
     ee = EVEnum()
-    file_data = None
     event_list = []
     selected_elements = []
     selected_path = None
     selected_tool_operation = None
-    operations = []
     left_press_start = None
     pointer_position = None
     shift_pressed = False
@@ -99,6 +96,7 @@ class EventProcessor(object):
         }
 
     def push_event(self, event, *args):
+        print "pushing", event 
         self.event_list.append((event, args))
 
     def process(self):
@@ -128,38 +126,39 @@ class EventProcessor(object):
             self.push_event(self.ee.load_project, result)
 
     def save_project_click(self, args):
+        print "save project clicked"
         mimes = [("BCam project (*.bcam)", "Application/bcam", "*.bcam")]
         result = self.mw.mk_file_save_dialog("Save project ...", mimes)
         if result!=None:
             self.push_event(self.ee.save_project, result)
 
     def update_paths_list(self, args):
-        if self.file_data != None:
+        if state.paths != None:
             self.mw.clear_list(self.mw.gtklist)
-            for p in self.file_data:
+            for p in state.paths:
                 if p.name[0] == '*':
                     continue
                 self.mw.add_item_to_list(self.mw.gtklist, p.name, self.ee.paths_check_button_click)
-        project.push_state(self.file_data, self.operations, settings, state)
+        project.push_state(state)
 
     def update_tool_operations_list(self, args):
-        if self.operations != None:
+        if state.tool_operations != None:
             self.mw.clear_list(self.mw.tp_gtklist)
-            for p in self.operations:
+            for p in state.tool_operations:
                 self.mw.add_item_to_list(self.mw.tp_gtklist, p.display_name, self.ee.tool_paths_check_button_click)
-        project.push_state(self.file_data, self.operations, settings, state)
+        project.push_state(state)
 
     def load_file(self, args):
         print "load file", args
         dxfloader = DXFLoader()
-        self.file_data = dxfloader.load(args[0])
+        state.add_paths(dxfloader.load(args[0]))
         self.push_event(self.ee.update_paths_list, (None))
 
     def save_file(self, args):
         print "save file", args
         file_path = args[0]
         out = ""
-        for p in self.operations:
+        for p in state.tool_operations:
             out+=p.get_gcode()
         f = open(file_path, "w")
         f.write(out)
@@ -167,7 +166,8 @@ class EventProcessor(object):
 
     def load_project(self, args):
         print "load project", args
-        pass
+        project_path = args[0]
+        project.load(project_path)
 
     def save_project(self, args):
         print "save project", args
@@ -189,7 +189,7 @@ class EventProcessor(object):
         cy = (args[0][1]-offset[1])/state.scale[1]
         self.pointer_position = (cx, cy)
         if (self.left_press_start!=None):
-            if self.file_data == None:
+            if state.paths == None:
                 self.left_press_start=None
                 return
 
@@ -198,7 +198,7 @@ class EventProcessor(object):
             dy = abs(cy-self.left_press_start[1])
             print "dx, dy:", dx, dy
             if dx<1 and dy<1:
-                for p in self.file_data:
+                for p in state.paths:
                     for e in p.elements:
                         if (e.distance_to_pt((cx, cy))<1):
                             #print "accepted"
@@ -224,7 +224,7 @@ class EventProcessor(object):
                 select_aabb = AABB(sx, sy, ex, ey)
                 if not self.shift_pressed:
                     self.deselect_all(None)
-                for p in self.file_data:
+                for p in state.paths:
                     for e in p.elements:
                         if not e in self.selected_elements:
                             e_aabb = e.get_aabb()
@@ -252,25 +252,26 @@ class EventProcessor(object):
         print "drill tool click:", args
         print self.selected_elements
         for e in self.selected_elements:
-            drl_op = TODrill(settings, index=len(self.operations))
+            drl_op = TODrill(state, index=len(state.tool_operations))
             if drl_op.apply(e):
-                self.operations.append(drl_op)
+                state.tool_operations.append(drl_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
-        print self.operations
+        print state.tool_operations
 
     def join_elements(self, args):
+        sp = state.paths
         if self.selected_elements!=None:
             print self.selected_elements
-            p = Path(self.selected_elements, "path", settings.get_def_lt())
+            p = Path(state, self.selected_elements, "path", state.settings.get_def_lt().name)
             connected = p.mk_connected_path()
             if connected != None:
-                connected.name = connected.name+" "+str(len(self.file_data))
+                connected.name = connected.name+" "+str(len(sp))
                 self.deselect_all(None)
                 for e in connected.elements:
-                    for i, p in enumerate(self.file_data):
-                        if e in self.file_data[i].elements:
-                            self.file_data[i].elements.remove(e)
-                self.file_data.append(connected)
+                    for i, p in enumerate(sp):
+                        if e in sp[i].elements:
+                            sp[i].elements.remove(e)
+                sp.append(connected)
                 self.push_event(self.ee.update_paths_list, (None))
                 return connected
         return None
@@ -292,7 +293,7 @@ class EventProcessor(object):
         self.selected_path = None
         for li in selection:
             name = li.children()[0].children()[1].get_text()
-            for p in self.file_data:
+            for p in state.paths:
                 if p.name == name:
                     self.selected_path = p
                     for e in p.elements:
@@ -305,7 +306,7 @@ class EventProcessor(object):
         self.selected_tool_operation = None
         for li in selection:
             name = li.children()[0].children()[1].get_text()
-            for p in self.operations:
+            for p in state.tool_operations:
                 if p.display_name == name:
                     self.selected_tool_operation = p
                     self.mw.new_settings_vbox(p.get_settings_list(), p.display_name+" settings")
@@ -315,9 +316,9 @@ class EventProcessor(object):
         connected = self.join_elements(None)
         print "selected path:", self.selected_path
         if connected != None:
-            path_follow_op = TOExactFollow(settings, index=len(self.operations))
+            path_follow_op = TOExactFollow(state, index=len(state.tool_operations))
             if path_follow_op.apply(connected):
-                self.operations.append(path_follow_op)
+                state.tool_operations.append(path_follow_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
 
     def offset_follow_tool_click(self, args):
@@ -326,9 +327,9 @@ class EventProcessor(object):
         print "selected path:", self.selected_path
         print "connected:", connected
         if connected != None:
-            path_follow_op = TOOffsetFollow(settings, index=len(self.operations))
+            path_follow_op = TOOffsetFollow(state, index=len(state.tool_operations))
             if path_follow_op.apply(connected):
-                self.operations.append(path_follow_op)
+                state.tool_operations.append(path_follow_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
 
     def pocket_tool_click(self, args):
@@ -336,9 +337,9 @@ class EventProcessor(object):
         connected = self.join_elements(None)
         print "selected path:", self.selected_path
         if connected != None:
-            pocket_op = TOPocketing(settings, index=len(self.operations))
+            pocket_op = TOPocketing(state, index=len(state.tool_operations))
             if pocket_op.apply(connected):
-                self.operations.append(pocket_op)
+                state.tool_operations.append(pocket_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
 
 
@@ -347,36 +348,36 @@ class EventProcessor(object):
         new_value = args[0][1][0].get_value()
         setting = args[0][0]
         setting.set_value(new_value)
-        project.push_state(self.file_data, self.operations, settings, state)
+        project.push_state(state)
 
     def tool_operation_up_click(self, args):
         print "tool operation up"
         if self.selected_tool_operation==None:
             return
-        if len(self.operations)==0:
+        if len(state.tool_operations)==0:
             return
-        cur_idx = self.operations.index(self.selected_tool_operation)
+        cur_idx = state.tool_operations.index(self.selected_tool_operation)
         print "cur idx:", cur_idx
         if cur_idx == 0:
             return
         temp = self.selected_tool_operation
-        self.operations.remove(self.selected_tool_operation)
-        self.operations.insert(cur_idx-1, temp)
+        state.tool_operations.remove(self.selected_tool_operation)
+        state.tool_operations.insert(cur_idx-1, temp)
         self.push_event(self.ee.update_tool_operations_list, (None))
 
     def tool_operation_down_click(self, args):
         print "tool operation down"
         if self.selected_tool_operation==None:
             return
-        if len(self.operations)==0:
+        if len(state.tool_operations)==0:
             return
-        cur_idx = self.operations.index(self.selected_tool_operation)
+        cur_idx = state.tool_operations.index(self.selected_tool_operation)
         print "cur idx:", cur_idx
-        if cur_idx == len(self.operations)-1:
+        if cur_idx == len(state.tool_operations)-1:
             return
         temp = self.selected_tool_operation
-        self.operations.remove(self.selected_tool_operation)
-        self.operations.insert(cur_idx+1, temp)
+        state.tool_operations.remove(self.selected_tool_operation)
+        state.tool_operations.insert(cur_idx+1, temp)
         self.push_event(self.ee.update_tool_operations_list, (None))
 
     def scroll_up(self, args):
@@ -410,27 +411,27 @@ class EventProcessor(object):
 
     def tool_paths_check_button_click(self, args):
         name = args[0][0]
-        for o in self.operations:
+        for o in state.tool_operations:
             if o.display_name == name:
                 o.display = not o.display
                 break
 
     def paths_check_button_click(self, args):
         name = args[0][0]
-        for p in self.file_data:
+        for p in state.paths:
             if p.name == name:
                 p.display = not p.display
                 break
 
     def path_delete_button_click(self, args):
-        if self.selected_path in self.file_data:
-            self.file_data.remove(self.selected_path)
+        if self.selected_path in state.paths:
+            state.paths.remove(self.selected_path)
             self.selected_path = None
             self.push_event(self.ee.update_paths_list, (None))
 
     def tool_operation_delete_button_click(self, args):
-        if self.selected_tool_operation in self.operations:
-            self.operations.remove(self.selected_tool_operation)
+        if self.selected_tool_operation in state.tool_operations:
+            state.tool_operations.remove(self.selected_tool_operation)
             self.selected_tool_operation = None
             self.push_event(self.ee.update_tool_operations_list, (None))
         

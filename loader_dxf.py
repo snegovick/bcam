@@ -1,6 +1,6 @@
 import loader
 from path import ELine, EArc, ECircle, Path
-from settings import settings
+from state import state
 
 import dxfgrabber
 
@@ -28,7 +28,7 @@ class DXFLoader(loader.SourceLoader):
         end[0]+=e[0]
         end[1]+=e[1]
 
-        return ELine(tuple(start), tuple(end), settings.get_def_lt())
+        return ELine(tuple(start), tuple(end), state.settings.get_def_lt())
 
     def __basic_el(self, e, p, offset):
 
@@ -44,7 +44,7 @@ class DXFLoader(loader.SourceLoader):
                 center = [0,0]
             center[0] += e.center[0]
             center[1] += e.center[1]
-            el = EArc(tuple(center[:2]), e.radius, e.startangle, e.endangle, settings.get_def_lt())
+            el = EArc(tuple(center[:2]), e.radius, e.startangle, e.endangle, state.settings.get_def_lt())
             p.add_element(el)
         elif e.dxftype == DXFEnum.circle:
             #print "circle"
@@ -55,7 +55,7 @@ class DXFLoader(loader.SourceLoader):
             center[0] += e.center[0]
             center[1] += e.center[1]
 
-            el = ECircle(tuple(center[:2]), e.radius, settings.get_def_lt())
+            el = ECircle(tuple(center[:2]), e.radius, state.settings.get_def_lt())
             p.add_element(el)
         elif e.dxftype == DXFEnum.polyline:
             start = None
@@ -88,14 +88,14 @@ class DXFLoader(loader.SourceLoader):
         blocks = dxf.blocks
         paths = []
         entities = [e for e in dxf.entities]
-        p = Path([], "ungrouped", settings.get_def_lt())
+        p = Path(state, [], "ungrouped", state.settings.get_def_lt().name)
         for e in entities:
             if self.__is_basic(e):
                 self.__basic_el(e, p, None)
             elif e.dxftype == DXFEnum.insert:
                 block_name = e.name
                 offset = e.insert[:2]
-                tp = Path([], block_name, settings.get_def_lt())
+                tp = Path(state, [], block_name, state.settings.get_def_lt().name)
                 for b in dxf.blocks:
                     if b.name == block_name:
                         for e in b:

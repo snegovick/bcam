@@ -60,10 +60,13 @@ class Element(object):
         return None
 
 class ELine(Element):
-    def __init__(self, start, end, lt):
-        super(ELine, self).__init__(lt)
-        self.start = start
-        self.end = end
+    def __init__(self, start=None, end=None, lt=None, data=None):
+        if data == None:
+            super(ELine, self).__init__(lt)
+            self.start = start
+            self.end = end
+        else:
+            self.deserialize(data)
         self.joinable = True
         self.operations[TOEnum.exact_follow] = True
         self.operations[TOEnum.offset_follow] = True
@@ -72,6 +75,10 @@ class ELine(Element):
 
     def serialize(self):
         return {'type': 'eline', 'start': self.start, 'end': self.end}
+        
+    def deserialize(self, data):
+        self.start = data["start"]
+        self.end = data["end"]
 
     def draw_first(self, ctx):
         ctx.move_to(self.start[0], self.start[1])
@@ -117,23 +124,17 @@ class ELine(Element):
         return "<ELine ("+str(self.start)+", "+str(self.end)+")>\r\n"
 
 class EArc(Element):
-    def __init__(self, center, radius=None, startangle=None, endangle=None, lt=None, start=None, end=None, turnaround=False):
+    def __init__(self, center=None, radius=None, startangle=None, endangle=None, lt=None, start=None, end=None, turnaround=False, data=None):
         super(EArc, self).__init__(lt)
         self.is_turnaround = turnaround
-        self.center = center
 
-        if start != None and end != None:
-            self.start = start
-            self.end = end
-            self.radius = vect_len(mk_vect(self.center, self.start))
-            self.startangle = math.atan2(self.start[1]-self.center[1], self.start[0]-self.center[0])
-            self.endangle = math.atan2(self.end[1]-self.center[1], self.end[0]-self.center[0])
+        if data == None:
+            if start != None and end != None:
+                self.init_from_pt(start, end, center)
+            else:
+                self.init_from_angles(radius, startangle, endangle, center)
         else:
-            self.radius = radius
-            self.startangle = math.radians(startangle)
-            self.endangle = math.radians(endangle)
-            self.start = (self.center[0]+math.cos(self.startangle)*self.radius, self.center[1]+math.sin(self.startangle)*self.radius)
-            self.end = (self.center[0]+math.cos(self.endangle)*self.radius, self.center[1]+math.sin(self.endangle)*self.radius)
+            self.deserialize(data)
 
         self.joinable = True
         self.operations[TOEnum.exact_follow] = True
@@ -141,8 +142,28 @@ class EArc(Element):
         self.start_normal = None
         self.end_normal = None
 
+    def init_from_pt(self, start, end, center):
+        self.center = center
+        self.start = start
+        self.end = end
+        self.radius = vect_len(mk_vect(self.center, self.start))
+        self.startangle = math.atan2(self.start[1]-self.center[1], self.start[0]-self.center[0])
+        self.endangle = math.atan2(self.end[1]-self.center[1], self.end[0]-self.center[0])
+
+    def init_from_angles(self, radius, startangle, endangle, center):
+        self.center = center
+        self.radius = radius
+        self.startangle = math.radians(startangle)
+        self.endangle = math.radians(endangle)
+        self.start = (self.center[0]+math.cos(self.startangle)*self.radius, self.center[1]+math.sin(self.startangle)*self.radius)
+        self.end = (self.center[0]+math.cos(self.endangle)*self.radius, self.center[1]+math.sin(self.endangle)*self.radius)
+
     def serialize(self):
         return {'type': 'earc', 'radius': self.radius, 'center': self.center, 'startangle': self.startangle, 'endangle': self.endangle}
+
+    def deserialize(self, data):
+        self.init_from_angles(data["radius"], data["startangle"], data["endangle"])
+        self.center = data["center"]
 
     def draw_element(self, ctx):
         if self.is_turnaround:
@@ -193,17 +214,24 @@ class EArc(Element):
         return "<EArc ("+str(self.start)+", "+str(self.end)+")>\r\n"
 
 class ECircle(Element):
-    def __init__(self, center, radius, lt):
+    def __init__(self, center=None, radius=None, lt=None, data=None):
+        if data == None:
+            self.center = center
+            self.radius = radius
+        else:
+            self.deserialize(data)
+
         super(ECircle, self).__init__(lt)
-        self.center = center
-        self.radius = radius
-        self.start = None
-        self.end = None
         self.joinable = False
         self.operations[TOEnum.drill] = True
 
+
     def serialize(self):
         return {'type': 'ecircle', 'radius': self.radius, 'center': self.center}
+
+    def deserialize(self, data):
+        self.radius = data["radius"]
+        self.center = data["center"]
 
     def draw_element(self, ctx):
         ctx.arc(self.center[0], self.center[1], self.radius, 0, math.pi*2)

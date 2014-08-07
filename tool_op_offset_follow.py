@@ -2,7 +2,6 @@ import math
 from tool_operation import ToolOperation, TOEnum
 from tool_abstract_follow import TOAbstractFollow
 from generalized_setting import TOSetting
-from settings import settings
 from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len
 from elements import ELine, EArc
 
@@ -10,23 +9,35 @@ import cairo
 import json
 
 class TOOffsetFollow(TOAbstractFollow):
-    def __init__(self, settings, depth=0, index=0, offset=0):
-        super(TOAbstractFollow, self).__init__(settings)
-        self.display_name = TOEnum.offset_follow+" "+str(index)
+    def __init__(self, state, depth=0, index=0, offset=0, data=None):
+        super(TOAbstractFollow, self).__init__(state)
+        self.state = state
         self.name = TOEnum.offset_follow
-        self.depth = depth
-        self.offset = 0
-        self.path = None
-        self.offset_path = None
+        if data == None:
+            self.index = index
+            self.depth = depth
+            self.offset = 0
+            self.path = None
+            self.offset_path = None
+        else:
+            self.deserialize(data)
+
+        self.display_name = TOEnum.offset_follow+" "+str(self.index)
 
     def serialize(self):
         return {'type': 'tooffsetfollow', 'path_ref': self.path.name, 'depth': self.depth, 'index': self.index, 'offset': self.offset}
 
     def deserialize(self, data):
-        pass
+        self.depth = data["depth"]
+        self.index = data["index"]
+        self.offset = data["offset"]
+
+        p = self.try_load_path_by_name(data["path_ref"], self.state)
+        if p:
+            self.apply(p)
 
     def get_settings_list(self):
-        settings_lst = [TOSetting("float", 0, settings.material.thickness, self.depth, "Depth, mm: ", self.set_depth_s),
+        settings_lst = [TOSetting("float", 0, self.state.settings.material.thickness, self.depth, "Depth, mm: ", self.set_depth_s),
                         TOSetting("float", None, None, 0, "Offset, mm: ", self.set_offset_s)]
         return settings_lst
 
@@ -95,13 +106,13 @@ class TOOffsetFollow(TOAbstractFollow):
         cp = self.tool.current_position
         out = ""
         new_pos = [cp[0], cp[1], self.tool.default_height]
-        out+= settings.default_pp.move_to_rapid(new_pos)
+        out+= self.state.settings.default_pp.move_to_rapid(new_pos)
         self.tool.current_position = new_pos
 
         start = self.offset_path[0].start
 
         new_pos = [start[0], start[1], new_pos[2]]
-        out+= settings.default_pp.move_to_rapid(new_pos)
+        out+= self.state.settings.default_pp.move_to_rapid(new_pos)
         self.tool.current_position = new_pos
 
         for step in range(int(self.depth/(self.tool.diameter/2.0))+1):
@@ -109,7 +120,7 @@ class TOOffsetFollow(TOAbstractFollow):
                 out += self.process_el_to_gcode(e, step)
 
         new_pos = [new_pos[0], new_pos[1], self.tool.default_height]
-        out+= settings.default_pp.move_to_rapid(new_pos)
+        out+= self.state.settings.default_pp.move_to_rapid(new_pos)
         self.tool.current_position = new_pos
         return out
 

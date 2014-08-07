@@ -4,7 +4,7 @@ pygtk.require('2.0')
 import gtk, gobject, cairo
 import sys
 from events import EVEnum, EventProcessor, ee, ep
-from settings import settings
+from state import state
 
 class MainWindow(object):
     def __init__(self, w, h, Widget):
@@ -197,7 +197,7 @@ class MainWindow(object):
         self.tool_label = gtk.Label("Tool settings")
         self.right_vbox.pack_start(self.tool_label, expand=False, fill=False, padding=0)
 
-        settings_lst = settings.tool.get_settings_list()
+        settings_lst = state.settings.tool.get_settings_list()
         if settings_lst != None:
             print settings_lst
             for s in settings_lst:
@@ -209,7 +209,7 @@ class MainWindow(object):
 
         self.material_label = gtk.Label("Material settings")
         self.right_vbox.pack_start(self.material_label, expand=False, fill=False, padding=0)
-        settings_lst = settings.material.get_settings_list()
+        settings_lst = state.settings.material.get_settings_list()
         if settings_lst != None:
             print settings_lst
             for s in settings_lst:

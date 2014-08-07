@@ -1,11 +1,10 @@
 from tool_operation import ToolOperation
-from settings import settings
 
 import cairo
 
 class TOAbstractFollow(ToolOperation):
-    def __init__(self, settings):
-        super(TOAbstractFollow, self).__init__(settings)
+    def __init__(self, state):
+        super(TOAbstractFollow, self).__init__(state)
         self.draw_list = []
 
     def set_lt(self, ctx):
@@ -33,31 +32,39 @@ class TOAbstractFollow(ToolOperation):
             self.__draw_elements(ctx)
             ctx.stroke()
 
+    def try_load_path(self, name, state):
+        p = state.get_path_by_name(name)
+        if p == None:
+            print "Path", name, "not found"
+            return False
+        return p
+
+
     def process_el_to_gcode(self, e, step):
         out = ""
         if type(e).__name__ == "ELine":
             new_pos = [e.start[0], e.start[1], -step*self.tool.diameter/2.0]
-            out+= settings.default_pp.move_to(new_pos)
+            out+= self.state.settings.default_pp.move_to(new_pos)
             self.tool.current_position = new_pos
 
             new_pos = [e.end[0], e.end[1], -step*self.tool.diameter/2.0]
-            out+= settings.default_pp.move_to(new_pos)
+            out+= self.state.settings.default_pp.move_to(new_pos)
             self.tool.current_position = new_pos
         elif type(e).__name__ == "EArc":
             if e.turnaround:
                 new_pos = [e.start[0], e.start[1], -step*self.tool.diameter/2.0]
-                out+= settings.default_pp.move_to(new_pos)
+                out+= self.state.settings.default_pp.move_to(new_pos)
                 self.tool.current_position = new_pos
                 new_pos = [e.end[0], e.end[1], -step*self.tool.diameter/2.0]
-                out+= settings.default_pp.mk_ccw_arc(e.radius, new_pos)
+                out+= self.state.settings.default_pp.mk_ccw_arc(e.radius, new_pos)
                 self.tool.current_position = new_pos
 
             else:
                 new_pos = [e.start[0], e.start[1], -step*self.tool.diameter/2.0]
-                out+= settings.default_pp.move_to(new_pos)
+                out+= self.state.settings.default_pp.move_to(new_pos)
                 self.tool.current_position = new_pos
                 new_pos = [e.end[0], e.end[1], -step*self.tool.diameter/2.0]
-                out+= settings.default_pp.mk_cw_arc(e.radius, new_pos)
+                out+= self.state.settings.default_pp.mk_cw_arc(e.radius, new_pos)
                 self.tool.current_position = new_pos
         else:
             print "unsuported element type:", type(e).__name__

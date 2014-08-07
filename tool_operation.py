@@ -7,8 +7,8 @@ class TOEnum:
     pocket = "pocket"
 
 class ToolOperation(object):
-    def __init__(self, settings_dispatcher):
-        self.tool=settings_dispatcher.tool
+    def __init__(self, state):
+        self.tool=state.settings.tool
         self.display = True
 
     def draw(self, ctx):

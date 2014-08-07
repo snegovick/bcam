@@ -5,7 +5,6 @@ import sys
 from events import EVEnum, EventProcessor, ee, ep
 from main_window import MainWindow
 from state import state
-from settings import settings
 
 width=640
 height=480
@@ -77,22 +76,22 @@ class Screen(gtk.DrawingArea):
 
         cr.stroke()
 
-        if ep.operations!=None:
+        if state.tool_operations!=None:
             cr.translate(offset[0], offset[1])
             cr.scale(state.scale[0], state.scale[1])
-            for o in ep.operations:
+            for o in state.tool_operations:
                 o.draw(cr)
             cr.identity_matrix()
         
-        if ep.file_data!=None:
-            for p in ep.file_data:
+        if state.paths!=None:
+            for p in state.paths:
                 p.draw(cr, offset)
 
         # draw selection box
         if ep.left_press_start != None:
             cr.translate(offset[0], offset[1])
             cr.scale(state.scale[0], state.scale[1])
-            settings.select_box_lt.set_lt(cr)
+            state.settings.select_box_lt.set_lt(cr)
             w = ep.pointer_position[0] - ep.left_press_start[0]
             h = ep.pointer_position[1] - ep.left_press_start[1]
             cr.rectangle(ep.left_press_start[0], ep.left_press_start[1], w, h)
