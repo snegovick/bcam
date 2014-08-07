@@ -153,6 +153,7 @@ class EventProcessor(object):
         dxfloader = DXFLoader()
         state.add_paths(dxfloader.load(args[0]))
         self.push_event(self.ee.update_paths_list, (None))
+        self.mw.widget.update()
 
     def save_file(self, args):
         print "save file", args
@@ -181,6 +182,7 @@ class EventProcessor(object):
         cy = (args[0][1]-offset[1])/state.scale[1]
         self.left_press_start = (cx, cy)
         self.pointer_position = (cx, cy)
+        self.mw.widget.update()
 
     def screen_left_release(self, args):
         print "release at", args
@@ -238,7 +240,7 @@ class EventProcessor(object):
                                     e.set_selected()
                                     self.selected_elements.append(e)
             #print self.selected_elements
-
+        self.mw.widget.update()
         self.left_press_start=None
         
     def pointer_motion(self, args):
@@ -247,6 +249,7 @@ class EventProcessor(object):
         cy = (args[0][1]-offset[1])/state.scale[1]
         self.pointer_position = (cx, cy)
         self.mw.cursor_pos_label.set_text("%.3f:%.3f"%(cx, cy))
+        self.mw.widget.update()
 
     def drill_tool_click(self, args):
         print "drill tool click:", args
@@ -257,6 +260,7 @@ class EventProcessor(object):
                 state.tool_operations.append(drl_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
         print state.tool_operations
+        self.mw.widget.update()
 
     def join_elements(self, args):
         sp = state.paths
@@ -280,6 +284,7 @@ class EventProcessor(object):
         for e in self.selected_elements:
             e.toggle_selected()
         self.selected_elements = []
+        self.mw.widget.update()
 
     def shift_press(self, args):
         self.shift_pressed = True
@@ -300,6 +305,7 @@ class EventProcessor(object):
                         if not e in self.selected_elements:
                             e.set_selected()
                             self.selected_elements.append(e)
+        self.mw.widget.update()
 
     def tool_operations_list_selection_changed(self, args):
         selection = args[0][0].get_selection()
@@ -310,6 +316,7 @@ class EventProcessor(object):
                 if p.display_name == name:
                     self.selected_tool_operation = p
                     self.mw.new_settings_vbox(p.get_settings_list(), p.display_name+" settings")
+        self.mw.widget.update()
 
     def exact_follow_tool_click(self, args):
         print "exact follow tool click:", args
@@ -318,8 +325,10 @@ class EventProcessor(object):
         if connected != None:
             path_follow_op = TOExactFollow(state, index=len(state.tool_operations))
             if path_follow_op.apply(connected):
-                state.tool_operations.append(path_follow_op)
+                state.add_tool_operations([path_follow_op])
+                #state.tool_operations.append(path_follow_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
+        self.mw.widget.update()
 
     def offset_follow_tool_click(self, args):
         print "offset follow tool click:", args
@@ -331,6 +340,7 @@ class EventProcessor(object):
             if path_follow_op.apply(connected):
                 state.tool_operations.append(path_follow_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
+        self.mw.widget.update()
 
     def pocket_tool_click(self, args):
         print "pocket tool click:", args
@@ -341,7 +351,7 @@ class EventProcessor(object):
             if pocket_op.apply(connected):
                 state.tool_operations.append(pocket_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
-
+        self.mw.widget.update()
 
     def update_settings(self, args):
         print "settings update:", args
@@ -349,6 +359,7 @@ class EventProcessor(object):
         setting = args[0][0]
         setting.set_value(new_value)
         project.push_state(state)
+        self.mw.widget.update()
 
     def tool_operation_up_click(self, args):
         print "tool operation up"
@@ -387,6 +398,7 @@ class EventProcessor(object):
         else:
             state.scale = (state.scale[0]+1, state.scale[1]+1)
         #project.push_state(self.file_data, self.operations, settings, state)
+        self.mw.widget.update()
 
     def scroll_down(self, args):
         print "scroll down"
@@ -396,18 +408,21 @@ class EventProcessor(object):
             else:
                 state.scale = (state.scale[0]-1, state.scale[1]-1)
         #project.push_state(self.file_data, self.operations, settings, state)
+        self.mw.widget.update()
 
     def hscroll(self, args):
         print "hscroll:", args
         print args[0][0].get_value()
         offset = state.get_base_offset()
         state.set_base_offset((-args[0][0].get_value(), offset[1]))
+        self.mw.widget.update()
 
     def vscroll(self, args):
         print "vscroll:", args
         print args[0][0].get_value()
         offset = state.get_base_offset()
         state.set_base_offset((offset[0], -args[0][0].get_value()))
+        self.mw.widget.update()
 
     def tool_paths_check_button_click(self, args):
         name = args[0][0]
@@ -415,6 +430,7 @@ class EventProcessor(object):
             if o.display_name == name:
                 o.display = not o.display
                 break
+        self.mw.widget.update()
 
     def paths_check_button_click(self, args):
         name = args[0][0]
@@ -422,18 +438,21 @@ class EventProcessor(object):
             if p.name == name:
                 p.display = not p.display
                 break
+        self.mw.widget.update()
 
     def path_delete_button_click(self, args):
         if self.selected_path in state.paths:
             state.paths.remove(self.selected_path)
             self.selected_path = None
             self.push_event(self.ee.update_paths_list, (None))
+        self.mw.widget.update()
 
     def tool_operation_delete_button_click(self, args):
         if self.selected_tool_operation in state.tool_operations:
             state.tool_operations.remove(self.selected_tool_operation)
             self.selected_tool_operation = None
             self.push_event(self.ee.update_tool_operations_list, (None))
+        self.mw.widget.update()
         
 ee = EVEnum()
 ep = EventProcessor()

@@ -1,4 +1,3 @@
-from state import state
 from elements import *
 from calc_utils import pt_to_pt_dist
 from tool_operation import TOEnum
@@ -18,7 +17,7 @@ class Path(Element):
         else:
             self.deserialize(data)
         
-        super(Path, self).__init__(state.settings.get_lt(self.lt_name))
+        super(Path, self).__init__(self.state.settings.get_lt(self.lt_name))
         self.operations[TOEnum.exact_follow] = True
         self.operations[TOEnum.offset_follow] = True
         self.operations[TOEnum.pocket] = True
@@ -37,14 +36,15 @@ class Path(Element):
     def deserialize(self, data):
         self.lt_name = data["lt_name"]
         self.elements = []
+        lt = self.state.settings.get_lt(self.lt_name)
         for e in data["elements"]:
             #replace with factory
             if e["type"] == "eline":
-                self.add_element(ELine(e))
+                self.add_element(ELine(lt=lt, data=e))
             if e["type"] == "earc":
-                self.add_element(EArc(e))
+                self.add_element(EArc(lt=lt, data=e))
             if e["type"] == "ecircle":
-                self.add_element(ECircle(e))
+                self.add_element(ECircle(lt=lt, data=e))
 
         self.display = data["display"]
         self.name = data["name"]
@@ -53,11 +53,11 @@ class Path(Element):
         for e in data["ordered_elements"]:
             #replace with factory
             if e["type"] == "eline":
-                self.ordered_elements.append(ELine(e))
+                self.ordered_elements.append(ELine(lt=lt, data=e))
             if e["type"] == "earc":
-                self.ordered_elements.append(EArc(e))
+                self.ordered_elements.append(EArc(lt=lt, data=e))
             if e["type"] == "ecircle":
-                self.ordered_elements.append(ECircle(e))
+                self.ordered_elements.append(ECircle(lt=lt, data=e))
 
 
     def add_element(self, e):
@@ -172,7 +172,7 @@ class Path(Element):
         print "available len", available_len, "len(ce):", len(ce)
         print available
         #if available_len == len(ce):
-        p = Path(state, ce, self.name+".sub", self.state.settings.get_def_lt().name)
+        p = Path(self.state, ce, self.name+".sub", self.state.settings.get_def_lt().name)
         p.ordered_elements = ordered_elements
         return p
 
@@ -182,13 +182,11 @@ class Path(Element):
     def get_closed(self):
         return self.closed
 
-    def draw(self, ctx, offset):
+    def draw(self, ctx):
         if self.display:
-            ctx.translate(offset[0], offset[1])
-            ctx.scale(self.state.scale[0], self.state.scale[1])
             for e in self.elements:
                 e.draw(ctx)
-            ctx.identity_matrix()
+            ctx.stroke()
 
     def __repr__(self):
         return "<Path "+str(self.elements)+">"

@@ -61,8 +61,8 @@ class Element(object):
 
 class ELine(Element):
     def __init__(self, start=None, end=None, lt=None, data=None):
+        super(ELine, self).__init__(lt)
         if data == None:
-            super(ELine, self).__init__(lt)
             self.start = start
             self.end = end
         else:
@@ -87,7 +87,6 @@ class ELine(Element):
     def draw_element(self, ctx):
         ctx.move_to(self.start[0], self.start[1])
         ctx.line_to(self.end[0], self.end[1])
-        ctx.stroke()
     
     def draw(self, ctx):
         self.set_lt(ctx)
@@ -126,9 +125,9 @@ class ELine(Element):
 class EArc(Element):
     def __init__(self, center=None, radius=None, startangle=None, endangle=None, lt=None, start=None, end=None, turnaround=False, data=None):
         super(EArc, self).__init__(lt)
-        self.is_turnaround = turnaround
 
         if data == None:
+            self.is_turnaround = turnaround
             if start != None and end != None:
                 self.init_from_pt(start, end, center)
             else:
@@ -159,18 +158,18 @@ class EArc(Element):
         self.end = (self.center[0]+math.cos(self.endangle)*self.radius, self.center[1]+math.sin(self.endangle)*self.radius)
 
     def serialize(self):
-        return {'type': 'earc', 'radius': self.radius, 'center': self.center, 'startangle': self.startangle, 'endangle': self.endangle}
+        return {'type': 'earc', 'radius': self.radius, 'center': self.center, 'startangle': self.startangle, 'endangle': self.endangle, 'turnaround': self.is_turnaround}
 
     def deserialize(self, data):
-        self.init_from_angles(data["radius"], data["startangle"], data["endangle"])
+        self.init_from_angles(data["radius"], math.degrees(data["startangle"]), math.degrees(data["endangle"]), data["center"])
         self.center = data["center"]
+        self.is_turnaround = data["turnaround"]
 
     def draw_element(self, ctx):
         if self.is_turnaround:
             ctx.arc(self.center[0], self.center[1], self.radius, self.endangle, self.startangle)
         else:
             ctx.arc(self.center[0], self.center[1], self.radius, self.startangle, self.endangle)
-        ctx.stroke()
     
     def draw(self, ctx):
         self.set_lt(ctx)

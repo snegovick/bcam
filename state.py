@@ -13,6 +13,15 @@ class State:
         else:
             self.deserialize(data)
 
+    def set(self, state):
+        self.settings = state.settings
+        self.__total_offset = state.__total_offset
+        self.__screen_offset = state.__screen_offset
+        self.__base_offset = state.__base_offset
+        self.scale = state.scale
+        self.paths = state.paths
+        self.tool_operations = state.tool_operations
+
     def get_offset(self):
         return self.__total_offset
 
@@ -35,8 +44,11 @@ class State:
     def add_paths(self, new_paths):
         self.paths+=new_paths
 
+    def add_tool_operations(self, to):
+        self.tool_operations+=to
+
     def serialize(self):
-        return {"type": "state", "screen_offset": self.__screen_offset, "base_offset": self.__base_offset, "scale": self.scale, "settigns": self.settigns.serialize(), 'paths': [p.serialize() for p in self.paths], "tool_operations": [to.serialize() for to in self.tool_operations]}
+        return {"type": "state", "screen_offset": self.__screen_offset, "base_offset": self.__base_offset, "scale": self.scale, "settings": self.settings.serialize(), 'paths': [p.serialize() for p in self.paths], "tool_operations": [to.serialize() for to in self.tool_operations]}
 
     def get_path_by_name(self, name):
         for p in self.paths:
@@ -47,12 +59,19 @@ class State:
 
     def get_tool_operation_by_name(self, name):
         for p in self.tool_operations:
-            if p.name == name:
+            if p.display_name == name:
                 return p
         else:
             return None
 
     def deserialize(self, data):
+
+        from path import Path
+        from tool_op_exact_follow import TOExactFollow
+        from tool_op_offset_follow import TOOffsetFollow
+        from tool_op_drill import TODrill
+        from tool_op_pocketing import TOPocketing
+
         self.__screen_offset = data["screen_offset"]
         self.__base_offset = data["base_offset"]
         self.scale = data["scale"]
@@ -61,7 +80,7 @@ class State:
         
         self.paths = []
         for p in data["paths"]:
-            self.paths.append(Path(p))
+            self.paths.append(Path(state=self, data=p))
 
         self.tool_operations = []
         for to in data["tool_operations"]:

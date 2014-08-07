@@ -1,7 +1,6 @@
 from path import Path
 from state import State
-from tool_op_drill import TODrill
-
+import state
 
 import json
 from copy import deepcopy
@@ -26,15 +25,21 @@ class Project(object):
         self.steps = []
 
     def load(self, project_path):
+        from events import ep, ee
+        #global state
         print "loading project from", project_path
         f = open(project_path)
         data = f.read()
         f.close()
-        print "json:", parsed_json
+        parsed_json = json.loads(data)
+        #print "json:", parsed_json
         if parsed_json["format_version"] == 1:
             for s in parsed_json["steps"]:
                 self.steps.append(Step(data=s))
-            state = self.steps[-1].state
+            state.state.set(self.steps[-1].state)
+            ep.push_event(ee.update_tool_operations_list, (None))
+            ep.push_event(ee.update_paths_list, (None))
+            ep.mw.widget.update()
         else:
             print "Can't load, unsupported format"
 

@@ -18,9 +18,14 @@ class Screen(gtk.DrawingArea):
     active_event_consumer = None
 
     def periodic(self):
-        self.queue_draw()
         ep.process()
         return True
+
+    def save_project(self, *args):
+        print "save project"
+
+    def update(self):
+        self.queue_draw()
 
     def scroll_event(self, widget, event):
         print "event:", event
@@ -74,8 +79,6 @@ class Screen(gtk.DrawingArea):
         cr.rectangle(0, 0, self.allocation.width, self.allocation.height)
         cr.fill()
 
-        cr.stroke()
-
         if state.tool_operations!=None:
             cr.translate(offset[0], offset[1])
             cr.scale(state.scale[0], state.scale[1])
@@ -84,8 +87,12 @@ class Screen(gtk.DrawingArea):
             cr.identity_matrix()
         
         if state.paths!=None:
+            cr.translate(offset[0], offset[1])
+            cr.scale(state.scale[0], state.scale[1])
             for p in state.paths:
-                p.draw(cr, offset)
+                p.draw(cr)
+            cr.identity_matrix()
+
 
         # draw selection box
         if ep.left_press_start != None:

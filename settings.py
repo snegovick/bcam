@@ -28,14 +28,14 @@ class LineType:
         ctx.set_line_width(self.selected_lw)
 
     def serialize(self):
-        return {"type": "linetype", "color": self.color, "selected_color": self.selected_color, "lw": self.lw, "selected_lw": self.selected_lw}
+        return {"type": "linetype", "color": self.color, "selected_color": self.selected_color, "lw": self.lw, "selected_lw": self.selected_lw, "name": self.name}
 
     def deserialize(self, data):
         self.color = data["color"]
         self.selected_color = data["selected_color"]
         self.lw = data["lw"]
         self.selected_lw = data["selected_lw"]
-
+        self.name = data["name"]
 
 class Material:
     def __init__(self, data=None):
@@ -88,6 +88,6 @@ class Settings:
     def deserialize(self, data):
         self.material = Material(data["material"])
         self.line_types = {}
-        for lt in data["line_types"]:
-            self.line_types[lt["name"]] = LineType(lt)
+        for lt in data["linetypes"]:
+            self.line_types[lt["name"]] = LineType(data=lt)
         self.tool = Tool(data["tool"])

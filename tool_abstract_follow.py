@@ -17,8 +17,7 @@ class TOAbstractFollow(ToolOperation):
 
     def __draw_elements(self, ctx):
         if self.draw_list != None:
-            self.draw_list[0].draw_first(ctx)
-            for e in self.draw_list[1:]:
+            for e in self.draw_list:
                 e.draw_element(ctx)
 
     def draw(self, ctx):
@@ -28,11 +27,12 @@ class TOAbstractFollow(ToolOperation):
             self.set_lt(ctx)
             self.__draw_elements(ctx)
             ctx.stroke()
+
             self.set_fill_lt(ctx)
             self.__draw_elements(ctx)
             ctx.stroke()
 
-    def try_load_path(self, name, state):
+    def try_load_path_by_name(self, name, state):
         p = state.get_path_by_name(name)
         if p == None:
             print "Path", name, "not found"
