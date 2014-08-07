@@ -8,7 +8,7 @@ class Step(object):
         self.state=state
 
     def serialize(self):
-        return json.dumps({'paths': [p.serialize() for p in self.paths], "tool_operations": [to.serialize() for to in self.tool_operations], 'settings': self.settings.serialize(), 'state': self.state.serialize()})
+        return {'paths': [p.serialize() for p in self.paths], "tool_operations": [to.serialize() for to in self.tool_operations], 'settings': self.settings.serialize(), 'state': self.state.serialize()}
 
     def deserialize(self, data):
         pass

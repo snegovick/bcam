@@ -3,11 +3,12 @@ from generalized_setting import TOSetting
 from pp_grbl import PPGRBL
 
 class LineType:
-    def __init__(self, lw, selected_lw, color, selected_color):
+    def __init__(self, lw, selected_lw, color, selected_color, name):
         self.lw = lw
         self.selected_lw = selected_lw
         self.color = color
         self.selected_color = selected_color
+        self.name = name
 
     def set_lt(self, ctx):
         if len(self.color) == 3:
@@ -24,7 +25,7 @@ class LineType:
         ctx.set_line_width(self.selected_lw)
 
     def serialize(self):
-        return 'LineType serialization is not implemented'
+        return {"type": "linetype", "color": self.color, "selected_color": self.selected_color, "lw": self.lw, "selected_lw": self.selected_lw}
 
     def deserialize(self):
         pass
@@ -43,7 +44,7 @@ class Material:
         self.thickness = setting.new_value
 
     def serialize(self):
-        return 'Material serialization is not implemented'
+        return {"type": "material", "material_name": self.material_name, "thickness": self.thickness}
 
     def deserialize(self):
         pass
@@ -51,9 +52,9 @@ class Material:
 
 class Settings:
     def __init__(self):
-        self.line_types = {"default": LineType(0.08, 0.1, (0,0,0), (1,0,0))}
+        self.line_types = {"default": LineType(0.08, 0.1, (0,0,0), (1,0,0), "default")}
         self.tool = Tool("cylinder", ToolType.cylinder)
-        self.select_box_lt = LineType(0.1, 0.1, (0, 1, 0, 0.2), (0, 1, 0, 0.2))
+        self.select_box_lt = LineType(0.1, 0.1, (0, 1, 0, 0.2), (0, 1, 0, 0.2), "select box lt")
         self.default_pp = PPGRBL()
         self.material = Material()
 
@@ -64,7 +65,7 @@ class Settings:
         return self.line_types["default"]
 
     def serialize(self):
-        return 'Settings serialization is not implemented'
+        return {"type": "settings", "material": self.material.serialize(), "linetypes": [l.serialize() for k, l in self.line_types.iteritems()], "tool": self.tool.serialize()}
 
     def deserialize(self):
         pass

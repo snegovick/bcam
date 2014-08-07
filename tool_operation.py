@@ -27,7 +27,7 @@ class ToolOperation(object):
         return []
 
     def serialize(self):
-        return ''
+        return "Unimplemented serialization for abstract tool operation"
 
     def deserialize(self, data):
         pass

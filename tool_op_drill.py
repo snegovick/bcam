@@ -18,7 +18,7 @@ class TODrill(ToolOperation):
         self.depth = depth
 
     def serialize(self):
-        return json.dumps({'type': 'todrill', 'center': self.center, 'depth': self.depth, 'index': self.index})
+        return {'type': 'todrill', 'center': self.center, 'depth': self.depth, 'index': self.index}
 
     def deserialize(self, data):
         pass

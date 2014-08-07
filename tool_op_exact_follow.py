@@ -17,7 +17,7 @@ class TOExactFollow(TOAbstractFollow):
         self.path = None
 
     def serialize(self):
-        return json.dumps({'type': 'toexactfollow', 'path_ref': self.path.name, 'depth': self.depth, 'index': self.index})
+        return {'type': 'toexactfollow', 'path_ref': self.path.name, 'depth': self.depth, 'index': self.index}
 
     def deserialize(self, data):
         pass

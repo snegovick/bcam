@@ -31,7 +31,7 @@ class Element(object):
         return None
 
     def serialize(self):
-        return ''
+        return 'Unimplemented serialization for abstract element'
 
     def deserialize(self, data):
         pass
@@ -71,7 +71,7 @@ class ELine(Element):
         self.end_normal = None
 
     def serialize(self):
-        return json.dumps({'type': 'eline', 'start': self.start, 'end': self.end})
+        return {'type': 'eline', 'start': self.start, 'end': self.end}
 
     def draw_first(self, ctx):
         ctx.move_to(self.start[0], self.start[1])
@@ -142,7 +142,7 @@ class EArc(Element):
         self.end_normal = None
 
     def serialize(self):
-        return json.dumps({'type': 'earc', 'radius': self.radius, 'center': self.center, 'startangle': self.startangle, 'endangle': self.endangle})
+        return {'type': 'earc', 'radius': self.radius, 'center': self.center, 'startangle': self.startangle, 'endangle': self.endangle}
 
     def draw_element(self, ctx):
         if self.is_turnaround:
@@ -203,7 +203,7 @@ class ECircle(Element):
         self.operations[TOEnum.drill] = True
 
     def serialize(self):
-        return json.dumps({'type': 'ecircle', 'radius': self.radius, 'center': self.center})
+        return {'type': 'ecircle', 'radius': self.radius, 'center': self.center}
 
     def draw_element(self, ctx):
         ctx.arc(self.center[0], self.center[1], self.radius, 0, math.pi*2)

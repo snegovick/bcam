@@ -19,7 +19,7 @@ class TOPocketing(TOAbstractFollow):
         self.offset_path = None
 
     def serialize(self):
-        return json.dumps({'type': 'topocketing', 'path_ref': self.path.name, 'depth': self.depth, 'index': self.index, 'offset': self.offset})
+        return {'type': 'topocketing', 'path_ref': self.path.name, 'depth': self.depth, 'index': self.index, 'offset': self.offset}
 
     def deserialize(self, data):
         pass
