@@ -40,8 +40,10 @@ class MainWindow(object):
         sep_export_import = gtk.SeparatorMenuItem()
         self.export_item = gtk.MenuItem("Export ...")
         self.import_item = gtk.MenuItem("Import ...")
-        self.quit_item = gtk.MenuItem("Quit")
         sep_quit = gtk.SeparatorMenuItem()
+        self.quit_item = gtk.MenuItem("Quit")
+        key, mod = gtk.accelerator_parse("<Control>Q")
+        self.quit_item.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
 
         self.file_menu.append(self.new_project_item)
         self.file_menu.append(self.open_project_item)
