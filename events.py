@@ -99,6 +99,12 @@ class EventProcessor(object):
             self.ee.tool_operation_delete_button_click: self.tool_operation_delete_button_click,
         }
 
+    def reset(self):
+        self.selected_elements = []
+        self.selected_path = None
+        self.selected_tool_operation = None
+        self.left_press_start = None
+
     def push_event(self, event, *args):
         print "pushing", event 
         self.event_list.append((event, args))
@@ -134,12 +140,16 @@ class EventProcessor(object):
         mimes = [("BCam project (*.bcam)", "Application/bcam", "*.bcam")]
         result = self.mw.mk_file_save_dialog("Save project ...", mimes)
         if result!=None:
-            self.push_event(self.ee.save_project, result)
+            self.save_project((result, ))
 
     def new_project_click(self, args):
         print "new project clicked"
         if not state.is_clean():
             print "not clean, ask to save"
+            print self.mw.mk_question_dialog("Current project has some unsaved data.\nWould you like to save it?")
+            self.save_project_click(None)
+            state.set(State())
+            self.reset()
         else:
             state.set(State())
 
@@ -147,6 +157,9 @@ class EventProcessor(object):
         print "quit clicked"
         if not state.is_clean():
             print "not clean, ask to save"
+            print self.mw.mk_question_dialog("Current project has some unsaved data.\nWould you like to save it?")
+            self.save_project_click(None)
+            exit(0)
         else:
             exit(0)
 

@@ -40,7 +40,6 @@ class MainWindow(object):
         self.file_menu.append(sep_quit)
         self.file_menu.append(self.quit_item)
 
-
         self.import_item.connect("activate", lambda *args: ep.push_event(ee.load_click, args))
         self.export_item.connect("activate", lambda *args: ep.push_event(ee.save_click, args))
         self.new_project_item.connect("activate", lambda *args: ep.push_event(ee.new_project_click, args))
@@ -106,6 +105,22 @@ class MainWindow(object):
             if s.type == "float":
                 w = self.__mk_labeled_spin(dct, s.display_name, s, None, s.default, s.min, s.max)
                 self.settings_vb.pack_start(w, expand=False, fill=False, padding=0)
+
+    def mk_question_dialog(self, question):
+        md = gtk.Dialog(title=question, parent=self.window, flags=gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT)
+        yes_button = md.add_button(gtk.STOCK_YES, gtk.RESPONSE_YES)
+        no_button = md.add_button(gtk.STOCK_NO, gtk.RESPONSE_NO)
+        yes_button.grab_default()
+        vbox = md.get_content_area()
+        l = gtk.Label(question)
+        l.show()
+        vbox.pack_end(l)
+        response = md.run()
+        ret = True
+        if response == gtk.RESPONSE_NO:
+            ret = False
+        md.destroy()
+        return ret
 
     def mk_file_dialog(self, name, mimes):
         ret = None
