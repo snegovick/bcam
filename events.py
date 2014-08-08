@@ -146,19 +146,19 @@ class EventProcessor(object):
         print "new project clicked"
         if not state.is_clean():
             print "not clean, ask to save"
-            print self.mw.mk_question_dialog("Current project has some unsaved data.\nWould you like to save it?")
-            self.save_project_click(None)
-            state.set(State())
-            self.reset()
-        else:
-            state.set(State())
+            if self.mw.mk_question_dialog("Current project has some unsaved data.\nWould you like to save it?"):
+                self.save_project_click(None)
+
+        self.reset()
+        state.set(State())
+        self.mw.widget.update()
 
     def quit_click(self, args):
         print "quit clicked"
         if not state.is_clean():
             print "not clean, ask to save"
-            print self.mw.mk_question_dialog("Current project has some unsaved data.\nWould you like to save it?")
-            self.save_project_click(None)
+            if self.mw.mk_question_dialog("Current project has some unsaved data.\nWould you like to save it?"):
+                self.save_project_click(None)
             exit(0)
         else:
             exit(0)
