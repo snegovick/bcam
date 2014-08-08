@@ -38,7 +38,6 @@ class Path(Element):
         self.elements = []
         lt = self.state.settings.get_lt(self.lt_name)
         for e in data["elements"]:
-            #replace with factory
             if e["type"] == "eline":
                 self.add_element(ELine(lt=lt, data=e))
             if e["type"] == "earc":
@@ -51,7 +50,6 @@ class Path(Element):
         self.ordered_elements = []
 
         for e in data["ordered_elements"]:
-            #replace with factory
             if e["type"] == "eline":
                 self.ordered_elements.append(ELine(lt=lt, data=e))
             if e["type"] == "earc":
