@@ -18,13 +18,25 @@ class MainWindow(object):
 
         self.menu_bar = gtk.MenuBar()
         self.file_menu = gtk.Menu()
-        self.file_item = gtk.MenuItem("File")
+        self.file_item = gtk.MenuItem("_File")
         self.file_item.set_submenu(self.file_menu)
         self.menu_bar.append(self.file_item)
 
+        agr = gtk.AccelGroup()
+        self.window.add_accel_group(agr)
+
         self.new_project_item = gtk.MenuItem("New project")
+        key, mod = gtk.accelerator_parse("<Control>N")
+        self.new_project_item.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+
         self.open_project_item = gtk.MenuItem("Open project ...")
+        key, mod = gtk.accelerator_parse("<Control>O")
+        self.open_project_item.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+
         self.save_project_item = gtk.MenuItem("Save project ...")
+        key, mod = gtk.accelerator_parse("<Control>S")
+        self.save_project_item.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+
         sep_export_import = gtk.SeparatorMenuItem()
         self.export_item = gtk.MenuItem("Export ...")
         self.import_item = gtk.MenuItem("Import ...")
