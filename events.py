@@ -106,7 +106,6 @@ class EventProcessor(object):
         self.left_press_start = None
 
     def push_event(self, event, *args):
-        print "pushing", event 
         self.event_list.append((event, args))
 
     def process(self):
