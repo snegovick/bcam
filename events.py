@@ -4,7 +4,7 @@ import gtk, gobject, cairo
 import sys
 
 from loader_dxf import DXFLoader
-from state import state
+from state import state, State
 from tool_op_drill import TODrill
 from tool_op_exact_follow import TOExactFollow
 from tool_op_offset_follow import TOOffsetFollow
@@ -22,6 +22,8 @@ class EVEnum:
     save_project_click = "save_project_click"
     load_project = "load_project"
     save_project = "save_project"
+    new_project_click = "new_project_click"
+    quit_click = "quit_click"
     screen_left_press = "screen_left_press"
     screen_left_release = "screen_left_release"
     pointer_motion = "pointer_motion"
@@ -68,6 +70,8 @@ class EventProcessor(object):
             self.ee.save_project_click: self.save_project_click,
             self.ee.load_project: self.load_project,
             self.ee.save_project: self.save_project,
+            self.ee.new_project_click: self.new_project_click,
+            self.ee.quit_click: self.quit_click,
             self.ee.screen_left_press: self.screen_left_press,
             self.ee.screen_left_release: self.screen_left_release,
             self.ee.pointer_motion: self.pointer_motion,
@@ -131,6 +135,20 @@ class EventProcessor(object):
         result = self.mw.mk_file_save_dialog("Save project ...", mimes)
         if result!=None:
             self.push_event(self.ee.save_project, result)
+
+    def new_project_click(self, args):
+        print "new project clicked"
+        if not state.is_clean():
+            print "not clean, ask to save"
+        else:
+            state.set(State())
+
+    def quit_click(self, args):
+        print "quit clicked"
+        if not state.is_clean():
+            print "not clean, ask to save"
+        else:
+            exit(0)
 
     def update_paths_list(self, args):
         if state.paths != None:

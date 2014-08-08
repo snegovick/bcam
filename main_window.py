@@ -25,23 +25,28 @@ class MainWindow(object):
         self.new_project_item = gtk.MenuItem("New project")
         self.open_project_item = gtk.MenuItem("Open project ...")
         self.save_project_item = gtk.MenuItem("Save project ...")
-        sep = gtk.SeparatorMenuItem()
-        self.export_item = gtk.MenuItem("Import ...")
-        self.import_item = gtk.MenuItem("Export ...")
-
+        sep_export_import = gtk.SeparatorMenuItem()
+        self.export_item = gtk.MenuItem("Export ...")
+        self.import_item = gtk.MenuItem("Import ...")
+        self.quit_item = gtk.MenuItem("Quit")
+        sep_quit = gtk.SeparatorMenuItem()
 
         self.file_menu.append(self.new_project_item)
         self.file_menu.append(self.open_project_item)
         self.file_menu.append(self.save_project_item)
-        self.file_menu.append(sep)
+        self.file_menu.append(sep_export_import)
         self.file_menu.append(self.import_item)
         self.file_menu.append(self.export_item)
+        self.file_menu.append(sep_quit)
+        self.file_menu.append(self.quit_item)
+
 
         self.import_item.connect("activate", lambda *args: ep.push_event(ee.load_click, args))
         self.export_item.connect("activate", lambda *args: ep.push_event(ee.save_click, args))
         self.new_project_item.connect("activate", lambda *args: ep.push_event(ee.new_project_click, args))
         self.open_project_item.connect("activate", lambda *args: ep.push_event(ee.load_project_click, args))
         self.save_project_item.connect("activate", lambda *args: ep.push_event(ee.save_project_click, args))
+        self.quit_item.connect("activate", lambda *args: ep.push_event(ee.quit_click, args))
 
         self.window_vbox = gtk.VBox(homogeneous=False, spacing=0)
         self.window_vbox.pack_start(self.menu_bar, expand=False, fill=False, padding=0)

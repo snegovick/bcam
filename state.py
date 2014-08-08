@@ -13,6 +13,11 @@ class State:
         else:
             self.deserialize(data)
 
+    def is_clean(self):
+        if self.paths == [] and self.tool_operations == []:
+            return True
+        return False
+
     def set(self, state):
         self.settings = state.settings
         self.__total_offset = state.__total_offset
