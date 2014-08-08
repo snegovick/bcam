@@ -57,7 +57,6 @@ class Path(Element):
             if e["type"] == "ecircle":
                 self.ordered_elements.append(ECircle(lt=lt, data=e))
 
-
     def add_element(self, e):
         self.elements.append(e)
 
