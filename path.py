@@ -112,7 +112,7 @@ class Path(Element):
             return None
 
         if not self.elements[0].joinable:
-            p = Path([self.elements[0]], self.name+".path", self.state.settings.get_def_lt())
+            p = Path(self.state, [self.elements[0]], self.name+".path", self.state.settings.get_def_lt())
             p.ordered_elements = [self.elements[0]]
             return p
         available = self.elements[:]

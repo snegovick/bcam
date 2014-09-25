@@ -3,7 +3,7 @@ from tool_operation import ToolOperation, TOEnum
 from tool_abstract_follow import TOAbstractFollow
 from generalized_setting import TOSetting
 from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len
-from elements import ELine, EArc
+from elements import ELine, EArc, ECircle
 
 import cairo
 import json
@@ -50,47 +50,50 @@ class TOOffsetFollow(TOAbstractFollow):
         self.draw_list = self.offset_path
         
     def __build_offset_path(self, p):
+        new_elements = []
         if len(p.elements)==0:
             return False
         if len(p.elements)==1:
-            #check for circle here
-            return
-        
-        new_elements = []
-        s = p.elements[0].start
-        e = p.elements[0].end
-        nsn = p.elements[0].get_normalized_start_normal()
-        s_pt = [nsn[0]*self.offset+s[0], nsn[1]*self.offset+s[1], 0]
-        for i, e in enumerate(p.elements):
-            sc = e.start # current start
-            ec = e.end # current end
-            
-
-            if s_pt == None:
-                nsn = e.get_normalized_start_normal()
-                n = normalize(vect_sum(nsn, nen)) # sum of new start normal and prev end normal
-                shift = sc
-                s_pt = [n[0]*self.offset+shift[0], n[1]*self.offset+shift[1], 0]
-
-            if i<len(p.elements)-1:
-                nnsn = p.elements[i+1].get_normalized_start_normal()
-                nen = e.get_normalized_end_normal()
-                n = normalize(vect_sum(nnsn, nen)) # sum of next start normal and current end normal
-                shift = ec
-                e_pt = [n[0]*self.offset+shift[0], n[1]*self.offset+shift[1], 0]
+            e = p.elements[0]
+            if type(e).__name__ == "ECircle":
+                new_elements.append(ECircle(e.center, e.radius+self.offset, e.lt, None))
             else:
-                nen = e.get_normalized_end_normal()
-                n = nen
-                shift = ec
-                e_pt = [n[0]*self.offset+shift[0], n[1]*self.offset+shift[1], 0]
-            if type(e).__name__ == "ELine":
-                ne = ELine(s_pt, e_pt, e.lt)
-            elif type(e).__name__ == "EArc":
-                ne = EArc(center=e.center, lt=e.lt, start=s_pt, end=e_pt)
+                return
+        else:
+            s = p.elements[0].start
+            e = p.elements[0].end
+            nsn = p.elements[0].get_normalized_start_normal()
+            s_pt = [nsn[0]*self.offset+s[0], nsn[1]*self.offset+s[1], 0]
+            for i, e in enumerate(p.elements):
+                sc = e.start # current start
+                ec = e.end # current end
 
-            new_elements.append(ne)
-            s_pt = None
-            e_pt = None
+
+                if s_pt == None:
+                    nsn = e.get_normalized_start_normal()
+                    n = normalize(vect_sum(nsn, nen)) # sum of new start normal and prev end normal
+                    shift = sc
+                    s_pt = [n[0]*self.offset+shift[0], n[1]*self.offset+shift[1], 0]
+
+                if i<len(p.elements)-1:
+                    nnsn = p.elements[i+1].get_normalized_start_normal()
+                    nen = e.get_normalized_end_normal()
+                    n = normalize(vect_sum(nnsn, nen)) # sum of next start normal and current end normal
+                    shift = ec
+                    e_pt = [n[0]*self.offset+shift[0], n[1]*self.offset+shift[1], 0]
+                else:
+                    nen = e.get_normalized_end_normal()
+                    n = nen
+                    shift = ec
+                    e_pt = [n[0]*self.offset+shift[0], n[1]*self.offset+shift[1], 0]
+                if type(e).__name__ == "ELine":
+                    ne = ELine(s_pt, e_pt, e.lt)
+                elif type(e).__name__ == "EArc":
+                    ne = EArc(center=e.center, lt=e.lt, start=s_pt, end=e_pt)
+
+                new_elements.append(ne)
+                s_pt = None
+                e_pt = None
         self.offset_path = new_elements
         
     def apply(self, path):

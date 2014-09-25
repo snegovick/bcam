@@ -66,6 +66,15 @@ class TOAbstractFollow(ToolOperation):
                 new_pos = [e.end[0], e.end[1], -step*self.tool.diameter/2.0]
                 out+= self.state.settings.default_pp.mk_cw_arc(e.radius, new_pos)
                 self.tool.current_position = new_pos
+        elif type(e).__name__ == "ECircle":
+            new_pos = [e.start[0], e.start[1], -step*self.tool.diameter/2.0]
+            out+= self.state.settings.default_pp.move_to(new_pos)
+            self.tool.current_position = new_pos
+            new_pos = [e.end[0], e.end[1], -step*self.tool.diameter/2.0]
+            rel_center = [e.center[0]-e.end[0], e.center[1]-e.end[1], 0]
+            out+= self.state.settings.default_pp.mk_cw_ijk_arc(rel_center, new_pos)
+            self.tool.current_position = new_pos
+            
         else:
             print "unsuported element type:", type(e).__name__
         return out
