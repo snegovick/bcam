@@ -103,7 +103,8 @@ class CircleUtils:
         return abs(dist)
 
 class ArcUtils:
-    def __init__(self, center, radius, startangle, endangle):
+    def __init__(self, center, radius, startangle, endangle, turnaround=False):
+        self.ta = turnaround
         self.center = center
         self.radius = radius
         self.sa = startangle
@@ -154,12 +155,11 @@ class ArcUtils:
         return abs(dist)
 
     def get_normalized_start_normal(self):
-        se_dir = mk_vect(self.start, self.end)
-        se_dir = normalize(se_dir)
         v = mk_vect(self.center, self.start)
         v = normalize(v)
-        z_dir = [0, 0, se_dir[0]*v[1]-se_dir[1]*v[0]]
-        z_dir = normalize(z_dir)
+        z_dir = [0, 0, -1]
+        if self.ta:
+            z_dir = [0, 0, 1]
         v_dir = [z_dir[2]*v[1], -v[0]*z_dir[2], 0]
         v_dir = normalize(v_dir)
         

@@ -51,20 +51,21 @@ class TOOffsetFollow(TOAbstractFollow):
         
     def __build_offset_path(self, p):
         new_elements = []
-        if len(p.elements)==0:
+        elements = p.get_ordered_elements()
+        if len(elements)==0:
             return False
-        if len(p.elements)==1:
-            e = p.elements[0]
+        if len(elements)==1:
+            e = elements[0]
             if type(e).__name__ == "ECircle":
                 new_elements.append(ECircle(e.center, e.radius+self.offset, e.lt, None))
             else:
                 return
         else:
-            s = p.elements[0].start
-            e = p.elements[0].end
-            nsn = p.elements[0].get_normalized_start_normal()
+            s = elements[0].start
+            e = elements[0].end
+            nsn = elements[0].get_normalized_start_normal()
             s_pt = [nsn[0]*self.offset+s[0], nsn[1]*self.offset+s[1], 0]
-            for i, e in enumerate(p.elements):
+            for i, e in enumerate(elements):
                 sc = e.start # current start
                 ec = e.end # current end
 
@@ -75,10 +76,10 @@ class TOOffsetFollow(TOAbstractFollow):
                     shift = sc
                     s_pt = [n[0]*self.offset+shift[0], n[1]*self.offset+shift[1], 0]
 
-                if i<len(p.elements)-1:
-                    nnsn = p.elements[i+1].get_normalized_start_normal()
+                if i<len(elements)-1:
+                    nnsn = elements[i+1].get_normalized_start_normal()
                     nen = e.get_normalized_end_normal()
-                    n = normalize(vect_sum(nnsn, nen)) # sum of next start normal and current end normal
+                    n = vect_sum(nnsn, nen) # sum of next start normal and current end normal
                     shift = ec
                     e_pt = [n[0]*self.offset+shift[0], n[1]*self.offset+shift[1], 0]
                 else:

@@ -195,13 +195,14 @@ class EArc(Element):
 
     def get_normalized_end_normal(self):
         if self.end_normal == None:
-            au = ArcUtils(self.center, self.radius, self.startangle, self.endangle)
+            au = None
+            au = ArcUtils(self.center, self.radius, self.startangle, self.endangle, self.is_turnaround)
             self.end_normal = au.get_normalized_end_normal()
         return self.end_normal
 
     def get_normalized_start_normal(self):
         if self.start_normal == None:
-            au = ArcUtils(self.center, self.radius, self.startangle, self.endangle)
+            au = ArcUtils(self.center, self.radius, self.startangle, self.endangle, self.is_turnaround)
             self.start_normal = au.get_normalized_start_normal()
         return self.start_normal
 
@@ -210,7 +211,7 @@ class EArc(Element):
 
 
     def __repr__(self):
-        return "<EArc ("+str(self.start)+", "+str(self.end)+")>\r\n"
+        return "<EArc ("+str(self.start)+", "+str(self.end)+", ta: "+str(self.is_turnaround)+")>\r\n"
 
 class ECircle(Element):
     def __init__(self, center=None, radius=None, lt=None, data=None):
