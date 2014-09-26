@@ -30,6 +30,9 @@ def vect_len(v):
         return math.sqrt(v[0]**2+v[1]**2+v[2]**2)
     return math.sqrt(v[0]**2+v[1]**2)
 
+def scale_vect(v, factor):
+    return map(lambda e: e*factor, v)
+
 class OverlapEnum:
     fully_covers = 1
     partially_overlap = 2
