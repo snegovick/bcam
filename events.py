@@ -150,6 +150,8 @@ class EventProcessor(object):
 
         self.reset()
         state.set(State())
+        self.push_event(self.ee.update_tool_operations_list, (None))
+        self.push_event(self.ee.update_paths_list, (None))
         self.mw.widget.update()
 
     def quit_click(self, args):
