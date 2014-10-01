@@ -2,7 +2,7 @@ import math
 from tool_operation import ToolOperation, TOEnum
 from tool_abstract_follow import TOAbstractFollow
 from generalized_setting import TOSetting
-from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len, scale_vect
+from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len, scale_vect, pt_to_pt_dist
 from elements import ELine, EArc, ECircle
 
 import cairo
@@ -66,6 +66,49 @@ class TOOffsetFollow(TOAbstractFollow):
     def __build_offset_path(self, p):
         return self.__build_offset_path_normals(p)
 
+    def __two_point_offset(self, prev, next):
+        nsc = next.start
+        nec = next.end
+        sc = prev.start
+        ec = prev.end
+        
+        nnsn = next.get_normalized_start_normal()
+        nen = prev.get_normalized_end_normal()
+
+        e_s_pt = [nen[0]*self.offset+sc[0], nen[1]*self.offset+sc[1], 0]
+        e_e_pt = [nen[0]*self.offset+ec[0], nen[1]*self.offset+ec[1], 0]
+        ne_s_pt = [nnsn[0]*self.offset+nsc[0], nnsn[1]*self.offset+nsc[1], 0]
+        ne_e_pt = [nnsn[0]*self.offset+nec[0], nnsn[1]*self.offset+nec[1], 0]
+        
+        ne_dy = ne_e_pt[1]-ne_s_pt[1]
+        ne_dx = ne_e_pt[0]-ne_s_pt[0]
+        
+        e_dy = e_e_pt[1]-e_s_pt[1]
+        e_dx = e_e_pt[0]-e_s_pt[0]
+        
+        if ((e_dx == 0) and (ne_dy == 0)):
+            x = e_e_pt[0]
+            y = ne_e_pt[1]
+            print "case 1,x:",x,"y:",y
+        elif((e_dy == 0) and (ne_dx == 0)):
+            x = ne_e_pt[0]
+            y = e_e_pt[1]
+            print "case 2,x:",x,"y:",y
+        else:
+            a = (ne_e_pt[0]*ne_s_pt[1]-ne_s_pt[0]*ne_e_pt[1])
+            b = (e_e_pt[0]*e_s_pt[1]-e_s_pt[0]*e_e_pt[1])
+
+            print "a:", a, "b:", b, "e_dx:", e_dx, "e_dy:", e_dy, "ne_dx:", ne_dx, "ne_dy:", ne_dy
+            
+            x = (a*e_dx-b*ne_dx)/(e_dy*ne_dx-ne_dy*e_dx)
+            if e_dx == 0:
+                y = ne_e_pt[1]
+            else:
+                y = (x*e_dy+b)/e_dx
+            print "case 3,x:",x,"y:",y
+        e_pt = [x, y]
+        return e_pt
+
     def __build_offset_path_normals(self, p):
         new_elements = []
         elements = p.get_ordered_elements()
@@ -110,11 +153,8 @@ class TOOffsetFollow(TOAbstractFollow):
                     converted_elements.append(e)
 
             elements = converted_elements
-            ne = None
-            s = elements[0].start
-            e = elements[0].end
-            nsn = elements[0].get_normalized_start_normal()
-            s_pt = [nsn[0]*self.offset+s[0], nsn[1]*self.offset+s[1], 0]
+            s_pt = None
+            #s_pt = [nsn[0]*self.offset+s[0], nsn[1]*self.offset+s[1], 0]
 
             for i, e in enumerate(elements):
                 sc = e.start # current start
@@ -122,30 +162,25 @@ class TOOffsetFollow(TOAbstractFollow):
 
 
                 if s_pt == None:
-                    nsn = e.get_normalized_start_normal()
-                    n = vect_sum(nsn, nen) # sum of new start normal and prev end normal
-                    shift = sc
-                    s_pt = [n[0]*self.offset+shift[0], n[1]*self.offset+shift[1], 0]
+                    if pt_to_pt_dist(sc, elements[-1].end)<0.001:
+                        print "s_pt"
+                        s_pt = self.__two_point_offset(elements[-1], e)
+                    else:
+                        nsn = e.get_normalized_start_normal()
+                        n = vect_sum(nsn, nen) # sum of new start normal and prev end normal
+                        shift = sc
+                        s_pt = [n[0]*self.offset+shift[0], n[1]*self.offset+shift[1], 0]
 
                 if i<len(elements)-1:
-                    nsc = elements[i+1].start
-                    nec = elements[i+1].end
-
-                    nnsn = elements[i+1].get_normalized_start_normal()
-                    nen = e.get_normalized_end_normal()
-                    e_s_pt = [nen[0]*self.offset+sc[0], nen[1]*self.offset+sc[1], 0]
-                    e_e_pt = [nen[0]*self.offset+ec[0], nen[1]*self.offset+ec[1], 0]
-                    ne_s_pt = [nnsn[0]*self.offset+nsc[0], nnsn[1]*self.offset+nsc[1], 0]
-                    ne_e_pt = [nnsn[0]*self.offset+nec[0], nnsn[1]*self.offset+nec[1], 0]
-
-                    x = ((ne_e_pt[0]*ne_s_pt[1]-ne_s_pt[0]*ne_e_pt[1])*(e_e_pt[0]-e_s_pt[0])-(e_e_pt[0]*e_s_pt[1]-e_s_pt[0]*e_e_pt[1])*(ne_e_pt[0]-ne_s_pt[0]))/((e_e_pt[1]-e_s_pt[1])*(ne_e_pt[0]-ne_s_pt[0])-(ne_e_pt[1]-ne_s_pt[1])*(e_e_pt[0]-e_s_pt[0]))
-                    y = (x*(e_e_pt[1]-e_s_pt[1])+(e_e_pt[0]*e_s_pt[1]-e_s_pt[0]*e_e_pt[1]))/(e_e_pt[0]-e_s_pt[0])
-                    e_pt = [x, y]
+                    e_pt = self.__two_point_offset(e, elements[i+1])
                 else:
                     nen = e.get_normalized_end_normal()
                     n = nen
-                    shift = ec
-                    e_pt = [n[0]*self.offset+shift[0], n[1]*self.offset+shift[1], 0]
+                    if pt_to_pt_dist(ec, elements[0].start)<0.001:
+                        e_pt = self.__two_point_offset(e, elements[0])
+                    else:
+                        shift = ec
+                        e_pt = [n[0]*self.offset+shift[0], n[1]*self.offset+shift[1], 0]
                 if type(e).__name__ == "ELine":
                     ne = ELine(s_pt, e_pt, e.lt)
                 elif type(e).__name__ == "EArc":

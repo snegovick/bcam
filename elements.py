@@ -136,6 +136,7 @@ class EArc(Element):
             self.deserialize(data)
 
         self.joinable = True
+        self.operations[TOEnum.drill] = True
         self.operations[TOEnum.exact_follow] = True
         self.operations[TOEnum.offset_follow] = True
         self.start_normal = None
