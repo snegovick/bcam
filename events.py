@@ -123,7 +123,7 @@ class EventProcessor(object):
             self.push_event(self.ee.load_file, result)
 
     def save_click(self, args):
-        mimes = [("GCode (*.ngc)", "Application/dxf", "*.dxf")]
+        mimes = [("GCode (*.ngc)", "Application/ngc", "*.ngc")]
         result = self.mw.mk_file_save_dialog("Save ...", mimes)
         if result!=None:
             self.push_event(self.ee.save_file, result)
