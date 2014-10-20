@@ -47,6 +47,9 @@ class Project(object):
         self.steps.append(Step(state))
 
     def save(self, project_path):
+        if os.path.splitext(file_path)[1][1:].strip() != "bcam":
+            path+=".bcam"
+
         # format 1
         serialized_steps = [s.serialize() for s in self.steps]
         f = open(project_path, 'w')

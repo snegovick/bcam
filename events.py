@@ -190,6 +190,8 @@ class EventProcessor(object):
     def save_file(self, args):
         print "save file", args
         file_path = args[0]
+        if os.path.splitext(file_path)[1][1:].strip() != "ngc":
+            path+=".ngc"
         out = ""
         out+=state.settings.default_pp.set_metric()
         feedrate = state.settings.tool.get_feedrate()
