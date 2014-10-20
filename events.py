@@ -191,6 +191,10 @@ class EventProcessor(object):
         print "save file", args
         file_path = args[0]
         out = ""
+        out+=state.settings.default_pp.set_metric()
+        feedrate = state.settings.tool.get_feedrate()
+        print "feedrate:", feedrate
+        out+=state.settings.default_pp.set_feedrate(feedrate)
         for p in state.tool_operations:
             out+=p.get_gcode()
         f = open(file_path, "w")
@@ -201,6 +205,7 @@ class EventProcessor(object):
         print "load project", args
         project_path = args[0]
         project.load(project_path)
+        self.mw.update_right_vbox()
 
     def save_project(self, args):
         print "save project", args
@@ -391,6 +396,8 @@ class EventProcessor(object):
         setting = args[0][0]
         setting.set_value(new_value)
         project.push_state(state)
+        print "tool:", state.get_tool()
+        print "feedrate:", state.get_tool().get_feedrate()
         self.mw.widget.update()
 
     def tool_operation_up_click(self, args):

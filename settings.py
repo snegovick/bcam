@@ -74,6 +74,9 @@ class Settings:
         self.default_pp = PPGRBL()
             
 
+    def get_tool(self):
+        return self.tool
+
     def get_lt(self, name):
         if name in self.line_types:
             return self.line_types[name]

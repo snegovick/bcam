@@ -17,6 +17,10 @@ class Tool(object):
         else:
             self.deserialize(data)
         self.current_position = [0,0,0]
+        print "initial feedrate:", feedrate
+
+    def get_feedrate(self):
+        return self.feedrate
 
     def get_settings_list(self):
         settings_lst = [TOSetting("float", 0, None, self.diameter, "Diameter, mm: ", self.set_diameter_s),
@@ -28,6 +32,8 @@ class Tool(object):
 
     def set_feedrate_s(self, setting):
         self.feedrate = setting.new_value
+        print "new feedrate:", self.feedrate
+        print "self:", self
 
     def serialize(self):
         return {"type": "tool", "diameter": self.diameter, "feedrate": self.feedrate, "default_height": self.default_height, "name": self.name, "tool_type": self.type, "step": self.step}
