@@ -2,6 +2,7 @@ import pygtk
 pygtk.require('2.0')
 import gtk, gobject, cairo
 import sys
+import os
 
 from loader_dxf import DXFLoader
 from state import state, State
@@ -191,7 +192,7 @@ class EventProcessor(object):
         print "save file", args
         file_path = args[0]
         if os.path.splitext(file_path)[1][1:].strip() != "ngc":
-            path+=".ngc"
+            file_path+=".ngc"
         out = ""
         out+=state.settings.default_pp.set_metric()
         feedrate = state.settings.tool.get_feedrate()
