@@ -95,7 +95,7 @@ class State:
             elif to["type"] == "toexactfollow":
                 op = TOExactFollow(state=self, data=to)
             elif to["type"] == "tooffsetfollow":
-                op = TOExactFollow(state=self, data=to)
+                op = TOOffsetFollow(state=self, data=to)
             elif to["type"] == "topocketing":
                 op = TOPocketing(state=self, data=to)
             else:
