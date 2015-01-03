@@ -179,6 +179,9 @@ class Path(Element):
     def get_closed(self):
         return self.closed
 
+    def get_ordered_elements(self):
+        return self.ordered_elements
+
     def draw(self, ctx):
         if self.display:
             for e in self.elements:

@@ -13,6 +13,9 @@ class State:
         else:
             self.deserialize(data)
 
+    def get_tool(self):
+        return self.settings.tool
+
     def is_clean(self):
         if self.paths == [] and self.tool_operations == []:
             return True
@@ -70,7 +73,6 @@ class State:
             return None
 
     def deserialize(self, data):
-
         from path import Path
         from tool_op_exact_follow import TOExactFollow
         from tool_op_offset_follow import TOOffsetFollow

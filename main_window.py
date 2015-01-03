@@ -232,13 +232,22 @@ class MainWindow(object):
         hbox.pack_start(spin, expand=True, fill=True, padding=0)
         return hbox
 
+    def update_right_vbox(self):
+        self.hbox.remove(self.hbox.children()[-1])
+        children = self.right_vbox.children()
+        for c in children:
+            self.right_vbox.remove(c)
+
+        self.__mk_right_vbox()
+        self.hbox.pack_start(self.right_vbox, expand=False, fill=False, padding=0)
     def __mk_right_vbox(self):
         self.right_vbox = gtk.VBox(homogeneous=False, spacing=0)
 
         self.tool_label = gtk.Label("Tool settings")
+        self.tool_label.show()
         self.right_vbox.pack_start(self.tool_label, expand=False, fill=False, padding=0)
 
-        settings_lst = state.settings.tool.get_settings_list()
+        settings_lst = state.get_tool().get_settings_list()
         if settings_lst != None:
             print settings_lst
             for s in settings_lst:
@@ -249,6 +258,7 @@ class MainWindow(object):
 
 
         self.material_label = gtk.Label("Material settings")
+        self.material_label.show()
         self.right_vbox.pack_start(self.material_label, expand=False, fill=False, padding=0)
         settings_lst = state.settings.material.get_settings_list()
         if settings_lst != None:
@@ -260,7 +270,9 @@ class MainWindow(object):
                     self.right_vbox.pack_start(w, expand=False, fill=False, padding=0)
 
         self.settings_vb = gtk.VBox(homogeneous=False, spacing=0)
+        self.settings_vb.show()
         self.right_vbox.pack_start(self.settings_vb, expand=False, fill=False, padding=0)
+        self.right_vbox.show()
 
     def __mk_left_vbox(self):
         self.left_vbox = gtk.VBox(homogeneous=False, spacing=0)

@@ -1,6 +1,7 @@
 from path import Path
 from state import State
 import state
+import os
 
 import json
 from copy import deepcopy
@@ -47,6 +48,9 @@ class Project(object):
         self.steps.append(Step(state))
 
     def save(self, project_path):
+        if os.path.splitext(project_path)[1][1:].strip() != "bcam":
+            project_path+=".bcam"
+
         # format 1
         serialized_steps = [s.serialize() for s in self.steps]
         f = open(project_path, 'w')

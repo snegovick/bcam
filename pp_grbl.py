@@ -27,3 +27,11 @@ class PPGRBL:
     def mk_ccw_arc(self, r, end):
         out = "G03 X%.3fY%.3fZ%.3f R%.3f\r\n" % (end[0], end[1], end[2], r)
         return out
+
+    def mk_cw_ijk_arc(self, center, end):
+        out = "G02 X%.3fY%.3fZ%.3f I%.3fJ%.3fK%.3f\r\n" % (end[0], end[1], end[2], center[0], center[1], center[2])
+        return out
+
+    def mk_ccw_ijk_arc(self, center, end):
+        out = "G03 X%.3fY%.3fZ%.3f I%.3fJ%.3fK%.3f\r\n" % (end[0], end[1], end[2], center[0], center[1], center[2])
+        return out

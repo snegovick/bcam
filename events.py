@@ -2,6 +2,7 @@ import pygtk
 pygtk.require('2.0')
 import gtk, gobject, cairo
 import sys
+import os
 
 from loader_dxf import DXFLoader
 from state import state, State
@@ -123,7 +124,7 @@ class EventProcessor(object):
             self.push_event(self.ee.load_file, result)
 
     def save_click(self, args):
-        mimes = [("GCode (*.ngc)", "Application/dxf", "*.dxf")]
+        mimes = [("GCode (*.ngc)", "Application/ngc", "*.ngc")]
         result = self.mw.mk_file_save_dialog("Save ...", mimes)
         if result!=None:
             self.push_event(self.ee.save_file, result)
@@ -150,6 +151,8 @@ class EventProcessor(object):
 
         self.reset()
         state.set(State())
+        self.push_event(self.ee.update_tool_operations_list, (None))
+        self.push_event(self.ee.update_paths_list, (None))
         self.mw.widget.update()
 
     def quit_click(self, args):
@@ -188,7 +191,13 @@ class EventProcessor(object):
     def save_file(self, args):
         print "save file", args
         file_path = args[0]
+        if os.path.splitext(file_path)[1][1:].strip() != "ngc":
+            file_path+=".ngc"
         out = ""
+        out+=state.settings.default_pp.set_metric()
+        feedrate = state.settings.tool.get_feedrate()
+        print "feedrate:", feedrate
+        out+=state.settings.default_pp.set_feedrate(feedrate)
         for p in state.tool_operations:
             out+=p.get_gcode()
         f = open(file_path, "w")
@@ -199,6 +208,7 @@ class EventProcessor(object):
         print "load project", args
         project_path = args[0]
         project.load(project_path)
+        self.mw.update_right_vbox()
 
     def save_project(self, args):
         print "save project", args
@@ -389,6 +399,8 @@ class EventProcessor(object):
         setting = args[0][0]
         setting.set_value(new_value)
         project.push_state(state)
+        print "tool:", state.get_tool()
+        print "feedrate:", state.get_tool().get_feedrate()
         self.mw.widget.update()
 
     def tool_operation_up_click(self, args):
