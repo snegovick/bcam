@@ -20,6 +20,9 @@ class Step(object):
     def deserialize(self, data):
         self.state = State(data["state"])
 
+    def __repr__(self):
+        return str(self.state)
+
 
 class Project(object):
     def __init__(self):
@@ -52,6 +55,7 @@ class Project(object):
             project_path+=".bcam"
 
         # format 1
+        print self.steps
         serialized_steps = [s.serialize() for s in self.steps]
         f = open(project_path, 'w')
         f.write(json.dumps({'format_version': 1, 'steps': serialized_steps}))

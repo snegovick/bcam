@@ -83,9 +83,11 @@ class TODrill(ToolOperation):
         for step in range(int(self.depth/(self.tool.diameter/2.0))+1):
             new_pos = [self.center[0], self.center[1], -step*self.tool.diameter/2.0]
             out+= self.state.settings.default_pp.move_to(new_pos)
-            new_pos = [self.center[0], self.center[1], self.tool.default_height]
+            new_pos = [self.center[0], self.center[1], self.tool.diameter]
             out+= self.state.settings.default_pp.move_to_rapid(new_pos)
             
+        new_pos = [self.center[0], self.center[1], self.tool.default_height]
+        out+= self.state.settings.default_pp.move_to_rapid(new_pos)
         self.tool.current_position = new_pos
         return out
 
