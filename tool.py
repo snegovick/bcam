@@ -17,7 +17,15 @@ class Tool(object):
         else:
             self.deserialize(data)
         self.current_position = [0,0,0]
-        print "initial feedrate:", feedrate
+        print "initial feedrate:", self.feedrate
+
+    def copy_tool(self, tool):
+        self.diameter = tool.diameter
+        self.step = tool.step
+        self.feedrate = tool.feedrate
+        self.type = tool.type
+        self.name = tool.name
+        self.default_height = tool.default_height
 
     def get_feedrate(self):
         return self.feedrate
@@ -39,6 +47,7 @@ class Tool(object):
         return {"type": "tool", "diameter": self.diameter, "feedrate": self.feedrate, "default_height": self.default_height, "name": self.name, "tool_type": self.type, "step": self.step}
 
     def deserialize(self, data):
+        print "tool deserialize:", data
         self.diameter = data["diameter"]
         self.feedrate = data["feedrate"]
         self.default_height = data["default_height"]

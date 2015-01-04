@@ -93,4 +93,4 @@ class Settings:
         self.line_types = {}
         for lt in data["linetypes"]:
             self.line_types[lt["name"]] = LineType(data=lt)
-        self.tool = Tool(data["tool"])
+        self.tool = Tool(data=data["tool"])

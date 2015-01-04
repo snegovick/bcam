@@ -187,6 +187,8 @@ class EventProcessor(object):
         state.add_paths(dxfloader.load(args[0]))
         self.push_event(self.ee.update_paths_list, (None))
         self.mw.widget.update()
+        feedrate = state.settings.tool.get_feedrate()
+        print "feedrate:", feedrate
 
     def save_file(self, args):
         print "save file", args
@@ -398,8 +400,12 @@ class EventProcessor(object):
         new_value = args[0][1][0].get_value()
         setting = args[0][0]
         setting.set_value(new_value)
+        oldtool = state.get_tool()
+        print "tool:", oldtool
+        print "feedrate:", oldtool.get_feedrate()
         project.push_state(state)
         print "tool:", state.get_tool()
+        state.get_tool().copy_tool(oldtool)
         print "feedrate:", state.get_tool().get_feedrate()
         self.mw.widget.update()
 

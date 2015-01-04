@@ -9,13 +9,13 @@ from copy import deepcopy
 class Step(object):
     def __init__(self, state=None, data=None):
         if data == None:
-            self.state=state
+            self.state=state.serialize()
             pass
         else:
             self.deserialize(data)
 
     def serialize(self):
-        return {'state': self.state.serialize()}
+        return {'state': self.state}
 
     def deserialize(self, data):
         self.state = State(data["state"])
