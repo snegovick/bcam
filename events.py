@@ -197,6 +197,7 @@ class EventProcessor(object):
             file_path+=".ngc"
         out = ""
         out+=state.settings.default_pp.set_metric()
+        out+=state.settings.default_pp.set_absolute()
         feedrate = state.settings.tool.get_feedrate()
         print "feedrate:", feedrate
         out+=state.settings.default_pp.set_feedrate(feedrate)

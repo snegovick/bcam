@@ -225,8 +225,8 @@ class ECircle(Element):
         super(ECircle, self).__init__(lt)
         self.joinable = False
         self.operations[TOEnum.drill] = True
-        self.start = [self.center[0]+self.radius, self.center[1]+self.radius]
-        self.end = [self.center[0]+self.radius, self.center[1]+self.radius]
+        self.start = [self.center[0]+self.radius, self.center[1]]
+        self.end = [self.center[0]+self.radius, self.center[1]]
 
 
     def serialize(self):

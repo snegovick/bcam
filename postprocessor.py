@@ -39,6 +39,10 @@ class Postprocessor:
         print "set_imperial is not implemented"
         return None
 
+    def set_absolute(self):
+        print "set_absolute is not implemented"
+        return None        
+
     def move_to_rapid(self):
         print "move_to_rapid is not implemented"
         return None

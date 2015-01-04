@@ -20,6 +20,9 @@ class PPGRBL:
     def set_metric(self):
         return "G21\r\n"
 
+    def set_absolute(self):
+        return "G90\r\n"
+
     def mk_cw_arc(self, r, end):
         out = "G02 X%.3fY%.3fZ%.3f R%.3f\r\n" % (end[0], end[1], end[2], r)
         return out
