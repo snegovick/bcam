@@ -7,7 +7,7 @@ class State:
             self.__total_offset = (0,0)
             self.__screen_offset = (0,0)
             self.__base_offset = (0,0)
-            self.scale = (10, 10)
+            self.scale = (1, 1)
             self.paths = []
             self.tool_operations = []
         else:

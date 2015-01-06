@@ -65,6 +65,7 @@ class Screen(gtk.DrawingArea):
         state.set_screen_offset((self.allocation.width/2, self.allocation.height/2))
         
         offset = state.get_offset()
+        scale = state.get_scale()
 
         cr_gdk = self.window.cairo_create()
         surface = cr_gdk.get_target()
@@ -78,6 +79,38 @@ class Screen(gtk.DrawingArea):
         cr.set_source_rgb(0.0, 0.0, 0.0)
         cr.rectangle(0, 0, self.allocation.width, self.allocation.height)
         cr.fill()
+
+        # grid drawing
+        cr.set_source_rgb(1.0, 1.0, 1.0)
+        step = 1.0
+        xsteps = self.allocation.width/state.scale[0]/step
+        ysteps = self.allocation.height/state.scale[1]/step
+        maxsteps = max(xsteps, ysteps)
+        if (maxsteps < 20):
+            while (maxsteps < 20):
+                if (step/10 == 0):
+                    break
+                step/=10
+                print step
+                xsteps = self.allocation.width/state.scale[0]/step
+                ysteps = self.allocation.height/state.scale[1]/step
+                maxsteps = max(xsteps, ysteps)
+        if (maxsteps > 40):
+            while (maxsteps > 40):
+                step*=10
+                xsteps = self.allocation.width/state.scale[0]/step
+                ysteps = self.allocation.height/state.scale[1]/step
+                maxsteps = max(xsteps, ysteps)
+
+        x = (offset[0]/state.scale[0])%(step)
+        y = (offset[1]/state.scale[1])%(step)
+        while (x*state.scale[0]<self.allocation.width):
+            y = (offset[1]/state.scale[1])%(step)
+            while (y*state.scale[1]<self.allocation.height):
+                cr.rectangle(x*state.scale[0], y*state.scale[1], 2, 2)
+                cr.fill()
+                y += step
+            x += step
 
         if state.tool_operations!=None:
             cr.translate(offset[0], offset[1])
