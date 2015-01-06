@@ -1,8 +1,12 @@
 import loader
+from calc_utils import rgb255_to_rgb1
 from path import ELine, EArc, ECircle, Path
 from state import state
 
 import dxfgrabber
+
+color_white = [255, 255, 255]
+default_color = color_white
 
 class DXFEnum:
     line = "LINE"
@@ -30,11 +34,24 @@ class DXFLoader(loader.SourceLoader):
 
         return ELine(tuple(start), tuple(end), state.settings.get_def_lt())
 
-    def __basic_el(self, e, p, offset):
+    def __basic_el(self, e, p, offset, layers, block):
+        layer = layers[e.layer]
+        color = None
+        if e.color == dxfgrabber.BYLAYER:
+            color = layer.color
+        elif e.color == dxfgrabber.BYBLOCK:
+            if (block != None):
+                color = block.color
+            else:
+                color = layer.color
+        else:
+            color = e.color
 
+        color = rgb255_to_rgb1(dxfgrabber.color.TrueColor.from_aci(color).rgb())
         if e.dxftype == DXFEnum.line:
             #print "line"
             el = self.__mk_line(e.start, e.end, offset)
+            el.color = color
             p.add_element(el)
         elif e.dxftype == DXFEnum.arc:
             #print "arc"
@@ -45,6 +62,7 @@ class DXFLoader(loader.SourceLoader):
             center[0] += e.center[0]
             center[1] += e.center[1]
             el = EArc(tuple(center[:2]), e.radius, e.startangle, e.endangle, state.settings.get_def_lt())
+            el.color = color
             p.add_element(el)
         elif e.dxftype == DXFEnum.circle:
             #print "circle"
@@ -56,6 +74,7 @@ class DXFLoader(loader.SourceLoader):
             center[1] += e.center[1]
 
             el = ECircle(tuple(center[:2]), e.radius, state.settings.get_def_lt())
+            el.color = color
             p.add_element(el)
         elif e.dxftype == DXFEnum.polyline:
             start = None
@@ -66,6 +85,7 @@ class DXFLoader(loader.SourceLoader):
 
                 else:
                     el = self.__mk_line(start, end, offset)
+                    el.color = color
                     p.add_element(el)
                 start = end
                 
@@ -91,7 +111,7 @@ class DXFLoader(loader.SourceLoader):
         p = Path(state, [], "ungrouped", state.settings.get_def_lt().name)
         for e in entities:
             if self.__is_basic(e):
-                self.__basic_el(e, p, None)
+                self.__basic_el(e, p, None, dxf.layers, None)
             elif e.dxftype == DXFEnum.insert:
                 block_name = e.name
                 offset = e.insert[:2]
@@ -100,7 +120,7 @@ class DXFLoader(loader.SourceLoader):
                     if b.name == block_name:
                         for e in b:
                             if self.__is_basic(e):
-                                self.__basic_el(e, p, offset)
+                                self.__basic_el(e, p, offset, dxf.layers, b)
                             else:
                                 print "Unknown type:", e.dxftype
                                 print e

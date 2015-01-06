@@ -21,10 +21,10 @@ class LineType:
         ctx.set_line_width(self.lw)
 
     def set_selected_lt(self, ctx):
-        if len(self.selected_color) == 3:
-            ctx.set_source_rgb(self.selected_color[0], self.selected_color[1], self.selected_color[2])
-        else:
-            ctx.set_source_rgba(self.selected_color[0], self.selected_color[1], self.selected_color[2], self.selected_color[3])
+        # if len(self.selected_color) == 3:
+        #     ctx.set_source_rgb(self.selected_color[0], self.selected_color[1], self.selected_color[2])
+        # else:
+        #     ctx.set_source_rgba(self.selected_color[0], self.selected_color[1], self.selected_color[2], self.selected_color[3])
         ctx.set_line_width(self.selected_lw)
 
     def serialize(self):
@@ -63,7 +63,7 @@ class Material:
 class Settings:
     def __init__(self, data=None):
         if data == None:
-            self.line_types = {"default": LineType(0.08, 0.1, (0,0,0), (1,0,0), "default")}
+            self.line_types = {"default": LineType(0.08, 0.2, (0,0,0), (1,0,0), "default")}
             self.tool = Tool("cylinder", ToolType.cylinder)
             self.material = Material()
         else:

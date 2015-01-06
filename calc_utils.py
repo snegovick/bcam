@@ -1,5 +1,8 @@
 import math
 
+def rgb255_to_rgb1(rgb):
+    return [rgb[0]/255.0, rgb[1]/255.0, rgb[2]/255.0]
+
 def sign(val):
     return (-1 if val<0 else 1)
 

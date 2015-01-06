@@ -91,6 +91,7 @@ class ELine(Element):
     def draw(self, ctx):
         self.set_lt(ctx)
         self.draw_first(ctx)
+        ctx.set_source_rgb(self.color[0], self.color[1], self.color[2])
         ctx.stroke()
 
     def distance_to_pt(self, pt):
@@ -175,6 +176,7 @@ class EArc(Element):
     def draw(self, ctx):
         self.set_lt(ctx)
         self.draw_element(ctx)
+        ctx.set_source_rgb(self.color[0], self.color[1], self.color[2])
         ctx.stroke()
 
     def draw_first(self, ctx):
@@ -245,6 +247,7 @@ class ECircle(Element):
     def draw(self, ctx):
         self.set_lt(ctx)
         self.draw_element(ctx)
+        ctx.set_source_rgb(self.color[0], self.color[1], self.color[2])
         ctx.stroke()
 
     def distance_to_pt(self, pt):

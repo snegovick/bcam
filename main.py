@@ -75,7 +75,7 @@ class Screen(gtk.DrawingArea):
         cr.rectangle(event.area.x, event.area.y, event.area.width, event.area.height)
         cr.clip()
 
-        cr.set_source_rgb(1.0, 1.0, 1.0)
+        cr.set_source_rgb(0.0, 0.0, 0.0)
         cr.rectangle(0, 0, self.allocation.width, self.allocation.height)
         cr.fill()
 
