@@ -221,8 +221,9 @@ class EventProcessor(object):
     def screen_left_press(self, args):
         print "press at", args
         offset = state.get_offset()
-        cx = (args[0][0]-offset[0])/state.scale[0]
-        cy = (args[0][1]-offset[1])/state.scale[1]
+        scale = state.get_scale()
+        cx = (args[0][0]-offset[0])/scale[0]
+        cy = (args[0][1]-offset[1])/scale[1]
         self.left_press_start = (cx, cy)
         self.pointer_position = (cx, cy)
         self.mw.widget.update()
@@ -230,8 +231,9 @@ class EventProcessor(object):
     def screen_left_release(self, args):
         print "release at", args
         offset = state.get_offset()
-        cx = (args[0][0]-offset[0])/state.scale[0]
-        cy = (args[0][1]-offset[1])/state.scale[1]
+        scale = state.get_scale()
+        cx = (args[0][0]-offset[0])/scale[0]
+        cy = (args[0][1]-offset[1])/scale[1]
         self.pointer_position = (cx, cy)
         if (self.left_press_start!=None):
             if state.paths == None:
@@ -288,8 +290,9 @@ class EventProcessor(object):
         
     def pointer_motion(self, args):
         offset = state.get_offset()
-        cx = (args[0][0]-offset[0])/state.scale[0]
-        cy = (args[0][1]-offset[1])/state.scale[1]
+        scale = state.get_scale()
+        cx = (args[0][0]-offset[0])/scale[0]
+        cy = (args[0][1]-offset[1])/scale[1]
         self.pointer_position = (cx, cy)
         self.mw.cursor_pos_label.set_text("%.3f:%.3f"%(cx, cy))
         self.mw.widget.update()

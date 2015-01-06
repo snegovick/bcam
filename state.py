@@ -33,6 +33,9 @@ class State:
     def get_offset(self):
         return self.__total_offset
 
+    def get_scale(self):
+        return (self.scale[0], -self.scale[1])
+
     def get_base_offset(self):
         return self.__base_offset
 

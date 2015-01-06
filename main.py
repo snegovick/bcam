@@ -81,23 +81,22 @@ class Screen(gtk.DrawingArea):
 
         if state.tool_operations!=None:
             cr.translate(offset[0], offset[1])
-            cr.scale(state.scale[0], state.scale[1])
+            cr.scale(state.scale[0], -state.scale[1])
             for o in state.tool_operations:
                 o.draw(cr)
             cr.identity_matrix()
         
         if state.paths!=None:
             cr.translate(offset[0], offset[1])
-            cr.scale(state.scale[0], state.scale[1])
+            cr.scale(state.scale[0], -state.scale[1])
             for p in state.paths:
                 p.draw(cr)
             cr.identity_matrix()
 
-
         # draw selection box
         if ep.left_press_start != None:
             cr.translate(offset[0], offset[1])
-            cr.scale(state.scale[0], state.scale[1])
+            cr.scale(state.scale[0], -state.scale[1])
             state.settings.select_box_lt.set_lt(cr)
             w = ep.pointer_position[0] - ep.left_press_start[0]
             h = ep.pointer_position[1] - ep.left_press_start[1]
