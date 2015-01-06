@@ -153,6 +153,7 @@ class EventProcessor(object):
         state.set(State())
         self.push_event(self.ee.update_tool_operations_list, (None))
         self.push_event(self.ee.update_paths_list, (None))
+        project.push_state(state)
         self.mw.widget.update()
 
     def quit_click(self, args):
@@ -172,20 +173,19 @@ class EventProcessor(object):
                 if p.name[0] == '*':
                     continue
                 self.mw.add_item_to_list(self.mw.gtklist, p.name, self.ee.paths_check_button_click)
-        project.push_state(state)
 
     def update_tool_operations_list(self, args):
         if state.tool_operations != None:
             self.mw.clear_list(self.mw.tp_gtklist)
             for p in state.tool_operations:
                 self.mw.add_item_to_list(self.mw.tp_gtklist, p.display_name, self.ee.tool_paths_check_button_click)
-        project.push_state(state)
 
     def load_file(self, args):
         print "load file", args
         dxfloader = DXFLoader()
         state.add_paths(dxfloader.load(args[0]))
         self.push_event(self.ee.update_paths_list, (None))
+        project.push_state(state)
         self.mw.widget.update()
         feedrate = state.settings.tool.get_feedrate()
         print "feedrate:", feedrate
@@ -305,6 +305,7 @@ class EventProcessor(object):
             if drl_op.apply(e):
                 state.tool_operations.append(drl_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
+                project.push_state(state)
         print state.tool_operations
         self.mw.widget.update()
 
@@ -323,6 +324,7 @@ class EventProcessor(object):
                             sp[i].elements.remove(e)
                 sp.append(connected)
                 self.push_event(self.ee.update_paths_list, (None))
+                project.push_state(state)
                 return connected
         return None
 
@@ -374,6 +376,7 @@ class EventProcessor(object):
                 state.add_tool_operations([path_follow_op])
                 #state.tool_operations.append(path_follow_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
+                project.push_state(state)
         self.mw.widget.update()
 
     def offset_follow_tool_click(self, args):
@@ -386,6 +389,7 @@ class EventProcessor(object):
             if path_follow_op.apply(connected):
                 state.tool_operations.append(path_follow_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
+                project.push_state(state)
         self.mw.widget.update()
 
     def pocket_tool_click(self, args):
@@ -397,6 +401,7 @@ class EventProcessor(object):
             if pocket_op.apply(connected):
                 state.tool_operations.append(pocket_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
+                project.push_state(state)
         self.mw.widget.update()
 
     def update_settings(self, args):
@@ -427,6 +432,7 @@ class EventProcessor(object):
         state.tool_operations.remove(self.selected_tool_operation)
         state.tool_operations.insert(cur_idx-1, temp)
         self.push_event(self.ee.update_tool_operations_list, (None))
+        project.push_state(state)
 
     def tool_operation_down_click(self, args):
         print "tool operation down"
@@ -442,6 +448,7 @@ class EventProcessor(object):
         state.tool_operations.remove(self.selected_tool_operation)
         state.tool_operations.insert(cur_idx+1, temp)
         self.push_event(self.ee.update_tool_operations_list, (None))
+        project.push_state(state)
 
     def scroll_up(self, args):
         print "scroll up"
@@ -497,6 +504,7 @@ class EventProcessor(object):
             state.paths.remove(self.selected_path)
             self.selected_path = None
             self.push_event(self.ee.update_paths_list, (None))
+            project.push_state(state)
         self.mw.widget.update()
 
     def tool_operation_delete_button_click(self, args):
@@ -504,6 +512,7 @@ class EventProcessor(object):
             state.tool_operations.remove(self.selected_tool_operation)
             self.selected_tool_operation = None
             self.push_event(self.ee.update_tool_operations_list, (None))
+            project.push_state(state)
         self.mw.widget.update()
         
 ee = EVEnum()
