@@ -44,6 +44,9 @@ class Path(Element):
                 self.add_element(EArc(lt=lt, data=e))
             if e["type"] == "ecircle":
                 self.add_element(ECircle(lt=lt, data=e))
+            if e["type"] == "epoint":
+                self.add_element(EPoint(lt=lt, data=e))
+
 
         self.display = data["display"]
         self.name = data["name"]
@@ -56,6 +59,9 @@ class Path(Element):
                 self.ordered_elements.append(EArc(lt=lt, data=e))
             if e["type"] == "ecircle":
                 self.ordered_elements.append(ECircle(lt=lt, data=e))
+            if e["type"] == "epoint":
+                self.ordered_elements.append(EPoint(lt=lt, data=e))
+
 
     def add_element(self, e):
         self.elements.append(e)

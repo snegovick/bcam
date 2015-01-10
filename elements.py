@@ -1,5 +1,5 @@
 import math
-from calc_utils import AABB, CircleUtils, LineUtils, ArcUtils, vect_len, mk_vect
+from calc_utils import AABB, CircleUtils, LineUtils, ArcUtils, PointUtils, vect_len, mk_vect
 from tool_operation import TOEnum
 
 import json
@@ -74,11 +74,12 @@ class ELine(Element):
         self.end_normal = None
 
     def serialize(self):
-        return {'type': 'eline', 'start': self.start, 'end': self.end}
+        return {'type': 'eline', 'start': self.start, 'end': self.end, 'color': self.color}
         
     def deserialize(self, data):
         self.start = data["start"]
         self.end = data["end"]
+        self.color = data["color"]
 
     def draw_first(self, ctx):
         ctx.move_to(self.start[0], self.start[1])
@@ -160,12 +161,13 @@ class EArc(Element):
         self.end = (self.center[0]+math.cos(self.endangle)*self.radius, self.center[1]+math.sin(self.endangle)*self.radius)
 
     def serialize(self):
-        return {'type': 'earc', 'radius': self.radius, 'center': self.center, 'startangle': self.startangle, 'endangle': self.endangle, 'turnaround': self.is_turnaround}
+        return {'type': 'earc', 'radius': self.radius, 'center': self.center, 'startangle': self.startangle, 'endangle': self.endangle, 'turnaround': self.is_turnaround, 'color': self.color}
 
     def deserialize(self, data):
         self.init_from_angles(data["radius"], math.degrees(data["startangle"]), math.degrees(data["endangle"]), data["center"])
         self.center = data["center"]
         self.is_turnaround = data["turnaround"]
+        self.color = data["color"]
 
     def draw_element(self, ctx):
         if self.is_turnaround:
@@ -232,11 +234,12 @@ class ECircle(Element):
 
 
     def serialize(self):
-        return {'type': 'ecircle', 'radius': self.radius, 'center': self.center}
+        return {'type': 'ecircle', 'radius': self.radius, 'center': self.center, 'color': self.color}
 
     def deserialize(self, data):
         self.radius = data["radius"]
         self.center = data["center"]
+        self.color = data["color"]
 
     def draw_element(self, ctx):
         ctx.arc(self.center[0], self.center[1], self.radius, 0, math.pi*2)
@@ -260,3 +263,44 @@ class ECircle(Element):
         
     def __repr__(self):
         return "<ECircle (center: "+str(self.center)+", r: "+str(self.radius)+")>\r\n"
+
+class EPoint(Element):
+    def __init__(self, center=None, lt=None, data=None):
+        if data == None:
+            self.center = center
+        else:
+            self.deserialize(data)
+
+        super(EPoint, self).__init__(lt)
+        self.joinable = False
+        self.operations[TOEnum.drill] = True
+
+    def serialize(self):
+        return {'type': 'epoint', 'center': self.center, 'color': self.color}
+
+    def deserialize(self, data):
+        self.center = data["center"]
+        self.color = data["color"]
+
+    def draw_element(self, ctx):
+        ctx.rectangle(self.center[0]-1, self.center[1]-1, 2, 2)
+
+    def draw_first(self, ctx):
+        self.draw_element(ctx)
+        
+    def draw(self, ctx):
+        self.set_lt(ctx)
+        self.draw_element(ctx)
+        ctx.set_source_rgb(self.color[0], self.color[1], self.color[2])
+        ctx.stroke()
+
+    def distance_to_pt(self, pt):
+        cpu = PointUtils(self.center)
+        return pu.distance_to_pt(pt)
+
+    def get_aabb(self):
+        pu = PointUtils(self.center)
+        return pu.get_aabb()
+        
+    def __repr__(self):
+        return "<EPoint (center: "+str(self.center)+")>\r\n"

@@ -203,7 +203,7 @@ class EventProcessor(object):
         out+=state.settings.default_pp.set_feedrate(feedrate)
         for p in state.tool_operations:
             out+=p.get_gcode()
-        out+= state.settings.default_pp.move_to_rapid([0, 0, self.tool.default_height])
+        out+= state.settings.default_pp.move_to_rapid([0, 0, state.settings.tool.default_height])
         f = open(file_path, "w")
         f.write(out)
         f.close()

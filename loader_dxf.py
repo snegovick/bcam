@@ -1,6 +1,6 @@
 import loader
 from calc_utils import rgb255_to_rgb1
-from path import ELine, EArc, ECircle, Path
+from path import ELine, EArc, ECircle, EPoint, Path
 from state import state
 
 import dxfgrabber
@@ -14,6 +14,7 @@ class DXFEnum:
     circle = "CIRCLE"
     insert = "INSERT"
     polyline = "POLYLINE"
+    point = "POINT"
 
 class DXFLoader(loader.SourceLoader):
     def __init__(self):
@@ -76,6 +77,18 @@ class DXFLoader(loader.SourceLoader):
             el = ECircle(tuple(center[:2]), e.radius, state.settings.get_def_lt())
             el.color = color
             p.add_element(el)
+        elif e.dxftype == DXFEnum.point:
+            #print "circle"
+            if offset != None:
+                center = [offset[0], offset[1]]
+            else:
+                center = [0,0]
+            center[0] += e.point[0]
+            center[1] += e.point[1]
+
+            el = EPoint(tuple(center[:2]), state.settings.get_def_lt())
+            el.color = color
+            p.add_element(el)
         elif e.dxftype == DXFEnum.polyline:
             start = None
             for pt in e.points:
@@ -94,7 +107,7 @@ class DXFLoader(loader.SourceLoader):
         return True
 
     def __is_basic(self, e):
-        if e.dxftype == DXFEnum.line or e.dxftype == DXFEnum.arc or e.dxftype == DXFEnum.circle or e.dxftype == DXFEnum.polyline:
+        if e.dxftype == DXFEnum.line or e.dxftype == DXFEnum.arc or e.dxftype == DXFEnum.circle or e.dxftype == DXFEnum.polyline or e.dxftype == DXFEnum.point:
             return True
         return False
 

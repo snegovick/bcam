@@ -100,12 +100,26 @@ class CircleUtils:
         cx = self.center[0]
         cy = self.center[1]
         r = self.radius
-        return AABB(cx-r, cy-r, cx+3, cy+r)
+        return AABB(cx-r, cy-r, cx+r, cy+r)
 
     def distance_to_pt(self, pt):
         dist = pt_to_pt_dist(pt, self.center)-self.radius
         if self.uses_inner_space:
             return 0 if dist<0 else dist
+        return abs(dist)
+
+class PointUtils:
+    def __init__(self, center):
+        self.center = center
+
+    def get_aabb(self):
+        cx = self.center[0]
+        cy = self.center[1]
+        r = 1
+        return AABB(cx-r, cy-r, cx+r, cy+r)
+
+    def distance_to_pt(self, pt):
+        dist = pt_to_pt_dist(pt, self.center)
         return abs(dist)
 
 class ArcUtils:

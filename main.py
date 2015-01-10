@@ -86,8 +86,10 @@ class Screen(gtk.DrawingArea):
         xsteps = self.allocation.width/state.scale[0]/step
         ysteps = self.allocation.height/state.scale[1]/step
         maxsteps = max(xsteps, ysteps)
-        if (maxsteps < 20):
-            while (maxsteps < 20):
+        mins = 40
+        maxs = 80
+        if (maxsteps < mins):
+            while (maxsteps < mins):
                 if (step/10 == 0):
                     break
                 step/=10
@@ -95,8 +97,8 @@ class Screen(gtk.DrawingArea):
                 xsteps = self.allocation.width/state.scale[0]/step
                 ysteps = self.allocation.height/state.scale[1]/step
                 maxsteps = max(xsteps, ysteps)
-        if (maxsteps > 40):
-            while (maxsteps > 40):
+        if (maxsteps > maxs):
+            while (maxsteps > maxs):
                 step*=10
                 xsteps = self.allocation.width/state.scale[0]/step
                 ysteps = self.allocation.height/state.scale[1]/step
@@ -107,7 +109,7 @@ class Screen(gtk.DrawingArea):
         while (x*state.scale[0]<self.allocation.width):
             y = (offset[1]/state.scale[1])%(step)
             while (y*state.scale[1]<self.allocation.height):
-                cr.rectangle(x*state.scale[0], y*state.scale[1], 2, 2)
+                cr.rectangle(x*state.scale[0], y*state.scale[1], 1, 1)
                 cr.fill()
                 y += step
             x += step
