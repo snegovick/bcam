@@ -118,8 +118,15 @@ class TOOffsetFollow(TOAbstractFollow):
             e = elements[0]
             if type(e).__name__ == "ECircle":
                 new_elements.append(ECircle(e.center, e.radius+self.offset, e.lt, None))
-            else:
-                return
+            elif type(e).__name__ == "ELine":
+                el = elements[0]
+                s = el.start
+                e = el.end
+                nsn = elements[0].get_normalized_start_normal()
+                s_pt = [nsn[0]*self.offset+s[0], nsn[1]*self.offset+s[1], 0]
+                e_pt = [nsn[0]*self.offset+e[0], nsn[1]*self.offset+e[1], 0]
+                ne = ELine(s_pt, e_pt, el.lt)
+                new_elements.append(ne)
         else:            
             s = elements[0].start
             e = elements[0].end
@@ -252,7 +259,9 @@ class TOOffsetFollow(TOAbstractFollow):
         
         
     def apply(self, path):
+        print "apply path:", path
         if path.operations[self.name]:
+            print "path ordered elements:", path.ordered_elements
             if path.ordered_elements!=None:
                 self.path = path
                 self.__build_offset_path(path)

@@ -313,9 +313,10 @@ class EventProcessor(object):
     def join_elements(self, args):
         sp = state.paths
         if self.selected_elements!=None:
-            print self.selected_elements
+            print "selected:", self.selected_elements
             p = Path(state, self.selected_elements, "path", state.settings.get_def_lt().name)
             connected = p.mk_connected_path()
+            print "connected elements:", connected
             if connected != None:
                 connected.name = connected.name+" "+str(len(sp))
                 self.deselect_all(None)
