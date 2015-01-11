@@ -65,11 +65,12 @@ class Element(object):
         return None
 
 class ELine(Element):
-    def __init__(self, start=None, end=None, lt=None, data=None):
+    def __init__(self, start=None, end=None, lt=None, color=None, data=None):
         super(ELine, self).__init__(lt)
         if data == None:
             self.start = start
             self.end = end
+            self.color = color
         else:
             self.deserialize(data)
         self.joinable = True
@@ -129,11 +130,12 @@ class ELine(Element):
         return "<ELine ("+str(self.start)+", "+str(self.end)+")>\r\n"
 
 class EArc(Element):
-    def __init__(self, center=None, radius=None, startangle=None, endangle=None, lt=None, start=None, end=None, turnaround=False, data=None):
+    def __init__(self, center=None, radius=None, startangle=None, endangle=None, lt=None, start=None, end=None, turnaround=False, color=None, data=None):
         super(EArc, self).__init__(lt)
 
         if data == None:
             self.is_turnaround = turnaround
+            self.color = color
             if start != None and end != None:
                 self.init_from_pt(start, end, center)
             else:
@@ -222,10 +224,11 @@ class EArc(Element):
         return "<EArc ("+str(self.start)+", "+str(self.end)+", ta: "+str(self.is_turnaround)+")>\r\n"
 
 class ECircle(Element):
-    def __init__(self, center=None, radius=None, lt=None, data=None):
+    def __init__(self, center=None, radius=None, lt=None, color=None, data=None):
         if data == None:
             self.center = center
             self.radius = radius
+            self.color = color
         else:
             self.deserialize(data)
 
@@ -267,9 +270,10 @@ class ECircle(Element):
         return "<ECircle (center: "+str(self.center)+", r: "+str(self.radius)+")>\r\n"
 
 class EPoint(Element):
-    def __init__(self, center=None, lt=None, data=None):
+    def __init__(self, center=None, lt=None, color=None, data=None):
         if data == None:
             self.center = center
+            self.color = color
         else:
             self.deserialize(data)
 

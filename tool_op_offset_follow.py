@@ -117,7 +117,7 @@ class TOOffsetFollow(TOAbstractFollow):
         if len(elements)==1:
             e = elements[0]
             if type(e).__name__ == "ECircle":
-                new_elements.append(ECircle(e.center, e.radius+self.offset, e.lt, None))
+                new_elements.append(ECircle(e.center, e.radius+self.offset, e.lt, e.color, None))
             elif type(e).__name__ == "ELine":
                 el = elements[0]
                 s = el.start
@@ -125,7 +125,7 @@ class TOOffsetFollow(TOAbstractFollow):
                 nsn = elements[0].get_normalized_start_normal()
                 s_pt = [nsn[0]*self.offset+s[0], nsn[1]*self.offset+s[1], 0]
                 e_pt = [nsn[0]*self.offset+e[0], nsn[1]*self.offset+e[1], 0]
-                ne = ELine(s_pt, e_pt, el.lt)
+                ne = ELine(s_pt, e_pt, el.lt, el.color)
                 new_elements.append(ne)
         else:            
             s = elements[0].start
@@ -149,12 +149,12 @@ class TOOffsetFollow(TOAbstractFollow):
                     for i in range(1,n_steps):
                         a = sa+i*0.1
                         e_pt = (e.center[0]+math.cos(a)*e.radius, e.center[1]+math.sin(a)*e.radius)
-                        ne = ELine(s_pt, e_pt, e.lt)
+                        ne = ELine(s_pt, e_pt, e.lt, e.color)
                         print "angle:", a, "line:", s_pt, e_pt
                         s_pt = e_pt
                         converted_elements.append(ne)
                     e_pt = e.end
-                    ne = ELine(s_pt, e_pt, e.lt)
+                    ne = ELine(s_pt, e_pt, e.lt, e.color)
                     converted_elements.append(ne)
                 else:
                     converted_elements.append(e)
@@ -189,9 +189,9 @@ class TOOffsetFollow(TOAbstractFollow):
                         shift = ec
                         e_pt = [n[0]*self.offset+shift[0], n[1]*self.offset+shift[1], 0]
                 if type(e).__name__ == "ELine":
-                    ne = ELine(s_pt, e_pt, e.lt)
+                    ne = ELine(s_pt, e_pt, e.lt, e.color)
                 elif type(e).__name__ == "EArc":
-                    ne = EArc(center=e.center, lt=e.lt, start=s_pt, end=e_pt)
+                    ne = EArc(center=e.center, lt=e.lt, start=s_pt, end=e_pt, color=e.color)
 
                 new_elements.append(ne)
                 s_pt = e_pt

@@ -20,7 +20,7 @@ class DXFLoader(loader.SourceLoader):
     def __init__(self):
         pass
 
-    def __mk_line(self, s, e, offset):
+    def __mk_line(self, s, e, offset, color):
         if offset !=None:
             start = [offset[0], offset[1]]
             end = [offset[0], offset[1]]
@@ -33,7 +33,7 @@ class DXFLoader(loader.SourceLoader):
         end[0]+=e[0]
         end[1]+=e[1]
 
-        return ELine(tuple(start), tuple(end), state.settings.get_def_lt())
+        return ELine(tuple(start), tuple(end), state.settings.get_def_lt(), color)
 
     def __basic_el(self, e, p, offset, layers, block):
         layer = layers[e.layer]
@@ -51,8 +51,7 @@ class DXFLoader(loader.SourceLoader):
         color = rgb255_to_rgb1(dxfgrabber.color.TrueColor.from_aci(color).rgb())
         if e.dxftype == DXFEnum.line:
             #print "line"
-            el = self.__mk_line(e.start, e.end, offset)
-            el.color = color
+            el = self.__mk_line(e.start, e.end, offset, color)
             p.add_element(el)
         elif e.dxftype == DXFEnum.arc:
             #print "arc"
@@ -62,8 +61,7 @@ class DXFLoader(loader.SourceLoader):
                 center = [0,0]
             center[0] += e.center[0]
             center[1] += e.center[1]
-            el = EArc(tuple(center[:2]), e.radius, e.startangle, e.endangle, state.settings.get_def_lt())
-            el.color = color
+            el = EArc(tuple(center[:2]), e.radius, e.startangle, e.endangle, state.settings.get_def_lt(), color)
             p.add_element(el)
         elif e.dxftype == DXFEnum.circle:
             #print "circle"
@@ -74,8 +72,7 @@ class DXFLoader(loader.SourceLoader):
             center[0] += e.center[0]
             center[1] += e.center[1]
 
-            el = ECircle(tuple(center[:2]), e.radius, state.settings.get_def_lt())
-            el.color = color
+            el = ECircle(tuple(center[:2]), e.radius, state.settings.get_def_lt(), color)
             p.add_element(el)
         elif e.dxftype == DXFEnum.point:
             #print "circle"
@@ -86,8 +83,7 @@ class DXFLoader(loader.SourceLoader):
             center[0] += e.point[0]
             center[1] += e.point[1]
 
-            el = EPoint(tuple(center[:2]), state.settings.get_def_lt())
-            el.color = color
+            el = EPoint(tuple(center[:2]), state.settings.get_def_lt(), color)
             p.add_element(el)
         elif e.dxftype == DXFEnum.polyline:
             start = None
@@ -97,8 +93,7 @@ class DXFLoader(loader.SourceLoader):
                     start = pt
 
                 else:
-                    el = self.__mk_line(start, end, offset)
-                    el.color = color
+                    el = self.__mk_line(start, end, offset, color)
                     p.add_element(el)
                 start = end
                 
