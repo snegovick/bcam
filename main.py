@@ -81,6 +81,19 @@ class Screen(gtk.DrawingArea):
         cr.fill()
 
         # grid drawing
+        cr.set_line_width(1.0/state.scale[0])
+        cr.translate(offset[0], offset[1])
+        cr.scale(state.scale[0], -state.scale[1])
+        cr.set_source_rgb(1.0, 0, 0)
+        cr.move_to(-10, 0)
+        cr.line_to(10, 0)
+        cr.stroke()
+
+        cr.move_to(0, -10)
+        cr.line_to(0, 10)
+        cr.stroke()
+        cr.identity_matrix()
+
         cr.set_source_rgb(1.0, 1.0, 1.0)
         step = 1.0
         xsteps = self.allocation.width/state.scale[0]/step

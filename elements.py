@@ -36,6 +36,9 @@ class Element(object):
     def deserialize(self, data):
         pass
 
+    def set_color(self, ctx):
+        ctx.set_source_rgb(self.color[0], self.color[1], self.color[2])
+
     def set_selected(self):
         self.selected = True
 
@@ -52,6 +55,8 @@ class Element(object):
                 self.lt.set_selected_lt(ctx)
             else:
                 self.lt.set_lt(ctx)
+                self.set_color(ctx)
+                
 
     def get_normalized_end_normal(self):
         return None
@@ -92,7 +97,6 @@ class ELine(Element):
     def draw(self, ctx):
         self.set_lt(ctx)
         self.draw_first(ctx)
-        ctx.set_source_rgb(self.color[0], self.color[1], self.color[2])
         ctx.stroke()
 
     def distance_to_pt(self, pt):
@@ -178,7 +182,6 @@ class EArc(Element):
     def draw(self, ctx):
         self.set_lt(ctx)
         self.draw_element(ctx)
-        ctx.set_source_rgb(self.color[0], self.color[1], self.color[2])
         ctx.stroke()
 
     def draw_first(self, ctx):
@@ -250,7 +253,6 @@ class ECircle(Element):
     def draw(self, ctx):
         self.set_lt(ctx)
         self.draw_element(ctx)
-        ctx.set_source_rgb(self.color[0], self.color[1], self.color[2])
         ctx.stroke()
 
     def distance_to_pt(self, pt):
@@ -291,7 +293,6 @@ class EPoint(Element):
     def draw(self, ctx):
         self.set_lt(ctx)
         self.draw_element(ctx)
-        ctx.set_source_rgb(self.color[0], self.color[1], self.color[2])
         ctx.stroke()
 
     def distance_to_pt(self, pt):
