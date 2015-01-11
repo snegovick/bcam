@@ -174,7 +174,8 @@ class TOOffsetFollow(TOAbstractFollow):
                         s_pt = self.__two_point_offset(elements[-1], e)
                     else:
                         nsn = e.get_normalized_start_normal()
-                        n = vect_sum(nsn, nen) # sum of new start normal and prev end normal
+                        #n = vect_sum(nsn, nen) # sum of new start normal and prev end normal
+                        n = nsn
                         shift = sc
                         s_pt = [n[0]*self.offset+shift[0], n[1]*self.offset+shift[1], 0]
 
@@ -286,7 +287,17 @@ class TOOffsetFollow(TOAbstractFollow):
             for e in self.offset_path:
                 out += self.process_el_to_gcode(e, step)
 
-        new_pos = [new_pos[0], new_pos[1], self.tool.default_height]
+            new_pos = [self.tool.current_position[0], self.tool.current_position[1], self.tool.default_height]
+            out+= self.state.settings.default_pp.move_to_rapid(new_pos)
+            self.tool.current_position = new_pos
+
+            new_pos = [start[0], start[1], self.tool.default_height]
+            out+= self.state.settings.default_pp.move_to_rapid(new_pos)
+            self.tool.current_position = new_pos
+
+            
+
+        new_pos = [self.tool.current_position[0], self.tool.current_position[1], self.tool.default_height]
         out+= self.state.settings.default_pp.move_to_rapid(new_pos)
         self.tool.current_position = new_pos
         return out
