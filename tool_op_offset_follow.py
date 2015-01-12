@@ -255,9 +255,6 @@ class TOOffsetFollow(TOAbstractFollow):
 
         self.offset_path = new_elements
         print "offset_path:", self.offset_path
-
-
-        
         
     def apply(self, path):
         print "apply path:", path
@@ -271,36 +268,7 @@ class TOOffsetFollow(TOAbstractFollow):
         return False
 
     def get_gcode(self):
-        cp = self.tool.current_position
-        out = ""
-        new_pos = [cp[0], cp[1], self.tool.default_height]
-        out+= self.state.settings.default_pp.move_to_rapid(new_pos)
-        self.tool.current_position = new_pos
-
-        start = self.offset_path[0].start
-
-        new_pos = [start[0], start[1], new_pos[2]]
-        out+= self.state.settings.default_pp.move_to_rapid(new_pos)
-        self.tool.current_position = new_pos
-
-        for step in range(int(self.depth/(self.tool.diameter/2.0))+1):
-            for e in self.offset_path:
-                out += self.process_el_to_gcode(e, step)
-
-            new_pos = [self.tool.current_position[0], self.tool.current_position[1], self.tool.default_height]
-            out+= self.state.settings.default_pp.move_to_rapid(new_pos)
-            self.tool.current_position = new_pos
-
-            new_pos = [start[0], start[1], self.tool.default_height]
-            out+= self.state.settings.default_pp.move_to_rapid(new_pos)
-            self.tool.current_position = new_pos
-
-            
-
-        new_pos = [self.tool.current_position[0], self.tool.current_position[1], self.tool.default_height]
-        out+= self.state.settings.default_pp.move_to_rapid(new_pos)
-        self.tool.current_position = new_pos
-        return out
+        return self.get_gcode_base(self.path.ordered_elements)
 
     def __repr__(self):
         return "<Exact follow>"

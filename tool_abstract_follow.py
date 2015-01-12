@@ -79,3 +79,34 @@ class TOAbstractFollow(ToolOperation):
         else:
             print "unsuported element type:", type(e).__name__
         return out
+
+
+    def get_gcode_base(self, path):
+        cp = self.tool.current_position
+        out = ""
+        new_pos = [cp[0], cp[1], self.tool.default_height]
+        out+= self.state.settings.default_pp.move_to_rapid(new_pos)
+        self.tool.current_position = new_pos
+
+        start = path[0].start
+
+        new_pos = [start[0], start[1], new_pos[2]]
+        out+= self.state.settings.default_pp.move_to_rapid(new_pos)
+        self.tool.current_position = new_pos
+
+        for step in range(int(self.depth/(self.tool.diameter/2.0))+1):
+            for e in path:
+                out += self.process_el_to_gcode(e, step)
+
+            new_pos = [self.tool.current_position[0], self.tool.current_position[1], self.tool.default_height]
+            out+= self.state.settings.default_pp.move_to_rapid(new_pos)
+            self.tool.current_position = new_pos
+
+            new_pos = [start[0], start[1], self.tool.default_height]
+            out+= self.state.settings.default_pp.move_to_rapid(new_pos)
+            self.tool.current_position = new_pos
+
+        new_pos = [self.tool.current_position[0], self.tool.current_position[1], self.tool.default_height]
+        out+= self.state.settings.default_pp.move_to_rapid(new_pos)
+        self.tool.current_position = new_pos
+        return out
