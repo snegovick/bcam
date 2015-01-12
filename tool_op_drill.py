@@ -22,7 +22,6 @@ class TODrill(ToolOperation):
         self.display_name = TOEnum.drill+" "+str(self.index)
         self.name = TOEnum.drill
 
-
     def serialize(self):
         return {'type': 'todrill', 'center': self.center, 'depth': self.depth, 'index': self.index}
 
@@ -56,7 +55,7 @@ class TODrill(ToolOperation):
         return False
 
     def get_settings_list(self):
-        settings_lst = [TOSetting("float", 0, self.state.settings.material.thickness, self.depth, "Depth, mm: ", self.set_depth_s),
+        settings_lst = [TOSetting("float", 0, self.state.get_settings().get_material().get_thickness(), self.depth, "Depth, mm: ", self.set_depth_s),
                         TOSetting("float", None, None, self.center[0], "Center x, mm: ", self.set_center_x_s),
                         TOSetting("float", None, None, self.center[1], "Center y, mm: ", self.set_center_y_s)]
         return settings_lst

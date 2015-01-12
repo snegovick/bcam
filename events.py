@@ -302,8 +302,9 @@ class EventProcessor(object):
         print "drill tool click:", args
         print self.selected_elements
         for e in self.selected_elements:
+            print "thickness:", state.get_settings().get_material().get_thickness()
             drl_op = TODrill(state, index=len(state.tool_operations))
-            if drl_op.apply(e):
+            if drl_op.apply(e, state.get_settings().get_material().get_thickness()):
                 state.tool_operations.append(drl_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
                 project.push_state(state)
@@ -373,7 +374,7 @@ class EventProcessor(object):
         connected = self.join_elements(None)
         print "selected path:", self.selected_path
         if connected != None:
-            path_follow_op = TOExactFollow(state, index=len(state.tool_operations))
+            path_follow_op = TOExactFollow(state, index=len(state.tool_operations), depth=state.get_settings().get_material().get_thickness())
             if path_follow_op.apply(connected):
                 state.add_tool_operations([path_follow_op])
                 #state.tool_operations.append(path_follow_op)
@@ -387,7 +388,7 @@ class EventProcessor(object):
         print "selected path:", self.selected_path
         print "connected:", connected
         if connected != None:
-            path_follow_op = TOOffsetFollow(state, index=len(state.tool_operations))
+            path_follow_op = TOOffsetFollow(state, index=len(state.tool_operations), depth=state.get_settings().get_material().get_thickness())
             if path_follow_op.apply(connected):
                 state.tool_operations.append(path_follow_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
@@ -399,7 +400,7 @@ class EventProcessor(object):
         connected = self.join_elements(None)
         print "selected path:", self.selected_path
         if connected != None:
-            pocket_op = TOPocketing(state, index=len(state.tool_operations))
+            pocket_op = TOPocketing(state, index=len(state.tool_operations), depth=state.get_settings().get_material().get_thickness())
             if pocket_op.apply(connected):
                 state.tool_operations.append(pocket_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))

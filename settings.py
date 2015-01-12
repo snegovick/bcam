@@ -49,6 +49,9 @@ class Material:
         settings_lst = [TOSetting("float", 0, None, self.thickness, "Thickness, mm: ", self.set_thickness_s),]
         return settings_lst
 
+    def get_thickness(self):
+        return self.thickness
+
     def set_thickness_s(self, setting):
         self.thickness = setting.new_value
 
@@ -72,7 +75,9 @@ class Settings:
 
         self.select_box_lt = LineType(1.0, 1.0, (0, 1, 0, 0.2), (0, 1, 0, 0.2), "select box lt")
         self.default_pp = PPGRBL()
-            
+
+    def get_material(self):
+        return self.material      
 
     def get_tool(self):
         return self.tool

@@ -30,6 +30,9 @@ class State:
         self.paths = state.paths
         self.tool_operations = state.tool_operations
 
+    def get_settings(self):
+        return self.settings
+
     def get_offset(self):
         return self.__total_offset
 
