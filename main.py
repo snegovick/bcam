@@ -1,7 +1,9 @@
-from logging import debug, info, warning, error, critical, DEBUG, basicConfig
+from logging import debug, info, warning, error, critical
+import logging
 from util import dbgfname
+import util
 
-basicConfig(level=DEBUG)
+logging.basicConfig(level=logging.WARNING)
 
 import pygtk
 pygtk.require('2.0')
@@ -10,8 +12,6 @@ import sys
 from events import EVEnum, EventProcessor, ee, ep
 from main_window import MainWindow
 from state import state
-
-
 
 width=640
 height=480
@@ -159,13 +159,19 @@ class Screen(gtk.DrawingArea):
         cr_gdk.set_source_surface(cr_surf)
         cr_gdk.paint()
 
-mw = MainWindow(width, height, Screen)
-ep.mw = mw
+mw = None
 
         
 # GTK mumbo-jumbo to show the widget in a window and quit when it's closed
 def run():
+    global mw, ep
+    mw = MainWindow(width, height, Screen)
+    ep.mw = mw
     mw.run()
 
 if __name__ == "__main__":
+    args = {"--log": {"is_set": util.NOT_SET, "has_option": util.NO_OPTION, "option": None}}
+    util.parse_args(args)
+    if args["--log"]["is_set"]:
+        logging.getLogger("").setLevel(logging.DEBUG)
     run()
