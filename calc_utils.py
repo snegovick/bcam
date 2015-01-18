@@ -284,7 +284,7 @@ class LineUtils:
         b = pt_to_pt_dist(s, p)
         c = pt_to_pt_dist(e, p)
         p = (a+b+c)/2.0
-        debug("  a: "+str(a)+" b: "+str(b)+" c: "+str(c)+" p: "+str(p)+" "+p*(p-a)*(p-b)*(p-c))
+        debug("  a: "+str(a)+" b: "+str(b)+" c: "+str(c)+" p: "+str(p)+" "+str(p*(p-a)*(p-b)*(p-c)))
         dist = abs(math.sqrt(p*(p-a)*(p-b)*(p-c))*2/a)
         debug("  dist: "+str(dist))
         return dist

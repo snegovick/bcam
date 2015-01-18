@@ -64,7 +64,7 @@ class DXFLoader(loader.SourceLoader):
                 center = [0,0]
             center[0] += e.center[0]
             center[1] += e.center[1]
-            el = EArc(tuple(center[:2]), e.radius, e.startangle, e.endangle, state.settings.get_def_lt(), color)
+            el = EArc(tuple(center[:2]), e.radius, e.startangle, e.endangle, state.settings.get_def_lt(), color=color)
             p.add_element(el)
         elif e.dxftype == DXFEnum.circle:
             #print "circle"

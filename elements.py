@@ -133,7 +133,6 @@ class ELine(Element):
 class EArc(Element):
     def __init__(self, center=None, radius=None, startangle=None, endangle=None, lt=None, start=None, end=None, turnaround=False, color=None, data=None):
         super(EArc, self).__init__(lt)
-
         if data == None:
             self.is_turnaround = turnaround
             self.color = color
