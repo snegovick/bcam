@@ -11,3 +11,5 @@ Supported operations:
   * Path following
   * Offseted path following
   * Pocketing
+
+![BCAM screenshot](http://hobbycam.org/scr_v01-2.png)
