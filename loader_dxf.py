@@ -3,6 +3,9 @@ from calc_utils import rgb255_to_rgb1
 from path import ELine, EArc, ECircle, EPoint, Path
 from state import state
 
+from logging import debug, info, warning, error, critical
+from util import dbgfname
+
 import dxfgrabber
 
 color_white = [255, 255, 255]
@@ -107,8 +110,9 @@ class DXFLoader(loader.SourceLoader):
         return False
 
     def load(self, path):
+        dbgfname()
         dxf = dxfgrabber.readfile(path)
-        print("DXF version: {}".format(dxf.dxfversion))
+        debug("  DXF version: {}".format(dxf.dxfversion))
         header_var_count = len(dxf.header) # dict of dxf header vars
         layer_count = len(dxf.layers) # collection of layer definitions
         block_definition_count = len(dxf.blocks) #  dict like collection of block definitions
@@ -130,12 +134,12 @@ class DXFLoader(loader.SourceLoader):
                             if self.__is_basic(e):
                                 self.__basic_el(e, p, offset, dxf.layers, b)
                             else:
-                                print "Unknown type:", e.dxftype
-                                print e
+                                debug("  Unknown type: "+str(e.dxftype))
+                                debug("  "+str(e))
                 paths.append(tp)
             else:
-                print "Unknown type:", e.dxftype
-                print e
+                debug("  Unknown type: "+str(e.dxftype))
+                debug("  "+str(e))
         if len(p.elements)>0:
             paths.append(p)
 

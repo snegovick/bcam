@@ -79,6 +79,7 @@ class State:
             return None
 
     def deserialize(self, data):
+        dbgfname()
         from path import Path
         from tool_op_exact_follow import TOExactFollow
         from tool_op_offset_follow import TOOffsetFollow
@@ -107,7 +108,7 @@ class State:
             elif to["type"] == "topocketing":
                 op = TOPocketing(state=self, data=to)
             else:
-                print "Unknown tool operation:", to["type"]
+                debug("  Unknown tool operation: "+str(to["type"]))
 
             self.tool_operations.append(op)
 

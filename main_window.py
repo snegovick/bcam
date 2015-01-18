@@ -6,6 +6,9 @@ import sys
 from events import EVEnum, EventProcessor, ee, ep
 from state import state
 
+from logging import debug, info, warning, error, critical
+from util import dbgfname
+
 class MainWindow(object):
     def __init__(self, w, h, Widget):
         self.tool_diameter_spin = {}
@@ -106,6 +109,7 @@ class MainWindow(object):
         gtk.main()
 
     def new_settings_vbox(self, settings_lst, label):
+        dbgfname()
         for c in self.settings_vb.children():
             self.settings_vb.remove(c)
         if settings_lst == None:
@@ -113,7 +117,7 @@ class MainWindow(object):
         l = gtk.Label(label)
         self.settings_vb.pack_start(l, expand=False, fill=False, padding=0)
         l.show()
-        print settings_lst
+        debug("  "+str(settings_lst))
         for s in settings_lst:
             dct = {}
             if s.type == "float":
@@ -241,6 +245,7 @@ class MainWindow(object):
         self.__mk_right_vbox()
         self.hbox.pack_start(self.right_vbox, expand=False, fill=False, padding=0)
     def __mk_right_vbox(self):
+        dbgfname()
         self.right_vbox = gtk.VBox(homogeneous=False, spacing=0)
 
         self.tool_label = gtk.Label("Tool settings")
@@ -249,7 +254,7 @@ class MainWindow(object):
 
         settings_lst = state.get_tool().get_settings_list()
         if settings_lst != None:
-            print settings_lst
+            debug("  "+str(settings_lst))
             for s in settings_lst:
                 dct = {}
                 if s.type == "float":
@@ -262,7 +267,7 @@ class MainWindow(object):
         self.right_vbox.pack_start(self.material_label, expand=False, fill=False, padding=0)
         settings_lst = state.settings.material.get_settings_list()
         if settings_lst != None:
-            print settings_lst
+            debug("  "+str(settings_lst))
             for s in settings_lst:
                 dct = {}
                 if s.type == "float":

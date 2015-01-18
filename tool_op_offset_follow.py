@@ -5,6 +5,9 @@ from generalized_setting import TOSetting
 from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len, scale_vect, pt_to_pt_dist
 from elements import ELine, EArc, ECircle
 
+from logging import debug, info, warning, error, critical
+from util import dbgfname
+
 import cairo
 import json
 
@@ -67,6 +70,7 @@ class TOOffsetFollow(TOAbstractFollow):
         return self.__build_offset_path_normals(p)
 
     def __two_point_offset(self, prev, next):
+        dbgfname()
         nsc = next.start
         nec = next.end
         sc = prev.start
@@ -89,27 +93,28 @@ class TOOffsetFollow(TOAbstractFollow):
         if ((e_dx == 0) and (ne_dy == 0)):
             x = e_e_pt[0]
             y = ne_e_pt[1]
-            print "case 1,x:",x,"y:",y
+            debug("  case 1, x: "+str(x)+" y: "+str(y))
         elif((e_dy == 0) and (ne_dx == 0)):
             x = ne_e_pt[0]
             y = e_e_pt[1]
-            print "case 2,x:",x,"y:",y
+            debug("  case 2, x: "+str(x)+" y: "+str(y))
         else:
             a = (ne_e_pt[0]*ne_s_pt[1]-ne_s_pt[0]*ne_e_pt[1])
             b = (e_e_pt[0]*e_s_pt[1]-e_s_pt[0]*e_e_pt[1])
 
-            print "a:", a, "b:", b, "e_dx:", e_dx, "e_dy:", e_dy, "ne_dx:", ne_dx, "ne_dy:", ne_dy
+            debug("  a: "+str(a)+" b: "+str(b)+" e_dx: "+str(e_dx)+" e_dy: "+str(e_dy)+" ne_dx: "+str(ne_dx)+" ne_dy: "+str(ne_dy))
             
             x = (a*e_dx-b*ne_dx)/(e_dy*ne_dx-ne_dy*e_dx)
             if e_dx == 0:
                 y = ne_e_pt[1]
             else:
                 y = (x*e_dy+b)/e_dx
-            print "case 3,x:",x,"y:",y
+            debug("  case 3, x: "+str(x)+" y: "+str(y))
         e_pt = [x, y]
         return e_pt
 
     def __build_offset_path_normals(self, p):
+        dbgfname()
         new_elements = []
         elements = p.get_ordered_elements()
         if len(elements)==0:
@@ -145,12 +150,12 @@ class TOOffsetFollow(TOAbstractFollow):
                     
                     n_steps = int(da/0.1)
                     s_pt = (e.center[0]+math.cos(sa)*e.radius, e.center[1]+math.sin(sa)*e.radius)
-                    print "splitting arc, start angle:", sa, "start_pt:", s_pt
+                    debug("  splitting arc, start angle: "+str(sa)+" start_pt: "+str(s_pt))
                     for i in range(1,n_steps):
                         a = sa+i*0.1
                         e_pt = (e.center[0]+math.cos(a)*e.radius, e.center[1]+math.sin(a)*e.radius)
                         ne = ELine(s_pt, e_pt, e.lt, e.color)
-                        print "angle:", a, "line:", s_pt, e_pt
+                        debug("  angle: "+str(a)+" line: "+str(s_pt)+" "+str(e_pt))
                         s_pt = e_pt
                         converted_elements.append(ne)
                     e_pt = e.end
@@ -170,7 +175,7 @@ class TOOffsetFollow(TOAbstractFollow):
 
                 if s_pt == None:
                     if pt_to_pt_dist(sc, elements[-1].end)<0.001:
-                        print "s_pt"
+                        debug("  s_pt")
                         s_pt = self.__two_point_offset(elements[-1], e)
                     else:
                         nsn = e.get_normalized_start_normal()
@@ -198,11 +203,11 @@ class TOOffsetFollow(TOAbstractFollow):
                 s_pt = e_pt
                 e_pt = None
         self.offset_path = new_elements
-        print "offset_path:", self.offset_path
+        debug("  offset_path: "+str(self.offset_path))
 
 
     def __build_offset_path_scale(self, p):
-
+        dbgfname()
         new_elements = []
         elements = p.get_ordered_elements()
         if len(elements)==0:
@@ -254,12 +259,13 @@ class TOOffsetFollow(TOAbstractFollow):
                 new_elements.append(ne)
 
         self.offset_path = new_elements
-        print "offset_path:", self.offset_path
+        debug("  offset_path: "+str(self.offset_path))
         
     def apply(self, path):
-        print "apply path:", path
+        dbgfname()
+        debug("  apply path: "+str(path))
         if path.operations[self.name]:
-            print "path ordered elements:", path.ordered_elements
+            debug("  path ordered elements: "+str(path.ordered_elements))
             if path.ordered_elements!=None:
                 self.path = path
                 self.__build_offset_path(path)

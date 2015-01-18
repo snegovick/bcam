@@ -1,3 +1,8 @@
+from logging import debug, info, warning, error, critical, DEBUG, basicConfig
+from util import dbgfname
+
+basicConfig(level=DEBUG)
+
 import pygtk
 pygtk.require('2.0')
 import gtk, gobject, cairo
@@ -5,6 +10,8 @@ import sys
 from events import EVEnum, EventProcessor, ee, ep
 from main_window import MainWindow
 from state import state
+
+
 
 width=640
 height=480
@@ -22,26 +29,24 @@ class Screen(gtk.DrawingArea):
         return True
 
     def save_project(self, *args):
-        print "save project"
+        pass
 
     def update(self):
         self.queue_draw()
 
     def scroll_event(self, widget, event):
-        print "event:", event
         if event.direction == gtk.gdk.SCROLL_UP:
             ep.push_event(ee.scroll_up, (None))
         elif event.direction == gtk.gdk.SCROLL_DOWN:
             ep.push_event(ee.scroll_down, (None))
     
     def button_press_event(self, widget, event):
-        print "button press:", event.button
-
+        debug("button press: "+ str(event.button))
         if event.button == 1:
             ep.push_event(ee.screen_left_press, (event.x, event.y))
 
     def key_press_event(self, widget, event):
-        print "key press:", event.keyval
+        debug("key press:" + str(event.keyval))
         if event.keyval == 65307: # ESC
             ep.push_event(ee.deselect_all, (None))
         elif event.keyval == 65505: # shift
@@ -106,7 +111,6 @@ class Screen(gtk.DrawingArea):
                 if (step/10 == 0):
                     break
                 step/=10
-                print step
                 xsteps = self.allocation.width/state.scale[0]/step
                 ysteps = self.allocation.height/state.scale[1]/step
                 maxsteps = max(xsteps, ysteps)

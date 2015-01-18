@@ -14,6 +14,9 @@ from calc_utils import AABB, OverlapEnum
 from path import Path
 from project import project
 
+from logging import debug, info, warning, error, critical
+from util import dbgfname
+
 class EVEnum:
     load_click = "load_click"
     save_click = "save_click"
@@ -114,7 +117,8 @@ class EventProcessor(object):
             if e in self.events:
                 self.events[e](args)
             else:
-                print "Unknown event:", e, args
+                warning("Unknown event:"+str(e)+" args: "+str(args))
+                warning("Please report")
         self.event_list = []
 
     def load_click(self, args):
@@ -136,16 +140,18 @@ class EventProcessor(object):
             self.push_event(self.ee.load_project, result)
 
     def save_project_click(self, args):
-        print "save project clicked"
+        dbgfname()
+        debug("  save project clicked")
         mimes = [("BCam project (*.bcam)", "Application/bcam", "*.bcam")]
         result = self.mw.mk_file_save_dialog("Save project ...", mimes)
         if result!=None:
             self.save_project((result, ))
 
     def new_project_click(self, args):
-        print "new project clicked"
+        dbgfname()
+        debug("  new project clicked")
         if not state.is_clean():
-            print "not clean, ask to save"
+            debug("  not clean, ask to save")
             if self.mw.mk_question_dialog("Current project has some unsaved data.\nWould you like to save it?"):
                 self.save_project_click(None)
 
@@ -157,9 +163,10 @@ class EventProcessor(object):
         self.mw.widget.update()
 
     def quit_click(self, args):
-        print "quit clicked"
+        dbgfname()
+        debug("  quit clicked")
         if not state.is_clean():
-            print "not clean, ask to save"
+            debug("  not clean, ask to save")
             if self.mw.mk_question_dialog("Current project has some unsaved data.\nWould you like to save it?"):
                 self.save_project_click(None)
             exit(0)
@@ -181,17 +188,19 @@ class EventProcessor(object):
                 self.mw.add_item_to_list(self.mw.tp_gtklist, p.display_name, self.ee.tool_paths_check_button_click)
 
     def load_file(self, args):
-        print "load file", args
+        dbgfname()
+        debug("  load file: "+str(args))
         dxfloader = DXFLoader()
         state.add_paths(dxfloader.load(args[0]))
         self.push_event(self.ee.update_paths_list, (None))
         project.push_state(state)
         self.mw.widget.update()
         feedrate = state.settings.tool.get_feedrate()
-        print "feedrate:", feedrate
+        debug("  feedrate: "+str(feedrate))
 
     def save_file(self, args):
-        print "save file", args
+        dbgfname()
+        debug("  save file: "+str(args))
         file_path = args[0]
         if os.path.splitext(file_path)[1][1:].strip() != "ngc":
             file_path+=".ngc"
@@ -199,7 +208,7 @@ class EventProcessor(object):
         out+=state.settings.default_pp.set_metric()
         out+=state.settings.default_pp.set_absolute()
         feedrate = state.settings.tool.get_feedrate()
-        print "feedrate:", feedrate
+        debug("  feedrate: "+str(feedrate))
         out+=state.settings.default_pp.set_feedrate(feedrate)
         for p in state.tool_operations:
             out+=p.get_gcode()
@@ -209,18 +218,21 @@ class EventProcessor(object):
         f.close()
 
     def load_project(self, args):
-        print "load project", args
+        dbgfname()
+        debug("  load project: "+str(args))
         project_path = args[0]
         project.load(project_path)
         self.mw.update_right_vbox()
 
     def save_project(self, args):
-        print "save project", args
+        dbgfname()
+        debug("  save project: "+str(args))
         project_path = args[0]
         project.save(project_path)
 
     def screen_left_press(self, args):
-        print "press at", args
+        dbgfname()
+        debug("  press at:"+str(args))
         offset = state.get_offset()
         scale = state.get_scale()
         cx = (args[0][0]-offset[0])/scale[0]
@@ -230,7 +242,8 @@ class EventProcessor(object):
         self.mw.widget.update()
 
     def screen_left_release(self, args):
-        print "release at", args
+        dbgfname()
+        debug("  release at: "+str(args))
         offset = state.get_offset()
         scale = state.get_scale()
         cx = (args[0][0]-offset[0])/scale[0]
@@ -244,12 +257,11 @@ class EventProcessor(object):
             # just a click
             dx = abs(cx-self.left_press_start[0])
             dy = abs(cy-self.left_press_start[1])
-            print "dx, dy:", dx, dy
+            debug("  dx, dy: "+str(dx)+" "+str(dy))
             if dx<1 and dy<1:
                 for p in state.paths:
                     for e in p.elements:
                         if (e.distance_to_pt((cx, cy))<1):
-                            #print "accepted"
                             if self.shift_pressed:
                                 if not e in self.selected_elements:
                                     e.set_selected()
@@ -277,15 +289,14 @@ class EventProcessor(object):
                         if not e in self.selected_elements:
                             e_aabb = e.get_aabb()
                             if (e_aabb != None):
-                                print "e:", e_aabb
-                                print "select:", select_aabb
+                                debug("  e: "+str(e_aabb))
+                                debug("  select:"+str(select_aabb))
                                 
                                 overlap = select_aabb.aabb_in_aabb(e_aabb)
-                                print "overlap",overlap
+                                debug("  overlap:"+str(overlap))
                                 if (overlap != OverlapEnum.no_overlap) and (overlap != OverlapEnum.fully_lays_inside):
                                     e.set_selected()
                                     self.selected_elements.append(e)
-            #print self.selected_elements
         self.mw.widget.update()
         self.left_press_start=None
         
@@ -299,25 +310,27 @@ class EventProcessor(object):
         self.mw.widget.update()
 
     def drill_tool_click(self, args):
-        print "drill tool click:", args
-        print self.selected_elements
+        dbgfname()
+        debug("  drill tool click:"+str(args))
+        debug("  "+str(self.selected_elements))
         for e in self.selected_elements:
-            print "thickness:", state.get_settings().get_material().get_thickness()
+            debug("  thickness:"+str(state.get_settings().get_material().get_thickness()))
             drl_op = TODrill(state, index=len(state.tool_operations))
             if drl_op.apply(e, state.get_settings().get_material().get_thickness()):
                 state.tool_operations.append(drl_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
                 project.push_state(state)
-        print state.tool_operations
+        debug("  "+str(state.tool_operations))
         self.mw.widget.update()
 
     def join_elements(self, args):
+        dbgfname()
         sp = state.paths
         if self.selected_elements!=None:
-            print "selected:", self.selected_elements
+            debug("  selected: "+str(self.selected_elements))
             p = Path(state, self.selected_elements, "path", state.settings.get_def_lt().name)
             connected = p.mk_connected_path()
-            print "connected elements:", connected
+            debug("  connected elements: "+str(connected))
             if connected != None:
                 connected.name = connected.name+" "+str(len(sp))
                 self.deselect_all(None)
@@ -370,9 +383,10 @@ class EventProcessor(object):
         self.mw.widget.update()
 
     def exact_follow_tool_click(self, args):
-        print "exact follow tool click:", args
+        dbgfname()
+        debug("  exact follow tool click: "+str(args))
         connected = self.join_elements(None)
-        print "selected path:", self.selected_path
+        debug("  selected path: "+str(self.selected_path))
         if connected != None:
             path_follow_op = TOExactFollow(state, index=len(state.tool_operations), depth=state.get_settings().get_material().get_thickness())
             if path_follow_op.apply(connected):
@@ -383,10 +397,11 @@ class EventProcessor(object):
         self.mw.widget.update()
 
     def offset_follow_tool_click(self, args):
-        print "offset follow tool click:", args
+        dbgfname()
+        debug("  offset follow tool click: "+str(args))
         connected = self.join_elements(None)
-        print "selected path:", self.selected_path
-        print "connected:", connected
+        debug("  selected path: "+str(self.selected_path))
+        debug("  connected: "+str(connected))
         if connected != None:
             path_follow_op = TOOffsetFollow(state, index=len(state.tool_operations), depth=state.get_settings().get_material().get_thickness())
             if path_follow_op.apply(connected):
@@ -396,9 +411,10 @@ class EventProcessor(object):
         self.mw.widget.update()
 
     def pocket_tool_click(self, args):
-        print "pocket tool click:", args
+        dbgfname()
+        debug("  pocket tool click: "+str(args))
         connected = self.join_elements(None)
-        print "selected path:", self.selected_path
+        debug("  selected path: "+str(self.selected_path))
         if connected != None:
             pocket_op = TOPocketing(state, index=len(state.tool_operations), depth=state.get_settings().get_material().get_thickness())
             if pocket_op.apply(connected):
@@ -408,27 +424,29 @@ class EventProcessor(object):
         self.mw.widget.update()
 
     def update_settings(self, args):
-        print "settings update:", args
+        dbgfname()
+        debug("  settings update: "+str(args))
         new_value = args[0][1][0].get_value()
         setting = args[0][0]
         setting.set_value(new_value)
         oldtool = state.get_tool()
-        print "tool:", oldtool
-        print "feedrate:", oldtool.get_feedrate()
+        debug("  tool: "+str(oldtool))
+        debug("  feedrate: "+str(oldtool.get_feedrate()))
         project.push_state(state)
-        print "tool:", state.get_tool()
+        debug("  tool: "+str(state.get_tool()))
         state.get_tool().copy_tool(oldtool)
-        print "feedrate:", state.get_tool().get_feedrate()
+        debug("  feedrate: "+str(state.get_tool().get_feedrate()))
         self.mw.widget.update()
 
     def tool_operation_up_click(self, args):
-        print "tool operation up"
+        dbgfname()
+        debug("  tool operation up")
         if self.selected_tool_operation==None:
             return
         if len(state.tool_operations)==0:
             return
         cur_idx = state.tool_operations.index(self.selected_tool_operation)
-        print "cur idx:", cur_idx
+        debug("  cur idx: "+str(cur_idx))
         if cur_idx == 0:
             return
         temp = self.selected_tool_operation
@@ -438,13 +456,14 @@ class EventProcessor(object):
         project.push_state(state)
 
     def tool_operation_down_click(self, args):
-        print "tool operation down"
+        dbgfname()
+        debug("  tool operation down")
         if self.selected_tool_operation==None:
             return
         if len(state.tool_operations)==0:
             return
         cur_idx = state.tool_operations.index(self.selected_tool_operation)
-        print "cur idx:", cur_idx
+        debug("  cur idx: "+str(cur_idx))
         if cur_idx == len(state.tool_operations)-1:
             return
         temp = self.selected_tool_operation
@@ -454,7 +473,8 @@ class EventProcessor(object):
         project.push_state(state)
 
     def scroll_up(self, args):
-        print "scroll up"
+        dbgfname()
+        debug("  scroll up")
         if state.scale[0]<=1:
             state.scale = (state.scale[0]+0.1, state.scale[1]+0.1)
         else:
@@ -463,7 +483,8 @@ class EventProcessor(object):
         self.mw.widget.update()
 
     def scroll_down(self, args):
-        print "scroll down"
+        dbgfname()
+        debug("  scroll down")
         if state.scale[0]>0.1:
             if state.scale[0]<=1:
                 state.scale = (state.scale[0]-0.1, state.scale[1]-0.1)
@@ -473,15 +494,17 @@ class EventProcessor(object):
         self.mw.widget.update()
 
     def hscroll(self, args):
-        print "hscroll:", args
-        print args[0][0].get_value()
+        dbgfname()
+        debug("  hscroll: "+str(args))
+        debug("  "+str(args[0][0].get_value()))
         offset = state.get_base_offset()
         state.set_base_offset((-args[0][0].get_value(), offset[1]))
         self.mw.widget.update()
 
     def vscroll(self, args):
-        print "vscroll:", args
-        print args[0][0].get_value()
+        dbgfname()
+        debug("  vscroll: "+str(args))
+        debug("  "+str(args[0][0].get_value()))
         offset = state.get_base_offset()
         state.set_base_offset((offset[0], -args[0][0].get_value()))
         self.mw.widget.update()

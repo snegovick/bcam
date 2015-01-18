@@ -2,6 +2,10 @@ from elements import *
 from calc_utils import pt_to_pt_dist
 from tool_operation import TOEnum
 
+from logging import debug, info, warning, error, critical
+from util import dbgfname
+
+
 import json
 
 class Path(Element):
@@ -114,6 +118,7 @@ class Path(Element):
 
 
     def mk_connected_path(self):
+        dbgfname()
         if len(self.elements)==0:
             return None
 
@@ -167,13 +172,13 @@ class Path(Element):
                     cont = True
 
             if not cont:
-                print "Ive tried hard, but still no success, so break"
+                debug("  I`ve tried hard, but still no success, so break")
                 break
 
         if abs(ce[0].start[0]-ce[-1].end[0])<0.001 and abs(ce[0].start[1]-ce[-1].end[1])<0.001:
             pass # have to move joined path to separate subpath
-        print "available len", available_len, "len(ce):", len(ce)
-        print available
+        debug("  available len", available_len, "len(ce):"+str(len(ce)))
+        debug("  "+str(available))
         #if available_len == len(ce):
         p = Path(self.state, ce, self.name+".sub", self.state.settings.get_def_lt().name)
         p.ordered_elements = ordered_elements

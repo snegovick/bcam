@@ -1,6 +1,7 @@
 import math
 from calc_utils import AABB, CircleUtils, LineUtils, ArcUtils, PointUtils, vect_len, mk_vect
 from tool_operation import TOEnum
+from logging import debug, info, warning, error, critical
 
 import json
 
@@ -190,9 +191,10 @@ class EArc(Element):
         self.draw_element(ctx)
 
     def turnaround(self):
-        print "arc turnaround, start:", self.start, "end:", self.end
+        debug("In EArc.turnaround")
+        debug("  arc turnaround, start: "+str(self.start)+" end: "+str(self.end))
         arc = EArc(self.center, self.radius, start = self.end, end = self.start, lt = self.lt, turnaround = not self.is_turnaround)
-        print "new arc, start:", arc.start, "end:", arc.end
+        debug("  new arc, start: "+str(arc.start)+" end: "+str(arc.end))
         return arc
 
     def distance_to_pt(self, pt):

@@ -1,6 +1,9 @@
 from tool_operation import ToolOperation
 from state import state
 
+from logging import debug, info, warning, error, critical
+from util import dbgfname
+
 import cairo
 
 class TOAbstractFollow(ToolOperation):
@@ -34,14 +37,16 @@ class TOAbstractFollow(ToolOperation):
             ctx.stroke()
 
     def try_load_path_by_name(self, name, state):
+        dbgfname()
         p = state.get_path_by_name(name)
         if p == None:
-            print "Path", name, "not found"
+            debug("  Path "+str(name)+" not found")
             return False
         return p
 
 
     def process_el_to_gcode(self, e, step):
+        dbgfname()
         out = ""
         if type(e).__name__ == "ELine":
             new_pos = [e.start[0], e.start[1], -step*state.get_tool().diameter/2.0]
@@ -77,7 +82,7 @@ class TOAbstractFollow(ToolOperation):
             state.get_tool().current_position = new_pos
             
         else:
-            print "unsuported element type:", type(e).__name__
+            debug("unsuported element type: "+str(type(e).__name__))
         return out
 
 

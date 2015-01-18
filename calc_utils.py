@@ -1,4 +1,5 @@
 import math
+from logging import debug, info, warning, error, critical
 
 def rgb255_to_rgb1(rgb):
     return [rgb[0]/255.0, rgb[1]/255.0, rgb[2]/255.0]
@@ -44,7 +45,7 @@ class OverlapEnum:
 
 class AABB:
     def __init__(self, sx, sy, ex, ey):
-        print sx, sy, ex, ey
+        debug("AABB sx, sy, ex, ey: "+str(sx)+" "+str(sy)+" "+str(ex)+" "+str(ey))
         self.left = min(sx, ex)
         self.right = max(sx, ex)
         self.top = max(sy, ey)
@@ -167,7 +168,7 @@ class ArcUtils:
 
     def distance_to_pt(self, pt):
         a = math.atan2(pt[1]-self.center[1], pt[0]-self.center[0])
-        print a, self.sa, self.ea
+        debug("Distance to pt atan, start, end: "+str(a)+" "+str(self.sa)+" "+str(self.ea))
         if self.check_angle_in_range(a):
             dist = pt_to_pt_dist(pt, self.center)-self.radius
         else:
@@ -189,21 +190,23 @@ class ArcUtils:
         return self.get_normalized_start_normal()
 
     def check_if_pt_belongs(self, pt):
+        debug("In check_if_pt_belongs")
         v = mk_vect(pt, self.center)
         if abs((self.radius) - vect_len(v))>0.001:
-            #print "radius check failed"
+            debug("  radius check failed")
             return False
 
         a = math.atan2(pt[1]-self.center[1], pt[0]-self.center[0])
         if (self.check_angle_in_range(a)):
-            #print "radius and angle ok"
+            debug("  radius and angle ok")
             return True
         return False
 
     def find_intersection(self, other_element):
+        debug("In ArcUtils.find_intersection")
         oe = other_element
         if other_element.__class__.__name__ == "LineUtils":
-            #print "line to arc"
+            debug("  line to arc")
             dx = oe.end[0] - oe.start[0]
             dy = oe.end[1] - oe.start[1]
             dr = math.sqrt(dx**2 + dy**2)
@@ -212,13 +215,13 @@ class ArcUtils:
             intersections = []
             if desc == 0:
                 #single point
-                #print "single point"
+                debug("  single point")
                 x_i = (d*dy+sign(dy)*dx*math.sqrt(desc))/(dr**2)
                 y_i = (-d*dx+abs(dy)*math.sqrt(desc))/(dr**2)
                 intersections.append((x_i, y_i))
             elif desc > 0:
                 #intersection
-                #print "intersection"
+                debug("  intersection")
                 x_i1 = (d*dy+sign(dy)*dx*math.sqrt(desc))/(dr**2)
                 y_i1 = (-d*dx+abs(dy)*math.sqrt(desc))/(dr**2)
                 x_i2 = (d*dy-sign(dy)*dx*math.sqrt(desc))/(dr**2)
@@ -227,26 +230,26 @@ class ArcUtils:
                 intersections.append((x_i2, y_i2))
             else:
                 #no intersection
-                #print "no intersection"
+                debug("  no intersection")
                 return None
             #check whether intersections are inside existing element sections
             checked_intersections = []
             for pt in intersections:
                 if oe.check_if_pt_belongs(pt):
-                    #print "oe belongs"
+                    debug("  oe belongs")
                     if self.check_if_pt_belongs(pt):
-                        #print "self belongs"
+                        debug("  self belongs")
                         checked_intersections.append(pt)
                     else:
-                        #print "self failed"
+                        debug("  self failed")
                         pass
                 else:
-                    #print "oe failed"
+                    debug("  oe failed")
                     pass
             if len(checked_intersections)>0:
                 return checked_intersections
         else:
-            print "A: Not calc util:", other_element.__class__.__name__
+            debug("  Not calc util:", other_element.__class__.__name__)
         return None
 
 
@@ -259,9 +262,10 @@ class LineUtils:
         return AABB(self.start[0], self.start[1], self.end[0], self.end[1])
 
     def distance_to_pt(self, pt):
+        debug("In distance_to_pt")
         dist = 0
         a = math.atan2(self.start[1]-self.end[1], self.start[0]-self.end[0])
-        #print "alpha:", a
+        debug("  alpha: "+str(a))
         sina = math.sin(a)
         cosa = math.cos(a)
         s = self.__reproject_pt(self.start, sina, cosa)
@@ -280,9 +284,9 @@ class LineUtils:
         b = pt_to_pt_dist(s, p)
         c = pt_to_pt_dist(e, p)
         p = (a+b+c)/2.0
-        #print "a:", a, "b:", b, "c:", c, "p:", p, p*(p-a)*(p-b)*(p-c)
+        debug("  a: "+str(a)+" b: "+str(b)+" c: "+str(c)+" p: "+str(p)+" "+p*(p-a)*(p-b)*(p-c))
         dist = abs(math.sqrt(p*(p-a)*(p-b)*(p-c))*2/a)
-        #print "dist:" , dist
+        debug("  dist: "+str(dist))
         return dist
 
     def check_if_pt_belongs(self, pt):
@@ -322,6 +326,7 @@ class LineUtils:
         return False
 
     def find_intersection(self, other_element):
+        debug("In LineUtils.find_intersection")
         oe = other_element
         #print oe
         if other_element.__class__.__name__ == "LineUtils":
@@ -364,7 +369,7 @@ class LineUtils:
             #print "arc to line"
             return oe.find_intersection(self)
         else:
-            print "L: Not calc util:", other_element.__class__.__name__
+            debug("  Not calc util:", other_element.__class__.__name__)
 
         return None
 

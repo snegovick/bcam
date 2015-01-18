@@ -39,7 +39,6 @@ class TOExactFollow(TOAbstractFollow):
     def apply(self, path):
         if path.operations[self.name]:
             if path.ordered_elements!=None:
-                print "setting path"
                 self.path = path
                 self.draw_list = path.ordered_elements
                 return True

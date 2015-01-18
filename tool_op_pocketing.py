@@ -5,6 +5,9 @@ from generalized_setting import TOSetting
 from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len
 from elements import ELine, EArc
 
+from logging import debug, info, warning, error, critical
+from util import dbgfname
+
 import json
 
 class TOPocketing(TOAbstractFollow):
@@ -94,6 +97,7 @@ class TOPocketing(TOAbstractFollow):
         self.offset_path = new_elements
 
     def __build_pocket_path(self):
+        dbgfname()
         # find bounding box
         points_x = []
         points_y = []
@@ -113,7 +117,7 @@ class TOPocketing(TOAbstractFollow):
         linear_pattern = []
         dy = top - bottom
         dx = right - left
-        print "dx:", dx, "dy:", dy
+        debug("  dx: "+str(dx)+" dy: "+str(dy))
         radius = self.tool.diameter/2.0
         for i in range(int(dy/radius)):
         #if True:
@@ -129,7 +133,7 @@ class TOPocketing(TOAbstractFollow):
                 if res != None:
                     intersections+=res
             if len(intersections)>0:
-                print "intersections:", intersections
+                debug("  intersections:"+str(intersections))
                 if len(intersections) == 1:
                     pass
                     # nleft = intersections[0]
@@ -142,7 +146,7 @@ class TOPocketing(TOAbstractFollow):
                         nright = min(intersections, key=lambda pt: pt[0])
                         intersections.remove(nright)
                         linear_pattern.append(ELine(nleft, nright, self.state.settings.get_def_lt()))
-        print "linear_pattern:", linear_pattern
+        debug("  linear_pattern: "+str(linear_pattern))
         self.pocket_pattern = linear_pattern
 
     def apply(self, path):
