@@ -11,7 +11,6 @@ from util import dbgfname
 import json
 import cairo
 
-
 class TOPocketing(TOAbstractFollow):
     def __init__(self, state, depth=0, index=0, offset=0, data=None):
         super(TOAbstractFollow, self).__init__(state)
@@ -40,16 +39,29 @@ class TOPocketing(TOAbstractFollow):
                 linearized_path.append(e)
         return linearized_path
 
+    # return [0]: if halfcrosses, [1]: if up
+    def __is_element_halfcrossing(self, el_coords):
+        if abs(el_coords[0][1])<0.001 and abs(el_coords[1][1])>0.001:
+            if el_coords[1][1] > 0:
+                return True, True
+            else:
+                return True, False
+        if abs(el_coords[1][1])<0.001 and abs(el_coords[0][1])>0.001:
+            if el_coords[0][1] > 0:
+                return True, False
+            else:
+                return True, True
+        return False, False
+
     def __is_element_crossing(self, el_coords):
-        return abs(el_coords[0][1])/el_coords[0][1] != abs(el_coords[1])/el_coords[1]
+        return abs(el_coords[0][1])/el_coords[0][1] != abs(el_coords[1][1])/el_coords[1][1]
 
     def __is_crossing_up(self, el_coords):
         if el_coords[1][1] > el_coords[0][1]:
             return True
         return False
 
-    def __is_point_at_left(self, pt, element, up):
-        
+    def __is_point_at_left(self, pt, element, up):        
         v1x = element.start[0]-pt[0]
         v1y = element.start[1]-pt[1]
 
@@ -64,7 +76,8 @@ class TOPocketing(TOAbstractFollow):
         return False
 
     def __is_pt_inside_path_winding(self, pt, path):
-        dbgfname()
+        if pt[0]<-26 and pt[1]<-16:
+            dbgfname()
         e = path[0]
 
         turns = 0
@@ -74,15 +87,32 @@ class TOPocketing(TOAbstractFollow):
             sy = e.start[1] - pt[1]
             ex = e.end[0] - pt[0]
             ey = e.end[1] - pt[1]
+            el_coords = [[sx, sy], [ex, ey]]
+            halfcross, up = self.__is_element_halfcrossing(el_coords)
+            if pt[0]<-26 and pt[1]<-16:
+                debug("  e: "+str(el_coords))
+                debug("  halfcross: "+str(halfcross)+" up: "+str(up))
+            if halfcross:
+                if self.__is_point_at_left(pt, e, up):
+                    if up:
+                        turns+=0.5
+                    else:
+                        turns-=0.5
+            elif self.__is_element_crossing(el_coords):
+                up = self.__is_crossing_up(el_coords)
+                if pt[0]<-26 and pt[1]<-16:
+                    debug("  e: "+str(el_coords))
+                    debug("  cross: True, up: "+str(up))
+                
+                if self.__is_point_at_left(pt, e, up):
+                    if up:
+                        turns+=1
+                    else:
+                        turns-=1
+
+        if pt[0]<-26 and pt[1]<-16:
+            debug("  turns: %f"%(turns,))
             
-            
-        debug("  cur ang: "+str(abs_angle))
-        abs_angle = abs(abs_angle)
-        if (abs_angle>=math.pi*2):
-            turns+=1
-        #while (abs_angle>=math.pi*2):
-        #    abs_angle -= math.pi*2
-        #    turns+=1
         if (abs(turns) >= 1):
             return True
         return False
@@ -141,8 +171,8 @@ class TOPocketing(TOAbstractFollow):
     def build_points(self, path):
         dbgfname()
         debug("  linearizing path")
-        #lpath = self.__linearize_path(path, 0.1)
-        lpath = path
+        lpath = self.__linearize_path(path, 0.1)
+        #lpath = path
 
         path_aabb = linearized_path_aabb(lpath)
         left = path_aabb.left - 10
