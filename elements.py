@@ -1,7 +1,10 @@
 import math
 from calc_utils import AABB, CircleUtils, LineUtils, ArcUtils, PointUtils, vect_len, mk_vect
 from tool_operation import TOEnum
+
 from logging import debug, info, warning, error, critical
+from util import dbgfname
+
 
 import json
 
@@ -150,6 +153,32 @@ class EArc(Element):
         self.start_normal = None
         self.end_normal = None
 
+    def to_line_sequence(self, precision):
+        dbgfname()
+        sa = self.startangle
+        ea = self.endangle
+        if sa > ea:
+            ea+=math.pi*2
+        da = (ea - sa)
+
+        n_steps = int(da/precision)
+        s_pt = (self.center[0]+math.cos(sa)*self.radius, self.center[1]+math.sin(sa)*self.radius)
+        debug("  splitting arc, start angle: "+str(sa)+" start_pt: "+str(s_pt))
+
+        converted_elements = []
+
+        for i in range(1,n_steps):
+            a = sa+i*0.1
+            e_pt = (self.center[0]+math.cos(a)*self.radius, self.center[1]+math.sin(a)*self.radius)
+            ne = ELine(s_pt, e_pt, self.lt, self.color)
+            debug("  angle: "+str(a)+" line: "+str(s_pt)+" "+str(e_pt))
+            s_pt = e_pt
+            converted_elements.append(ne)
+        e_pt = self.end
+        ne = ELine(s_pt, e_pt, self.lt, self.color)
+        converted_elements.append(ne)
+        return converted_elements
+
     def init_from_pt(self, start, end, center):
         self.center = center
         self.start = start
@@ -290,7 +319,7 @@ class EPoint(Element):
         self.color = data["color"]
 
     def draw_element(self, ctx):
-        ctx.rectangle(self.center[0]-1, self.center[1]-1, 2, 2)
+        ctx.rectangle(self.center[0]-0.1, self.center[1]-0.1, 0.2, 0.2)
 
     def draw_first(self, ctx):
         self.draw_element(ctx)

@@ -2,13 +2,15 @@ import math
 from tool_operation import ToolOperation, TOEnum
 from tool_abstract_follow import TOAbstractFollow
 from generalized_setting import TOSetting
-from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len
-from elements import ELine, EArc
+from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len, linearized_path_aabb, LineUtils
+from elements import ELine, EArc, EPoint
 
 from logging import debug, info, warning, error, critical
 from util import dbgfname
 
 import json
+import cairo
+
 
 class TOPocketing(TOAbstractFollow):
     def __init__(self, state, depth=0, index=0, offset=0, data=None):
@@ -23,17 +25,153 @@ class TOPocketing(TOAbstractFollow):
             self.offset_path = None
         else:
             self.deserialize(data)
-
         self.display_name = TOEnum.pocket+" "+str(self.index)
 
     def serialize(self):
         return {'type': 'topocketing', 'path_ref': self.path.name, 'depth': self.depth, 'index': self.index, 'offset': self.offset}
 
+    def __linearize_path(self, path, tolerance):
+        linearized_path = []
+        for e in path:
+            if type(e).__name__ == "EArc":
+                lpath = e.to_line_sequence(tolerance)
+                linearized_path += lpath
+            elif type(e).__name__ == "ELine":
+                linearized_path.append(e)
+        return linearized_path
+
+    def __is_element_crossing(self, el_coords):
+        return abs(el_coords[0][1])/el_coords[0][1] != abs(el_coords[1])/el_coords[1]
+
+    def __is_crossing_up(self, el_coords):
+        if el_coords[1][1] > el_coords[0][1]:
+            return True
+        return False
+
+    def __is_point_at_left(self, pt, element, up):
+        
+        v1x = element.start[0]-pt[0]
+        v1y = element.start[1]-pt[1]
+
+        v2x = element.end[0]-element.start[0]
+        v2y = element.end[1]-element.start[1]
+
+        cross_product = v1x*v2y-v1y*v2x
+        if (up and (cross_product > 0)):
+            return True
+        elif (not up) and (cross_product < 0):
+            return True
+        return False
+
+    def __is_pt_inside_path_winding(self, pt, path):
+        dbgfname()
+        e = path[0]
+
+        turns = 0
+        
+        for e in path:
+            sx = e.start[0] - pt[0]
+            sy = e.start[1] - pt[1]
+            ex = e.end[0] - pt[0]
+            ey = e.end[1] - pt[1]
+            
+            
+        debug("  cur ang: "+str(abs_angle))
+        abs_angle = abs(abs_angle)
+        if (abs_angle>=math.pi*2):
+            turns+=1
+        #while (abs_angle>=math.pi*2):
+        #    abs_angle -= math.pi*2
+        #    turns+=1
+        if (abs(turns) >= 1):
+            return True
+        return False
+
+    def __is_pt_inside_path_intersections(self, pt, path, aabb):
+        #dbgfname()
+        #debug("  pt:"+str(pt))
+        #debug("  path:"+str(path))
+        left = aabb.left - 10
+        right = aabb.right + 10
+        top = aabb.top + 10
+        bottom = aabb.bottom - 10
+        start = [left, pt[1]]
+        end = [right, pt[1]]
+        pt_line0 = LineUtils(start, end)
+
+        start = [left, bottom]
+        end = [right, top]
+        pt_line45 = LineUtils(start, end)
+
+        start = [left, top]
+        end = [right, bottom]
+        pt_line135 = LineUtils(start, end)
+
+        #lines = [pt_line0, pt_line45, pt_line135]
+        lines = [pt_line0]
+
+        intersections = []
+
+        for l in lines:
+            line_intersections = []
+            for e in path:
+                util = e.get_cu()
+                intersection = util.find_intersection(l)
+                if (intersection != None):
+                    line_intersections.append(intersection)
+            if len(line_intersections) != 0:
+                intersections.append(line_intersections)
+
+                
+        if len(intersections) == 0:
+            return False
+        intersections = min(intersections, key=lambda l: len(l))
+
+        n_intersections_on_left = 0
+        #debug("  intersections:"+str(intersections))
+        for i in intersections:
+            if (i[0] < pt[0]):
+                n_intersections_on_left += 1
+                
+        #debug("  n_intersections_on_left:"+str(n_intersections_on_left))
+        if (n_intersections_on_left % 2) != 0:
+            return True
+        return False
+
+    def build_points(self, path):
+        dbgfname()
+        debug("  linearizing path")
+        #lpath = self.__linearize_path(path, 0.1)
+        lpath = path
+
+        path_aabb = linearized_path_aabb(lpath)
+        left = path_aabb.left - 10
+        right = path_aabb.right + 10
+        top = path_aabb.top + 10
+        bottom = path_aabb.bottom - 10
+        points = []
+        step = 0.1
+        total_points = int(right-left+1)*int(top-bottom+1)/step
+        debug("  AABB: "+str(path_aabb))
+        point_counter = 0
+        x = left
+        while (x<right):
+            y = bottom
+            while (y<top):
+                debug("  checking pt: "+str(x)+" "+str(y)+" "+str(point_counter)+"/"+str(total_points))
+                if self.__is_pt_inside_path_winding((x, y), lpath):
+                    points.append(EPoint(center=[x, y], lt=self.state.settings.get_def_lt()))
+                    debug("  it fits")
+                point_counter += 1
+                y += step
+            x += step
+        debug("  points: "+str(points))
+        return points
+            
     def deserialize(self, data):
         self.depth = data["depth"]
         self.index = data["index"]
         self.offset = data["offset"]
-
         p = self.try_load_path_by_name(data["path_ref"], self.state)
         if p:
             self.apply(p)
@@ -48,9 +186,9 @@ class TOPocketing(TOAbstractFollow):
 
     def set_offset_s(self, setting):
         self.offset = setting.new_value
-        self.__build_offset_path(self.path)
-        self.__build_pocket_path()
-        self.draw_list = self.offset_path+self.pocket_pattern
+        #self.__build_offset_path(self.path)
+        #self.__build_pocket_path()
+        #self.draw_list = self.offset_path+self.pocket_pattern
         
     def __build_offset_path(self, p):
         if len(p.elements)==0:
@@ -153,9 +291,11 @@ class TOPocketing(TOAbstractFollow):
         if path.operations[self.name]:
             if path.ordered_elements!=None:
                 self.path = path
-                self.__build_offset_path(path)
-                self.__build_pocket_path()
-                self.draw_list = self.offset_path+self.pocket_pattern
+                #self.__build_offset_path(path)
+                #self.__build_pocket_path()
+                #self.draw_list = self.offset_path+self.pocket_pattern
+                #self.draw_list = path.ordered_elements
+                self.draw_list = self.build_points(path.ordered_elements)
                 return True
         return False
 

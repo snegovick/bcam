@@ -37,6 +37,37 @@ def vect_len(v):
 def scale_vect(v, factor):
     return map(lambda e: e*factor, v)
 
+def linearized_path_aabb(path):
+    xmin = path[0].start[0]
+    xmax = path[0].start[0]
+    ymin = path[0].start[1]
+    ymax = path[0].start[1]
+
+    for e in path:
+        sx = e.start[0]
+        sy = e.start[1]
+        ex = e.end[0]
+        ey = e.end[1]
+        
+        xmax_se = max(sx, ex)
+        xmin_se = min(sx, ex)
+        ymax_se = max(sy, ey)
+        ymin_se = min(sy, ey)
+
+        if (xmin_se < xmin):
+            xmin = xmin_se
+
+        if (ymin_se < ymin):
+            ymin = ymin_se
+
+        if (xmax_se > xmax):
+            xmax = xmax_se
+
+        if (ymax_se > ymax):
+            ymax = ymax_se
+
+    return AABB(xmin, ymin, xmax, ymax)
+
 class OverlapEnum:
     fully_covers = 1
     partially_overlap = 2
@@ -326,7 +357,7 @@ class LineUtils:
         return False
 
     def find_intersection(self, other_element):
-        debug("In LineUtils.find_intersection")
+        #debug("In LineUtils.find_intersection")
         oe = other_element
         #print oe
         if other_element.__class__.__name__ == "LineUtils":
@@ -356,7 +387,7 @@ class LineUtils:
                     #print "on self"
                     if oe.check_if_pt_belongs((x_i, y_i)):
                         #print "on oe"
-                        return [(x_i, y_i),]
+                        return [x_i, y_i]
                     else:
                         #print "not on oe"
                         #print "int:", x_i, y_i
