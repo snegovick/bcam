@@ -68,6 +68,17 @@ def linearized_path_aabb(path):
 
     return AABB(xmin, ymin, xmax, ymax)
 
+def find_center_of_mass(path):
+    x = path[0].start[0]
+    y = path[0].start[1]
+    for e in path:
+        x+=e.end[0]
+        y+=e.end[1]
+
+    x_center = float(x)/len(path)
+    y_center = float(y)/len(path)
+    return x_center, y_center
+
 class OverlapEnum:
     fully_covers = 1
     partially_overlap = 2

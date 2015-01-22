@@ -2,7 +2,7 @@ import math
 from tool_operation import ToolOperation, TOEnum
 from tool_abstract_follow import TOAbstractFollow
 from generalized_setting import TOSetting
-from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len, linearized_path_aabb, LineUtils
+from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len, linearized_path_aabb, find_center_of_mass, LineUtils
 from elements import ELine, EArc, EPoint
 
 from logging import debug, info, warning, error, critical
@@ -76,8 +76,8 @@ class TOPocketing(TOAbstractFollow):
         return False
 
     def __is_pt_inside_path_winding(self, pt, path):
-        if pt[0]<-26 and pt[1]<-16:
-            dbgfname()
+        # if pt[0]<-26 and pt[1]<-16:
+        #     dbgfname()
         e = path[0]
 
         turns = 0
@@ -89,9 +89,9 @@ class TOPocketing(TOAbstractFollow):
             ey = e.end[1] - pt[1]
             el_coords = [[sx, sy], [ex, ey]]
             halfcross, up = self.__is_element_halfcrossing(el_coords)
-            if pt[0]<-26 and pt[1]<-16:
-                debug("  e: "+str(el_coords))
-                debug("  halfcross: "+str(halfcross)+" up: "+str(up))
+            # if pt[0]<-26 and pt[1]<-16:
+            #     debug("  e: "+str(el_coords))
+            #     debug("  halfcross: "+str(halfcross)+" up: "+str(up))
             if halfcross:
                 if self.__is_point_at_left(pt, e, up):
                     if up:
@@ -100,9 +100,9 @@ class TOPocketing(TOAbstractFollow):
                         turns-=0.5
             elif self.__is_element_crossing(el_coords):
                 up = self.__is_crossing_up(el_coords)
-                if pt[0]<-26 and pt[1]<-16:
-                    debug("  e: "+str(el_coords))
-                    debug("  cross: True, up: "+str(up))
+                # if pt[0]<-26 and pt[1]<-16:
+                #     debug("  e: "+str(el_coords))
+                #     debug("  cross: True, up: "+str(up))
                 
                 if self.__is_point_at_left(pt, e, up):
                     if up:
@@ -110,8 +110,8 @@ class TOPocketing(TOAbstractFollow):
                     else:
                         turns-=1
 
-        if pt[0]<-26 and pt[1]<-16:
-            debug("  turns: %f"%(turns,))
+        # if pt[0]<-26 and pt[1]<-16:
+        #     debug("  turns: %f"%(turns,))
             
         if (abs(turns) >= 1):
             return True
@@ -180,7 +180,7 @@ class TOPocketing(TOAbstractFollow):
         top = path_aabb.top + 10
         bottom = path_aabb.bottom - 10
         points = []
-        step = 0.1
+        step = 0.5
         total_points = int(right-left+1)*int(top-bottom+1)/step
         debug("  AABB: "+str(path_aabb))
         point_counter = 0
@@ -197,6 +197,58 @@ class TOPocketing(TOAbstractFollow):
             x += step
         debug("  points: "+str(points))
         return points
+
+    def build_circles(self, path):
+        dbgfname()
+        debug("  linearizing path")
+        lpath = self.__linearize_path(path, 0.1)
+        x, y = find_center_of_mass(lpath)
+
+        path_aabb = linearized_path_aabb(lpath)
+        left = path_aabb.left
+        right = path_aabb.right
+        top = path_aabb.top
+        bottom = path_aabb.bottom
+        
+        debug("  building paths")
+        tool_paths = []
+        r = 0
+        max_r = max(abs(abs(left)-abs(x)), abs(abs(right)-abs(x)))
+        tool_radius = self.tool.diameter/2.0
+        while r < max_r:
+            debug("  r: %f"%(r,))
+            r+=tool_radius
+            angle = 0
+            cur_x = x+r*math.cos(angle)
+            cur_y = y+r*math.sin(angle)
+            is_inside = False
+            start_angle = 0
+            end_angle = 0
+            if (self.__is_pt_inside_path_winding([cur_x, cur_y], lpath)):
+                debug("  s start: "+str(start_angle))
+                is_inside = True
+
+            while angle<=math.pi*2:
+                cur_x = x+r*math.cos(angle)
+                cur_y = y+r*math.sin(angle)
+                if (self.__is_pt_inside_path_winding([cur_x, cur_y], lpath)):
+                    if not is_inside:
+                        debug("  start: "+str(start_angle))
+                        start_angle = angle
+                        is_inside = True
+                else:
+                    if is_inside:
+                        debug("  end: "+str(end_angle))
+                        end_angle = angle
+                        is_inside = False
+                        tool_paths.append(EArc(center=[x, y], radius=r, startangle=start_angle, endangle=end_angle, lt=self.state.settings.get_def_lt()))
+                angle += 0.1
+            if is_inside:
+                debug("  e end: "+str(angle))
+                tool_paths.append(EArc(center=[x, y], radius=r, startangle=start_angle, endangle=angle-0.1, lt=self.state.settings.get_def_lt()))
+
+                        
+        return tool_paths
             
     def deserialize(self, data):
         self.depth = data["depth"]
@@ -325,7 +377,7 @@ class TOPocketing(TOAbstractFollow):
                 #self.__build_pocket_path()
                 #self.draw_list = self.offset_path+self.pocket_pattern
                 #self.draw_list = path.ordered_elements
-                self.draw_list = self.build_points(path.ordered_elements)
+                self.draw_list = self.build_circles(path.ordered_elements)
                 return True
         return False
 
