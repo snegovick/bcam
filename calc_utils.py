@@ -1,5 +1,6 @@
 import math
 from logging import debug, info, warning, error, critical
+from util import dbgfname
 
 def rgb255_to_rgb1(rgb):
     return [rgb[0]/255.0, rgb[1]/255.0, rgb[2]/255.0]
@@ -29,13 +30,28 @@ def vect_sum(v1, v2):
         return [v1[0]+v2[0], v1[1]+v2[1], v1[2]+v2[2]]
     return [v1[0]+v2[0], v1[1]+v2[1], 0]
 
+def vect_mul_const(v, c):
+    return [v[0]*c, v[1]*c]
+
+def vect_sub(v1, v2):
+    return [v1[0] - v2[0], v1[1] - v2[1]]
+
 def vect_len(v):
     if len(v) == 3:
         return math.sqrt(v[0]**2+v[1]**2+v[2]**2)
     return math.sqrt(v[0]**2+v[1]**2)
 
+def vect_len2(v):
+    if len(v) == 3:
+        return v[0]**2+v[1]**2+v[2]**2
+    return v[0]**2+v[1]**2
+
+
 def scale_vect(v, factor):
     return map(lambda e: e*factor, v)
+
+def dot_product(v1, v2):
+    return v1[0]*v2[0]+v1[1]*v2[1]
 
 def linearized_path_aabb(path):
     xmin = path[0].start[0]
@@ -303,37 +319,63 @@ class LineUtils:
     def get_aabb(self):
         return AABB(self.start[0], self.start[1], self.end[0], self.end[1])
 
+    # def distance_to_pt(self, pt):
+    #     #dbgfname()
+    #     dist = 0
+    #     a = math.atan2(self.start[1]-self.end[1], self.start[0]-self.end[0])
+    #     #debug("  alpha: "+str(a))
+    #     sina = math.sin(a)
+    #     cosa = math.cos(a)
+    #     s = self.__reproject_pt(self.start, sina, cosa)
+    #     #s = self.start
+    #     e = self.__reproject_pt(self.end, sina, cosa)
+    #     p = self.__reproject_pt(pt, sina, cosa)
+    #     left = min(s[0], e[0])
+    #     right = max(s[0], e[0])
+    #     if p[0]<=left:
+    #         dist = pt_to_pt_dist(p, (left, s[1]))
+    #         return dist
+    #     elif p[0]>=right:
+    #         dist = pt_to_pt_dist(p, (right, s[1]))
+    #         return dist
+    #     a = pt_to_pt_dist(s, e) #abs(s[0]-e[0])
+    #     b = pt_to_pt_dist(s, p)
+    #     c = pt_to_pt_dist(e, p)
+    #     p = (a+b+c)/2.0
+    #     #debug("  a: "+str(a)+" b: "+str(b)+" c: "+str(c)+" p: "+str(p)+" "+str(p*(p-a)*(p-b)*(p-c)))
+    #     dist = abs(math.sqrt(p*(p-a)*(p-b)*(p-c))*2/a)
+    #     #debug("  dist: "+str(dist))
+    #     return dist
+
     def distance_to_pt(self, pt):
-        debug("In distance_to_pt")
-        dist = 0
-        a = math.atan2(self.start[1]-self.end[1], self.start[0]-self.end[0])
-        debug("  alpha: "+str(a))
-        sina = math.sin(a)
-        cosa = math.cos(a)
-        s = self.__reproject_pt(self.start, sina, cosa)
-        #s = self.start
-        e = self.__reproject_pt(self.end, sina, cosa)
-        p = self.__reproject_pt(pt, sina, cosa)
-        left = min(s[0], e[0])
-        right = max(s[0], e[0])
-        if p[0]<=left:
-            dist = pt_to_pt_dist(p, (left, s[1]))
-            return dist
-        elif p[0]>=right:
-            dist = pt_to_pt_dist(p, (right, s[1]))
-            return dist
-        a = pt_to_pt_dist(s, e) #abs(s[0]-e[0])
-        b = pt_to_pt_dist(s, p)
-        c = pt_to_pt_dist(e, p)
-        p = (a+b+c)/2.0
-        debug("  a: "+str(a)+" b: "+str(b)+" c: "+str(c)+" p: "+str(p)+" "+str(p*(p-a)*(p-b)*(p-c)))
-        dist = abs(math.sqrt(p*(p-a)*(p-b)*(p-c))*2/a)
-        debug("  dist: "+str(dist))
-        return dist
+        #dbgfname()
+        s = self.start
+        e = self.end
+        se = mk_vect(s, e)
+        l2 = vect_len2(se)
+        if l2 < 0.0001:
+            d = vect_len(mk_vect(s, pt))
+            #debug("  distance: %f"%(d,))
+            return d
+        cosine = dot_product(vect_sub(pt, s), vect_sub(e, s)) / l2
+        #debug("  cosine: %f"%(cosine,))
+        if cosine<0.0:
+            d = vect_len(mk_vect(pt, s))
+            #debug("  distance: %f"%(d,))
+            return d
+        elif cosine>1.0:
+            d = vect_len(mk_vect(pt, e))
+            #debug("  distance: %f"%(d,))
+            return d
+        v = find_vect_normal(se)
+        r = mk_vect(e, pt)
+        d = abs(-v[1]*r[1]-r[0]*v[0])/vect_len(v)
+        #debug("  distance: %f"%(d,))
+        return d
+            
 
     def check_if_pt_belongs(self, pt):
         x_i, y_i = pt
-
         minx = min(self.start[0], self.end[0])
         maxx = max(self.start[0], self.end[0])
         miny = min(self.start[1], self.end[1])

@@ -2,7 +2,7 @@ import math
 from tool_operation import ToolOperation, TOEnum
 from tool_abstract_follow import TOAbstractFollow
 from generalized_setting import TOSetting
-from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len, linearized_path_aabb, find_center_of_mass, LineUtils
+from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len, linearized_path_aabb, find_center_of_mass, sign, LineUtils
 from elements import ELine, EArc, EPoint
 
 from logging import debug, info, warning, error, critical
@@ -70,7 +70,7 @@ class TOPocketing(TOAbstractFollow):
         return False, False
 
     def __is_element_crossing(self, el_coords):
-        return abs(el_coords[0][1])/el_coords[0][1] != abs(el_coords[1][1])/el_coords[1][1]
+        return sign(el_coords[0][1]) != sign(el_coords[1][1])
 
     def __is_crossing_up(self, el_coords):
         if el_coords[1][1] > el_coords[0][1]:
@@ -214,6 +214,14 @@ class TOPocketing(TOAbstractFollow):
         debug("  points: "+str(points))
         return points
 
+    def __check_if_pt_is_close(self, pt, path):
+        tool_diameter = self.state.settings.get_tool().diameter/2.0
+        for e in path:
+            cu = e.get_cu()
+            if (cu.distance_to_pt(pt)<=(tool_diameter)):
+                return True
+        return False
+
     def build_circles(self, path):
         dbgfname()
         debug("  linearizing path")
@@ -244,23 +252,34 @@ class TOPocketing(TOAbstractFollow):
                 debug("  cx: %f, cy: %f"%(cur_x, cur_y))
                 debug("  s start: "+str(start_angle))
                 is_inside = True
+            if self.__check_if_pt_is_close([cur_x, cur_y], lpath):
+                if is_inside:
+                    is_inside = False
 
             while angle<=360:
                 cur_x = x+r*math.cos(math.radians(angle))
                 cur_y = y+r*math.sin(math.radians(angle))
-                if (self.__is_pt_inside_path_winding([cur_x, cur_y], lpath)):
-                    if not is_inside:
-                        debug("  cx: %f, cy: %f"%(cur_x, cur_y))
-                        debug("  start: "+str(start_angle))
-                        start_angle = angle
-                        is_inside = True
-                else:
-                    if is_inside:
-                        debug("  cx: %f, cy: %f"%(cur_x, cur_y))
-                        debug("  end: "+str(end_angle))
-                        end_angle = angle
-                        is_inside = False
-                        tool_paths.append(EArc(center=[x, y], radius=r, startangle=start_angle, endangle=end_angle, lt=self.state.settings.get_def_lt()))
+                close = self.__check_if_pt_is_close([cur_x, cur_y], lpath)
+                in_winding = self.__is_pt_inside_path_winding([cur_x, cur_y], lpath)
+                if in_winding and (not close) and (not is_inside):
+                    debug("  cx: %f, cy: %f"%(cur_x, cur_y))
+                    debug("  start: "+str(start_angle))
+                    start_angle = angle
+                    is_inside = True
+                elif (not in_winding) and (not close) and (is_inside):
+                    debug("  cx: %f, cy: %f"%(cur_x, cur_y))
+                    debug("  end: "+str(end_angle))
+                    end_angle = angle
+                    is_inside = False
+                    tool_paths.append(EArc(center=[x, y], radius=r, startangle=start_angle, endangle=end_angle, lt=self.state.settings.get_def_lt()))
+                elif is_inside and close:
+                    debug("  cx: %f, cy: %f"%(cur_x, cur_y))
+                    debug("  close end: "+str(end_angle))
+                    is_inside = False
+                    end_angle = angle
+                    tool_paths.append(EArc(center=[x, y], radius=r, startangle=start_angle, endangle=end_angle, lt=self.state.settings.get_def_lt()))
+
+                    
                 angle += 0.1
             if is_inside:
                 debug("  cx: %f, cy: %f"%(cur_x, cur_y))
