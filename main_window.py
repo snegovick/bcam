@@ -10,13 +10,13 @@ from logging import debug, info, warning, error, critical
 from util import dbgfname
 
 class MainWindow(object):
-    def __init__(self, w, h, Widget):
+    def __init__(self, Widget):
         self.tool_diameter_spin = {}
         self.tool_feedrate_spin = {}
         self.tool_vert_step = {}
 
         self.window = gtk.Window()
-        self.window.resize(w, h)
+        self.window.maximize()
         self.window.connect("delete-event", gtk.main_quit)
 
         self.menu_bar = gtk.MenuBar()
@@ -329,8 +329,3 @@ class MainWindow(object):
         self.pocket_tool_button = gtk.Button("Pocket")
         self.pocket_tool_button.connect("clicked", lambda *args: ep.push_event(ee.pocket_tool_click, args))
         self.left_vbox.pack_start(self.pocket_tool_button, expand=False, fill=False, padding=0)
-
-
-
-
-

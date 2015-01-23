@@ -13,9 +13,6 @@ from events import EVEnum, EventProcessor, ee, ep
 from main_window import MainWindow
 from state import state
 
-width=640
-height=480
-
 class Screen(gtk.DrawingArea):
 
     # Draw in response to an expose-event
@@ -165,7 +162,7 @@ mw = None
 # GTK mumbo-jumbo to show the widget in a window and quit when it's closed
 def run():
     global mw, ep
-    mw = MainWindow(width, height, Screen)
+    mw = MainWindow(Screen)
     ep.mw = mw
     mw.run()
 
