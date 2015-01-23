@@ -226,18 +226,20 @@ class TOPocketing(TOAbstractFollow):
         dbgfname()
         debug("  linearizing path")
         lpath = self.__linearize_path(path, 0.1)
-        x, y = find_center_of_mass(lpath)
+        #x, y = find_center_of_mass(lpath)
 
         path_aabb = linearized_path_aabb(lpath)
         left = path_aabb.left
         right = path_aabb.right
         top = path_aabb.top
         bottom = path_aabb.bottom
+        x = (right-left)/2.0+left
+        y = (top-bottom)/2.0+bottom
         
         debug("  building paths")
         tool_paths = []
         r = 0
-        max_r = max(abs(abs(left)-abs(x)), abs(abs(right)-abs(x)))
+        max_r = math.sqrt(((right-left)/2.0)**2+((top-bottom)/2.0)**2)
         tool_radius = self.tool.diameter/2.0
         while r < max_r:
             debug("  r: %f"%(r,))
@@ -260,19 +262,20 @@ class TOPocketing(TOAbstractFollow):
                 cur_x = x+r*math.cos(math.radians(angle))
                 cur_y = y+r*math.sin(math.radians(angle))
                 close = self.__check_if_pt_is_close([cur_x, cur_y], lpath)
-                in_winding = self.__is_pt_inside_path_winding([cur_x, cur_y], lpath)
-                if in_winding and (not close) and (not is_inside):
-                    debug("  cx: %f, cy: %f"%(cur_x, cur_y))
-                    debug("  start: "+str(start_angle))
-                    start_angle = angle
-                    is_inside = True
-                elif (not in_winding) and (not close) and (is_inside):
-                    debug("  cx: %f, cy: %f"%(cur_x, cur_y))
-                    debug("  end: "+str(end_angle))
-                    end_angle = angle
-                    is_inside = False
-                    tool_paths.append(EArc(center=[x, y], radius=r, startangle=start_angle, endangle=end_angle, lt=self.state.settings.get_def_lt()))
-                elif is_inside and close:
+                if not close:
+                    in_winding = self.__is_pt_inside_path_winding([cur_x, cur_y], lpath)
+                    if in_winding and (not is_inside):
+                        debug("  cx: %f, cy: %f"%(cur_x, cur_y))
+                        debug("  start: "+str(start_angle))
+                        start_angle = angle
+                        is_inside = True
+                    elif (not in_winding) and (is_inside):
+                        debug("  cx: %f, cy: %f"%(cur_x, cur_y))
+                        debug("  end: "+str(end_angle))
+                        end_angle = angle
+                        is_inside = False
+                        tool_paths.append(EArc(center=[x, y], radius=r, startangle=start_angle, endangle=end_angle, lt=self.state.settings.get_def_lt()))
+                elif is_inside:
                     debug("  cx: %f, cy: %f"%(cur_x, cur_y))
                     debug("  close end: "+str(end_angle))
                     is_inside = False
