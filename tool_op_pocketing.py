@@ -29,6 +29,22 @@ class TOPocketing(TOAbstractFollow):
     def serialize(self):
         return {'type': 'topocketing', 'path_ref': self.path.name, 'depth': self.depth, 'index': self.index, 'offset': self.offset}
 
+    def __draw_elements(self, ctx):
+        if self.draw_list != None:
+            for e in self.draw_list:
+                e.draw_element(ctx)
+                ctx.stroke()
+
+    def draw(self, ctx):
+        if self.display:
+            ctx.set_line_join(cairo.LINE_JOIN_ROUND)
+            ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+            self.set_lt(ctx)
+            self.__draw_elements(ctx)
+
+            self.set_fill_lt(ctx)
+            self.__draw_elements(ctx)
+
     def __linearize_path(self, path, tolerance):
         linearized_path = []
         for e in path:
@@ -41,12 +57,12 @@ class TOPocketing(TOAbstractFollow):
 
     # return [0]: if halfcrosses, [1]: if up
     def __is_element_halfcrossing(self, el_coords):
-        if abs(el_coords[0][1])<0.001 and abs(el_coords[1][1])>0.001:
+        if abs(el_coords[0][1])<0.0001 and abs(el_coords[1][1])>0.0001:
             if el_coords[1][1] > 0:
                 return True, True
             else:
                 return True, False
-        if abs(el_coords[1][1])<0.001 and abs(el_coords[0][1])>0.001:
+        if abs(el_coords[1][1])<0.0001 and abs(el_coords[0][1])>0.0001:
             if el_coords[0][1] > 0:
                 return True, False
             else:
@@ -225,25 +241,29 @@ class TOPocketing(TOAbstractFollow):
             start_angle = 0
             end_angle = 0
             if (self.__is_pt_inside_path_winding([cur_x, cur_y], lpath)):
+                debug("  cx: %f, cy: %f"%(cur_x, cur_y))
                 debug("  s start: "+str(start_angle))
                 is_inside = True
 
-            while angle<=math.pi*2:
-                cur_x = x+r*math.cos(angle)
-                cur_y = y+r*math.sin(angle)
+            while angle<=360:
+                cur_x = x+r*math.cos(math.radians(angle))
+                cur_y = y+r*math.sin(math.radians(angle))
                 if (self.__is_pt_inside_path_winding([cur_x, cur_y], lpath)):
                     if not is_inside:
+                        debug("  cx: %f, cy: %f"%(cur_x, cur_y))
                         debug("  start: "+str(start_angle))
                         start_angle = angle
                         is_inside = True
                 else:
                     if is_inside:
+                        debug("  cx: %f, cy: %f"%(cur_x, cur_y))
                         debug("  end: "+str(end_angle))
                         end_angle = angle
                         is_inside = False
                         tool_paths.append(EArc(center=[x, y], radius=r, startangle=start_angle, endangle=end_angle, lt=self.state.settings.get_def_lt()))
                 angle += 0.1
             if is_inside:
+                debug("  cx: %f, cy: %f"%(cur_x, cur_y))
                 debug("  e end: "+str(angle))
                 tool_paths.append(EArc(center=[x, y], radius=r, startangle=start_angle, endangle=angle-0.1, lt=self.state.settings.get_def_lt()))
 
