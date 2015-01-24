@@ -1,5 +1,9 @@
+class TOSTypes:
+    button = "button"
+    float = "float"
+
 class TOSetting:
-    def __init__(self, type, min, max, default, display_name, parent_cb):
+    def __init__(self, type, min=None, max=None, default=None, display_name="", parent_cb=None):
         self.type = type
         self.min = min
         self.max = max

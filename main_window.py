@@ -5,9 +5,11 @@ import gtk, gobject, cairo
 import sys
 from events import EVEnum, EventProcessor, ee, ep
 from state import state
+from generalized_setting import TOSTypes
 
 from logging import debug, info, warning, error, critical
 from util import dbgfname
+
 
 class MainWindow(object):
     def __init__(self, Widget):
@@ -117,12 +119,7 @@ class MainWindow(object):
         l = gtk.Label(label)
         self.settings_vb.pack_start(l, expand=False, fill=False, padding=0)
         l.show()
-        debug("  "+str(settings_lst))
-        for s in settings_lst:
-            dct = {}
-            if s.type == "float":
-                w = self.__mk_labeled_spin(dct, s.display_name, s, None, s.default, s.min, s.max)
-                self.settings_vb.pack_start(w, expand=False, fill=False, padding=0)
+        self.populate_box_with_settings(self.settings_vb, settings_lst)
 
     def mk_question_dialog(self, question):
         md = gtk.Dialog(title=question, parent=self.window, flags=gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT)
@@ -213,7 +210,7 @@ class MainWindow(object):
         list_item.add(hbox)
         lst.add(list_item)
 
-    def __mk_labeled_spin(self, dct, mlabel, data=None, callback=None, value=3.0, lower=-999.0, upper=999.0, step_incr=0.01, page_incr=0.5):
+    def __mk_labeled_spin(self, dct, mlabel, data=None, value=3.0, lower=-999.0, upper=999.0, step_incr=0.01, page_incr=0.5):
         if lower == None:
             lower = -999.0
         if upper == None:
@@ -236,6 +233,32 @@ class MainWindow(object):
         hbox.pack_start(spin, expand=True, fill=True, padding=0)
         return hbox
 
+    def __mk_button(self, dct, mlabel, data=None):
+        hbox = gtk.HBox(homogeneous=False, spacing=0)
+        hbox.show()
+        dct["hbox"] = hbox
+        button = gtk.Button(label=mlabel)
+        button.connect("clicked", lambda *args: ep.push_event(ee.update_settings, (data, args)))
+        button.show()
+        dct["button"] = button
+        hbox.pack_start(button, expand=True, fill=True, padding=0)
+        return hbox
+
+    def populate_box_with_settings(self, box, settings_lst):
+        if settings_lst != None:
+            debug("  "+str(settings_lst))
+            for s in settings_lst:
+                dct = {}
+                if s.type == TOSTypes.float:
+                    w = self.__mk_labeled_spin(dct, s.display_name, s, s.default, s.min, s.max)
+                elif s.type == TOSTypes.button:
+                    w = self.__mk_button(dct, s.display_name, s)
+                else:
+                    warning("  Bad tool setting: %s"%(s.type,))
+                    continue
+                box.pack_start(w, expand=False, fill=False, padding=0)
+
+
     def update_right_vbox(self):
         self.hbox.remove(self.hbox.children()[-1])
         children = self.right_vbox.children()
@@ -253,26 +276,14 @@ class MainWindow(object):
         self.right_vbox.pack_start(self.tool_label, expand=False, fill=False, padding=0)
 
         settings_lst = state.get_tool().get_settings_list()
-        if settings_lst != None:
-            debug("  "+str(settings_lst))
-            for s in settings_lst:
-                dct = {}
-                if s.type == "float":
-                    w = self.__mk_labeled_spin(dct, s.display_name, s, None, s.default, s.min, s.max)
-                    self.right_vbox.pack_start(w, expand=False, fill=False, padding=0)
+        self.populate_box_with_settings(self.right_vbox, settings_lst)
 
 
         self.material_label = gtk.Label("Material settings")
         self.material_label.show()
         self.right_vbox.pack_start(self.material_label, expand=False, fill=False, padding=0)
         settings_lst = state.settings.material.get_settings_list()
-        if settings_lst != None:
-            debug("  "+str(settings_lst))
-            for s in settings_lst:
-                dct = {}
-                if s.type == "float":
-                    w = self.__mk_labeled_spin(dct, s.display_name, s, None, s.default, s.min, s.max)
-                    self.right_vbox.pack_start(w, expand=False, fill=False, padding=0)
+        self.populate_box_with_settings(self.right_vbox, settings_lst)
 
         self.settings_vb = gtk.VBox(homogeneous=False, spacing=0)
         self.settings_vb.show()

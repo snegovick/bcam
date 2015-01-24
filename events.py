@@ -13,6 +13,7 @@ from tool_op_pocketing import TOPocketing
 from calc_utils import AABB, OverlapEnum
 from path import Path
 from project import project
+from generalized_setting import TOSTypes
 
 from logging import debug, info, warning, error, critical
 from util import dbgfname
@@ -426,16 +427,15 @@ class EventProcessor(object):
     def update_settings(self, args):
         dbgfname()
         debug("  settings update: "+str(args))
-        new_value = args[0][1][0].get_value()
         setting = args[0][0]
-        setting.set_value(new_value)
-        oldtool = state.get_tool()
-        debug("  tool: "+str(oldtool))
-        debug("  feedrate: "+str(oldtool.get_feedrate()))
-        project.push_state(state)
-        debug("  tool: "+str(state.get_tool()))
-        state.get_tool().copy_tool(oldtool)
-        debug("  feedrate: "+str(state.get_tool().get_feedrate()))
+        if setting.type == TOSTypes.float:
+            new_value = args[0][1][0].get_value()
+            setting.set_value(new_value)
+            project.push_state(state)
+        elif setting.type == TOSTypes.button:
+            setting.set_value(None)
+        else:
+            warning("  Unknown setting type: %s"%(setting.type,))
         self.mw.widget.update()
 
     def tool_operation_up_click(self, args):

@@ -1,7 +1,7 @@
 import math
 from tool_operation import ToolOperation, TOEnum
 from tool_abstract_follow import TOAbstractFollow
-from generalized_setting import TOSetting
+from generalized_setting import TOSetting, TOSTypes
 from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len, linearized_path_aabb, find_center_of_mass, sign, LineUtils
 from elements import ELine, EArc, EPoint
 
@@ -19,7 +19,8 @@ class TOPocketing(TOAbstractFollow):
         if data == None:
             self.index = index
             self.depth = depth
-            self.offset = 0
+            self.offset = offset
+            self.old_offset = offset
             self.path = None
         else:
             self.deserialize(data)
@@ -163,10 +164,10 @@ class TOPocketing(TOAbstractFollow):
         return points
 
     def __check_if_pt_is_close(self, pt, path):
-        tool_diameter = self.state.settings.get_tool().diameter/2.0
+        offset = self.offset
         for e in path:
             cu = e.get_cu()
-            if (cu.distance_to_pt(pt)<=(tool_diameter)):
+            if (cu.distance_to_pt(pt)<=offset):
                 return True
         return False
 
@@ -249,15 +250,22 @@ class TOPocketing(TOAbstractFollow):
             self.apply(p)
 
     def get_settings_list(self):
-        settings_lst = [TOSetting("float", 0, self.state.settings.material.thickness, self.depth, "Depth, mm: ", self.set_depth_s),
-                        TOSetting("float", 0, None, self.offset, "Offset, mm: ", self.set_offset_s)]
+        settings_lst = [TOSetting(TOSTypes.float, 0, self.state.settings.material.thickness, self.depth, "Depth, mm: ", self.set_depth_s),
+                        TOSetting(TOSTypes.float, 0, None, self.offset, "Offset, mm: ", self.set_offset_s),
+                        TOSetting(TOSTypes.button, display_name="Recalculate", parent_cb=self.clicked_recalculate)
+        ]
         return settings_lst
 
     def set_depth_s(self, setting):
         self.depth = setting.new_value
 
     def set_offset_s(self, setting):
-        self.offset = setting.new_value        
+        self.offset = setting.new_value
+
+    def clicked_recalculate(self, setting):
+        if self.offset != self.old_offset:
+            self.old_offset = self.offset
+            self.apply(self.path)
 
     def apply(self, path):
         if path.operations[self.name]:
