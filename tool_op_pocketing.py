@@ -1,5 +1,5 @@
 import math
-from tool_operation import ToolOperation, TOEnum
+from tool_operation import ToolOperation, TOEnum, TOResult
 from tool_abstract_follow import TOAbstractFollow
 from generalized_setting import TOSetting, TOSTypes
 from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len, linearized_path_aabb, find_center_of_mass, sign, LineUtils
@@ -10,6 +10,7 @@ from util import dbgfname
 
 import json
 import cairo
+from multiprocessing import Process, Pipe
 
 class TOPocketing(TOAbstractFollow):
     def __init__(self, state, depth=0, index=0, offset=0, data=None):
@@ -263,17 +264,47 @@ class TOPocketing(TOAbstractFollow):
         self.offset = setting.new_value
 
     def clicked_recalculate(self, setting):
-        if self.offset != self.old_offset:
-            self.old_offset = self.offset
-            self.apply(self.path)
+        dbgfname()
+        op = self.state.get_operation_in_progress()
+        debug("  current operation:" + str(op))
+        if op==None:
+            if self.offset != self.old_offset:
+                self.old_offset = self.offset
+                self.state.set_operation_in_progress(self)
+                if self.apply(self.path)!=TOResult.ok:
+                    debug("  pushing event to update pocketing state")
+                    self.state.ep.push_event(self.state.ee.pocket_tool_click, None)
+
+    def build_circles_wrapper(self, pipe, path):
+        draw_list = self.build_circles(path.ordered_elements)
+        pipe.send(draw_list)
+        pipe.close()
 
     def apply(self, path):
-        if path.operations[self.name]:
-            if path.ordered_elements!=None:
-                self.path = path
-                self.draw_list = self.build_circles(path.ordered_elements)
-                return True
-        return False
+        dbgfname()
+        if path != None:
+            if path.operations[self.name]:
+                if path.ordered_elements!=None:
+                    self.path = path
+                    parent, child = Pipe()
+                    self.parent = parent
+                    debug("  starting subprocess")
+                    self.process = Process(target=self.build_circles_wrapper, args=(child, path))
+                    self.process.start()
+                    if self.process.is_alive():
+                        return TOResult.repeat
+                    self.draw_list = self.parent.recv()
+                    debug("  joining: "+str(self.draw_list))
+                    self.process.join()
+                    return TOResult.ok
+        else:
+            if self.process.is_alive():
+                return TOResult.repeat
+            self.draw_list = self.parent.recv()
+            debug("  joining: "+str(self.draw_list))
+            self.process.join()
+            return TOResult.ok
+        return TOResult.failed
 
     def get_gcode(self):
         cp = self.tool.current_position

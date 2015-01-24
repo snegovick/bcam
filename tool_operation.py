@@ -6,6 +6,11 @@ class TOEnum:
     offset_follow = "offset follow"
     pocket = "pocket"
 
+class TOResult:
+    ok = "ok"
+    failed = "failed"
+    repeat = "repeat"
+
 class ToolOperation(object):
     def __init__(self, state):
         self.tool=state.settings.tool

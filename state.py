@@ -17,6 +17,17 @@ class State:
         else:
             self.deserialize(data)
 
+        self.operation_in_progress = None
+
+    def set_operation_in_progress(self, operation):
+        self.operation_in_progress = operation
+
+    def get_operation_in_progress(self):
+        return self.operation_in_progress
+
+    def unset_operation_in_progress(self):
+        self.operation_in_progress = None
+
     def get_tool(self):
         return self.settings.tool
 

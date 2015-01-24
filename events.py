@@ -6,6 +6,7 @@ import os
 
 from loader_dxf import DXFLoader
 from state import state, State
+from tool_operation import TOResult
 from tool_op_drill import TODrill
 from tool_op_exact_follow import TOExactFollow
 from tool_op_offset_follow import TOOffsetFollow
@@ -54,6 +55,7 @@ class EVEnum:
     paths_check_button_click = "paths_check_button_click"
     path_delete_button_click = "path_delete_button_click"
     tool_operation_delete_button_click = "tool_operation_delete_button_click"
+    update_progress = "update_progress"
 
 class EventProcessor(object):
     ee = EVEnum()
@@ -114,13 +116,15 @@ class EventProcessor(object):
         self.event_list.append((event, args))
 
     def process(self):
-        for e, args in self.event_list:
+        event_list = self.event_list[:]
+        self.event_list = []
+        for e, args in event_list:
             if e in self.events:
                 self.events[e](args)
             else:
-                warning("Unknown event:"+str(e)+" args: "+str(args))
-                warning("Please report")
-        self.event_list = []
+                dbgfname()
+                warning("  Unknown event:"+str(e)+" args: "+str(args))
+                warning("  Please report")
 
     def load_click(self, args):
         mimes = [("Blueprints (*.dxf)", "Application/dxf", "*.dxf")]
@@ -413,15 +417,37 @@ class EventProcessor(object):
 
     def pocket_tool_click(self, args):
         dbgfname()
-        debug("  pocket tool click: "+str(args))
-        connected = self.join_elements(None)
-        debug("  selected path: "+str(self.selected_path))
-        if connected != None:
-            pocket_op = TOPocketing(state, index=len(state.tool_operations), depth=state.get_settings().get_material().get_thickness())
-            if pocket_op.apply(connected):
-                state.tool_operations.append(pocket_op)
-                self.push_event(self.ee.update_tool_operations_list, (None))
-                project.push_state(state)
+        debug("  args: "+str(args))
+        if args[0] != None:
+            debug("  pocket tool click: "+str(args))
+            connected = self.join_elements(None)
+            debug("  selected path: "+str(self.selected_path))
+            if connected != None:
+                pocket_op = TOPocketing(state, index=len(state.tool_operations), depth=state.get_settings().get_material().get_thickness())
+                result = pocket_op.apply(connected)
+                if result == TOResult.ok:
+                    if state.get_tool_operation_by_name(pocket_op.display_name) == None:
+                        state.tool_operations.append(pocket_op)
+                        project.push_state(state)
+                        self.push_event(self.ee.update_tool_operations_list, (None))
+                elif result == TOResult.repeat:
+                    state.set_operation_in_progress(pocket_op)
+                    self.push_event(self.ee.update_progress, None)
+                    self.push_event(self.ee.pocket_tool_click, None)
+        else:
+            op = state.get_operation_in_progress()
+            debug("  Operation in progress: "+str(op))
+            if op != None:
+                if op.apply(None) == TOResult.repeat:
+                    self.push_event(self.ee.update_progress, None)
+                    self.push_event(self.ee.pocket_tool_click, None)
+                else:
+                    if state.get_tool_operation_by_name(op.display_name) == None:
+                        state.tool_operations.append(op)
+                        project.push_state(state)
+                        self.push_event(self.ee.update_tool_operations_list, (None))
+                    self.push_event(self.ee.update_progress, None)
+                    state.unset_operation_in_progress()
         self.mw.widget.update()
 
     def update_settings(self, args):
@@ -543,3 +569,5 @@ class EventProcessor(object):
         
 ee = EVEnum()
 ep = EventProcessor()
+state.ep = ep
+state.ee = ee
