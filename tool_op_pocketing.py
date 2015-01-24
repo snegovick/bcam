@@ -20,12 +20,13 @@ class TOPocketing(TOAbstractFollow):
         if data == None:
             self.index = index
             self.depth = depth
-            self.offset = offset
+            self.offset = (offset if offset!=0 else self.state.settings.get_tool().diameter/2.0)
             self.old_offset = offset
             self.path = None
         else:
             self.deserialize(data)
         self.display_name = TOEnum.pocket+" "+str(self.index)
+        self.process = None
 
     def serialize(self):
         return {'type': 'topocketing', 'path_ref': self.path.name, 'depth': self.depth, 'index': self.index, 'offset': self.offset}
@@ -250,10 +251,10 @@ class TOPocketing(TOAbstractFollow):
         if p:
             self.apply(p)
 
-    def get_settings_list(self):
+    def get_settings_list(self):            
         settings_lst = [TOSetting(TOSTypes.float, 0, self.state.settings.material.thickness, self.depth, "Depth, mm: ", self.set_depth_s),
                         TOSetting(TOSTypes.float, 0, None, self.offset, "Offset, mm: ", self.set_offset_s),
-                        TOSetting(TOSTypes.button, display_name="Recalculate", parent_cb=self.clicked_recalculate)
+                        TOSetting(TOSTypes.button, display_name="Recalculate offset", parent_cb=self.clicked_recalculate)
         ]
         return settings_lst
 
@@ -281,7 +282,7 @@ class TOPocketing(TOAbstractFollow):
         pipe.close()
 
     def apply(self, path):
-        dbgfname()
+        #dbgfname()
         if path != None:
             if path.operations[self.name]:
                 if path.ordered_elements!=None:
@@ -296,14 +297,17 @@ class TOPocketing(TOAbstractFollow):
                     self.draw_list = self.parent.recv()
                     debug("  joining: "+str(self.draw_list))
                     self.process.join()
+                    self.process = None
                     return TOResult.ok
         else:
-            if self.process.is_alive():
-                return TOResult.repeat
-            self.draw_list = self.parent.recv()
-            debug("  joining: "+str(self.draw_list))
-            self.process.join()
-            return TOResult.ok
+            if self.process != None:
+                if self.process.is_alive():
+                    return TOResult.repeat
+                self.draw_list = self.parent.recv()
+                debug("  joining: "+str(self.draw_list))
+                self.process.join()
+                self.process = None
+                return TOResult.ok
         return TOResult.failed
 
     def get_gcode(self):

@@ -18,6 +18,8 @@ class State:
             self.deserialize(data)
 
         self.operation_in_progress = None
+        self.spinner = ['-', '\\', '|', '/']
+        self.spinner_frame = 0
 
     def set_operation_in_progress(self, operation):
         self.operation_in_progress = operation

@@ -97,8 +97,14 @@ class MainWindow(object):
         self.widget_vbox.pack_start(self.widget_hscroll, expand=False, fill=False, padding=0)
         self.hbox.pack_start(self.widget_vbox, expand=True, fill=True, padding=0)
 
+        self.status_hbox = gtk.HBox(homogeneous=False, spacing=5)
+        self.widget_vbox.pack_start(self.status_hbox, expand=False, fill=False)
+
         self.cursor_pos_label = gtk.Label("")
-        self.widget_vbox.pack_start(self.cursor_pos_label, expand=False, fill=False)
+        self.status_hbox.pack_start(self.cursor_pos_label, expand=False, fill=False)
+
+        self.progress_label = gtk.Label("")
+        self.status_hbox.pack_start(self.progress_label, expand=False, fill=False)
 
         self.__mk_right_vbox()
         self.hbox.pack_start(self.right_vbox, expand=False, fill=False, padding=0)

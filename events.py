@@ -104,6 +104,7 @@ class EventProcessor(object):
             self.ee.paths_check_button_click: self.paths_check_button_click,
             self.ee.path_delete_button_click: self.path_delete_button_click,
             self.ee.tool_operation_delete_button_click: self.tool_operation_delete_button_click,
+            self.ee.update_progress: self.update_progress,
         }
 
     def reset(self):
@@ -311,7 +312,7 @@ class EventProcessor(object):
         cx = (args[0][0]-offset[0])/scale[0]
         cy = (args[0][1]-offset[1])/scale[1]
         self.pointer_position = (cx, cy)
-        self.mw.cursor_pos_label.set_text("%.3f:%.3f"%(cx, cy))
+        self.mw.cursor_pos_label.set_text("cur: %.3f:%.3f"%(cx, cy))
         self.mw.widget.update()
 
     def drill_tool_click(self, args):
@@ -416,12 +417,12 @@ class EventProcessor(object):
         self.mw.widget.update()
 
     def pocket_tool_click(self, args):
-        dbgfname()
-        debug("  args: "+str(args))
+        #dbgfname()
+        #debug("  args: "+str(args))
         if args[0] != None:
-            debug("  pocket tool click: "+str(args))
+            #debug("  pocket tool click: "+str(args))
             connected = self.join_elements(None)
-            debug("  selected path: "+str(self.selected_path))
+            #debug("  selected path: "+str(self.selected_path))
             if connected != None:
                 pocket_op = TOPocketing(state, index=len(state.tool_operations), depth=state.get_settings().get_material().get_thickness())
                 result = pocket_op.apply(connected)
@@ -432,23 +433,33 @@ class EventProcessor(object):
                         self.push_event(self.ee.update_tool_operations_list, (None))
                 elif result == TOResult.repeat:
                     state.set_operation_in_progress(pocket_op)
-                    self.push_event(self.ee.update_progress, None)
+                    self.push_event(self.ee.update_progress, True)
                     self.push_event(self.ee.pocket_tool_click, None)
         else:
             op = state.get_operation_in_progress()
-            debug("  Operation in progress: "+str(op))
+            #debug("  Operation in progress: "+str(op))
             if op != None:
                 if op.apply(None) == TOResult.repeat:
-                    self.push_event(self.ee.update_progress, None)
+                    self.push_event(self.ee.update_progress, True)
                     self.push_event(self.ee.pocket_tool_click, None)
                 else:
                     if state.get_tool_operation_by_name(op.display_name) == None:
                         state.tool_operations.append(op)
                         project.push_state(state)
                         self.push_event(self.ee.update_tool_operations_list, (None))
-                    self.push_event(self.ee.update_progress, None)
+                    self.push_event(self.ee.update_progress, False)
                     state.unset_operation_in_progress()
         self.mw.widget.update()
+
+    def update_progress(self, args):
+        if args[0] == True:
+            state.spinner_frame+=1
+            state.spinner_frame %= (len(state.spinner)*20)
+            self.mw.progress_label.set_text("progress: "+state.spinner[int(state.spinner_frame/20)])
+            self.mw.widget.update()
+        else:
+            self.mw.progress_label.set_text("No task running")
+            self.mw.widget.update()
 
     def update_settings(self, args):
         dbgfname()
