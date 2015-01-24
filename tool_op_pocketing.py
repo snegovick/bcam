@@ -317,22 +317,19 @@ class TOPocketing(TOAbstractFollow):
         out+= self.state.settings.default_pp.move_to_rapid(new_pos)
         self.tool.current_position = new_pos
 
-        start = self.offset_path[0].start
-
-        new_pos = [start[0], start[1], new_pos[2]]
-        out+= self.state.settings.default_pp.move_to_rapid(new_pos)
-        self.tool.current_position = new_pos
 
         for step in range(int(self.depth/(self.tool.diameter/2.0))+1):
-            for e in self.offset_path:
-                out += self.process_el_to_gcode(e, step)
-            for e in self.pocket_pattern:
-                out += self.process_el_to_gcode(e, step)
-                
+            for e in self.draw_list:
+                start = e.start
+                new_pos = start[:2]+[self.tool.default_height]
+                out+=self.state.settings.default_pp.move_to_rapid(new_pos)
+                self.tool.current_position = new_pos
 
-        new_pos = [new_pos[0], new_pos[1], self.tool.default_height]
-        out+= self.state.settings.default_pp.move_to_rapid(new_pos)
-        self.tool.current_position = new_pos
+                out += self.process_el_to_gcode(e, step)
+
+                new_pos = self.tool.current_position[:2]+[self.tool.default_height]
+                out+=self.state.settings.default_pp.move_to_rapid(new_pos)
+                self.tool.current_position = new_pos
         return out
 
     def __repr__(self):
