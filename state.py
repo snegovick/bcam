@@ -1,5 +1,9 @@
 from settings import Settings
 
+from logging import debug, info, warning, error, critical
+from util import dbgfname
+
+
 class State:
     def __init__(self, data=None):
         if data == None:

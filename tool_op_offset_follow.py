@@ -43,7 +43,7 @@ class TOOffsetFollow(TOAbstractFollow):
 
     def get_settings_list(self):
         settings_lst = [TOSetting("float", 0, self.state.settings.material.thickness, self.depth, "Depth, mm: ", self.set_depth_s),
-                        TOSetting("float", None, None, 1.0, "Offset, mm: ", self.set_offset_s),
+                        TOSetting("float", None, None, self.offset, "Offset, mm: ", self.set_offset_s),
                         TOSetting("float", None, None, 1.0, "Scale center x: ", self.set_scale_center_x_s),
                         TOSetting("float", None, None, 1.0, "Scale center y: ", self.set_scale_center_y_s)]
         return settings_lst
