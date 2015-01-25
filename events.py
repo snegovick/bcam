@@ -38,6 +38,8 @@ class EVEnum:
     deselect_all = "deselect_all"
     shift_press = "shift_press"
     shift_release = "shift_release"
+    ctrl_press = "ctrl_press"
+    ctrl_release = "ctrl_release"
     update_paths_list = "update_paths_list"
     update_tool_operations_list = "update_tool_operations_list"
     path_list_selection_changed = "path_list_selection_changed"
@@ -67,6 +69,7 @@ class EventProcessor(object):
     left_press_start = None
     pointer_position = None
     shift_pressed = False
+    ctrl_pressed = False
 
     def __init__(self):
         Singleton.ee = self.ee
@@ -89,6 +92,8 @@ class EventProcessor(object):
             self.ee.deselect_all: self.deselect_all,
             self.ee.shift_press: self.shift_press,
             self.ee.shift_release: self.shift_release,
+            self.ee.ctrl_press: self.ctrl_press,
+            self.ee.ctrl_release: self.ctrl_release,
             self.ee.update_paths_list: self.update_paths_list,
             self.ee.path_list_selection_changed: self.path_list_selection_changed,
             self.ee.exact_follow_tool_click: self.exact_follow_tool_click,
@@ -365,6 +370,12 @@ class EventProcessor(object):
     def shift_release(self, args):
         self.shift_pressed = False
 
+    def ctrl_press(self, args):
+        self.ctrl_pressed = True
+
+    def ctrl_release(self, args):
+        self.ctrl_pressed = False
+
     def path_list_selection_changed(self, args):
         selection = args[0][0].get_selection()
         self.deselect_all(None)
@@ -515,22 +526,36 @@ class EventProcessor(object):
     def scroll_up(self, args):
         dbgfname()
         debug("  scroll up")
-        if Singleton.state.scale[0]<=1:
-            Singleton.state.scale = (Singleton.state.scale[0]+0.1, Singleton.state.scale[1]+0.1)
+        if self.shift_pressed:
+            offset = Singleton.state.get_base_offset()
+            Singleton.mw.widget_vscroll.set_value(-(offset[1]+10*Singleton.state.scale[0]))
+        elif self.ctrl_pressed:
+            offset = Singleton.state.get_base_offset()
+            Singleton.mw.widget_hscroll.set_value(-(offset[0]+10*Singleton.state.scale[0]))
         else:
-            Singleton.state.scale = (Singleton.state.scale[0]+1, Singleton.state.scale[1]+1)
-        #project.push_state(self.file_data, self.operations, settings, state)
+            if Singleton.state.scale[0]<=1:
+                Singleton.state.scale = (Singleton.state.scale[0]+0.1, Singleton.state.scale[1]+0.1)
+            else:
+                Singleton.state.scale = (Singleton.state.scale[0]+1, Singleton.state.scale[1]+1)
+            #project.push_state(self.file_data, self.operations, settings, state)
         self.mw.widget.update()
 
     def scroll_down(self, args):
         dbgfname()
         debug("  scroll down")
-        if Singleton.state.scale[0]>0.1:
-            if Singleton.state.scale[0]<=1:
-                Singleton.state.scale = (Singleton.state.scale[0]-0.1, Singleton.state.scale[1]-0.1)
-            else:
-                Singleton.state.scale = (Singleton.state.scale[0]-1, Singleton.state.scale[1]-1)
-        #project.push_state(self.file_data, self.operations, settings, state)
+        if self.shift_pressed:
+            offset = Singleton.state.get_base_offset()
+            Singleton.mw.widget_vscroll.set_value(-(offset[1]-10*Singleton.state.scale[0]))
+        elif self.ctrl_pressed:
+            offset = Singleton.state.get_base_offset()
+            Singleton.mw.widget_hscroll.set_value(-(offset[0]-10*Singleton.state.scale[0]))
+        else:
+            if Singleton.state.scale[0]>0.1:
+                if Singleton.state.scale[0]<=1:
+                    Singleton.state.scale = (Singleton.state.scale[0]-0.1, Singleton.state.scale[1]-0.1)
+                else:
+                    Singleton.state.scale = (Singleton.state.scale[0]-1, Singleton.state.scale[1]-1)
+            #project.push_state(self.file_data, self.operations, settings, state)
         self.mw.widget.update()
 
     def hscroll(self, args):

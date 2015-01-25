@@ -49,10 +49,15 @@ class Screen(gtk.DrawingArea):
             ep.push_event(ee.deselect_all, (None))
         elif event.keyval == 65505: # shift
             ep.push_event(ee.shift_press, (None))
+        elif event.keyval == 65507: # ctrl
+            ep.push_event(ee.ctrl_press, (None))
 
     def key_release_event(self, widget, event):
         if event.keyval == 65505: # shift
             ep.push_event(ee.shift_release, (None))
+        elif event.keyval == 65507: # shift
+            ep.push_event(ee.ctrl_release, (None))
+
 
     def button_release_event(self, widget, event):
         if event.button == 1:
@@ -158,13 +163,13 @@ class Screen(gtk.DrawingArea):
         cr_gdk.paint()
 
 mw = None
-
         
 # GTK mumbo-jumbo to show the widget in a window and quit when it's closed
 def run():
     global mw, ep
     state.State()
     mw = MainWindow(Screen)
+    Singleton.mw = mw
     ep.mw = mw
     mw.run()
 
