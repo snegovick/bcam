@@ -1,11 +1,12 @@
 from path import Path
 from state import State
 import state
-import os
+from singleton import Singleton
 
 from logging import debug, info, warning, error, critical
 from util import dbgfname
 
+import os
 import json
 from copy import deepcopy
 
@@ -43,10 +44,11 @@ class Project(object):
         #print "json:", parsed_json
         if parsed_json["format_version"] == 1:
             for s in parsed_json["steps"]:
-                self.steps.append(Step(data=s))
+                step = Step(data=s)
+                self.steps.append(step)
 
             debug("  steps: "+str(len(self.steps)))
-            state.state.set(self.steps[-1].state)
+            Singleton.state.set(self.steps[-1].state)
             ep.push_event(ee.update_tool_operations_list, (None))
             ep.push_event(ee.update_paths_list, (None))
             ep.mw.widget.update()

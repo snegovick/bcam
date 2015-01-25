@@ -4,6 +4,7 @@ from tool_abstract_follow import TOAbstractFollow
 from generalized_setting import TOSetting, TOSTypes
 from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len, linearized_path_aabb, find_center_of_mass, sign, LineUtils
 from elements import ELine, EArc, EPoint
+from singleton import Singleton
 
 from logging import debug, info, warning, error, critical
 from util import dbgfname
@@ -12,11 +13,15 @@ import json
 import cairo
 from multiprocessing import Process, Pipe
 
+
 class TOPocketing(TOAbstractFollow):
     def __init__(self, state, depth=0, index=0, offset=0, data=None):
         super(TOAbstractFollow, self).__init__(state)
         self.state = state
         self.name = TOEnum.pocket
+        self.draw_list = []
+        self.process = None
+
         if data == None:
             self.index = index
             self.depth = depth
@@ -26,7 +31,6 @@ class TOPocketing(TOAbstractFollow):
         else:
             self.deserialize(data)
         self.display_name = TOEnum.pocket+" "+str(self.index)
-        self.process = None
 
     def serialize(self):
         return {'type': 'topocketing', 'path_ref': self.path.name, 'depth': self.depth, 'index': self.index, 'offset': self.offset}
@@ -247,14 +251,14 @@ class TOPocketing(TOAbstractFollow):
         self.depth = data["depth"]
         self.index = data["index"]
         self.offset = data["offset"]
+        self.old_offset = 0
         p = self.try_load_path_by_name(data["path_ref"], self.state)
-        if p:
-            self.apply(p)
+        self.path = p
 
     def get_settings_list(self):            
         settings_lst = [TOSetting(TOSTypes.float, 0, self.state.settings.material.thickness, self.depth, "Depth, mm: ", self.set_depth_s),
                         TOSetting(TOSTypes.float, 0, None, self.offset, "Offset, mm: ", self.set_offset_s),
-                        TOSetting(TOSTypes.button, display_name="Recalculate offset", parent_cb=self.clicked_recalculate)
+                        TOSetting(TOSTypes.button, display_name="Recalculate", parent_cb=self.clicked_recalculate)
         ]
         return settings_lst
 
@@ -266,15 +270,15 @@ class TOPocketing(TOAbstractFollow):
 
     def clicked_recalculate(self, setting):
         dbgfname()
-        op = self.state.get_operation_in_progress()
+        op = Singleton.state.get_operation_in_progress()
         debug("  current operation:" + str(op))
         if op==None:
             if self.offset != self.old_offset:
                 self.old_offset = self.offset
-                self.state.set_operation_in_progress(self)
+                Singleton.state.set_operation_in_progress(self)
                 if self.apply(self.path)!=TOResult.ok:
                     debug("  pushing event to update pocketing state")
-                    self.state.ep.push_event(self.state.ee.pocket_tool_click, None)
+                    Singleton.ep.push_event(Singleton.ee.pocket_tool_click, None)
 
     def build_circles_wrapper(self, pipe, path):
         draw_list = self.build_circles(path.ordered_elements)
@@ -320,7 +324,7 @@ class TOPocketing(TOAbstractFollow):
 
         for step in range(int(self.depth/(self.tool.diameter/2.0))+1):
             for e in self.draw_list:
-                start = e.start
+                start = list(e.start)
                 new_pos = start[:2]+[self.tool.default_height]
                 out+=self.state.settings.default_pp.move_to_rapid(new_pos)
                 self.tool.current_position = new_pos

@@ -1,5 +1,5 @@
 from tool_operation import ToolOperation
-from state import state
+from singleton import Singleton
 
 from logging import debug, info, warning, error, critical
 from util import dbgfname
@@ -38,7 +38,7 @@ class TOAbstractFollow(ToolOperation):
 
     def try_load_path_by_name(self, name, state):
         dbgfname()
-        p = state.get_path_by_name(name)
+        p = Singleton.state.get_path_by_name(name)
         if p == None:
             debug("  Path "+str(name)+" not found")
             return False
@@ -49,37 +49,37 @@ class TOAbstractFollow(ToolOperation):
         dbgfname()
         out = ""
         if type(e).__name__ == "ELine":
-            new_pos = [e.start[0], e.start[1], -step*state.get_tool().diameter/2.0]
-            out+= self.state.settings.default_pp.move_to(new_pos)
-            state.get_tool().current_position = new_pos
+            new_pos = [e.start[0], e.start[1], -step*Singleton.state.get_tool().diameter/2.0]
+            out+= Singleton.state.settings.default_pp.move_to(new_pos)
+            Singleton.state.get_tool().current_position = new_pos
 
-            new_pos = [e.end[0], e.end[1], -step*state.get_tool().diameter/2.0]
-            out+= self.state.settings.default_pp.move_to(new_pos)
-            state.get_tool().current_position = new_pos
+            new_pos = [e.end[0], e.end[1], -step*Singleton.state.get_tool().diameter/2.0]
+            out+= Singleton.state.settings.default_pp.move_to(new_pos)
+            Singleton.state.get_tool().current_position = new_pos
         elif type(e).__name__ == "EArc":
             if e.turnaround:
-                new_pos = [e.start[0], e.start[1], -step*state.get_tool().diameter/2.0]
-                out+= self.state.settings.default_pp.move_to(new_pos)
-                state.get_tool().current_position = new_pos
-                new_pos = [e.end[0], e.end[1], -step*state.get_tool().diameter/2.0]
-                out+= self.state.settings.default_pp.mk_ccw_arc(e.radius, new_pos)
-                state.get_tool().current_position = new_pos
+                new_pos = [e.start[0], e.start[1], -step*Singleton.state.get_tool().diameter/2.0]
+                out+= Singleton.state.settings.default_pp.move_to(new_pos)
+                Singleton.state.get_tool().current_position = new_pos
+                new_pos = [e.end[0], e.end[1], -step*Singleton.state.get_tool().diameter/2.0]
+                out+= Singleton.state.settings.default_pp.mk_ccw_arc(e.radius, new_pos)
+                Singleton.state.get_tool().current_position = new_pos
 
             else:
-                new_pos = [e.start[0], e.start[1], -step*state.get_tool().diameter/2.0]
-                out+= self.state.settings.default_pp.move_to(new_pos)
-                state.get_tool().current_position = new_pos
-                new_pos = [e.end[0], e.end[1], -step*state.get_tool().diameter/2.0]
-                out+= self.state.settings.default_pp.mk_cw_arc(e.radius, new_pos)
-                state.get_tool().current_position = new_pos
+                new_pos = [e.start[0], e.start[1], -step*Singleton.state.get_tool().diameter/2.0]
+                out+= Singleton.state.settings.default_pp.move_to(new_pos)
+                Singleton.state.get_tool().current_position = new_pos
+                new_pos = [e.end[0], e.end[1], -step*Singleton.state.get_tool().diameter/2.0]
+                out+= Singleton.state.settings.default_pp.mk_cw_arc(e.radius, new_pos)
+                Singleton.state.get_tool().current_position = new_pos
         elif type(e).__name__ == "ECircle":
-            new_pos = [e.start[0], e.start[1], -step*state.get_tool().diameter/2.0]
-            out+= self.state.settings.default_pp.move_to(new_pos)
-            state.get_tool().current_position = new_pos
-            new_pos = [e.end[0], e.end[1], -step*state.get_tool().diameter/2.0]
+            new_pos = [e.start[0], e.start[1], -step*Singleton.state.get_tool().diameter/2.0]
+            out+= Singleton.state.settings.default_pp.move_to(new_pos)
+            Singleton.state.get_tool().current_position = new_pos
+            new_pos = [e.end[0], e.end[1], -step*Singleton.state.get_tool().diameter/2.0]
             rel_center = [e.center[0]-e.end[0], e.center[1]-e.end[1], 0]
-            out+= self.state.settings.default_pp.mk_cw_ijk_arc(rel_center, new_pos)
-            state.get_tool().current_position = new_pos
+            out+= Singleton.state.settings.default_pp.mk_cw_ijk_arc(rel_center, new_pos)
+            Singleton.state.get_tool().current_position = new_pos
             
         else:
             debug("unsuported element type: "+str(type(e).__name__))
@@ -90,13 +90,13 @@ class TOAbstractFollow(ToolOperation):
         cp = self.tool.current_position
         out = ""
         new_pos = [cp[0], cp[1], self.tool.default_height]
-        out+= self.state.settings.default_pp.move_to_rapid(new_pos)
+        out+= Singleton.state.settings.default_pp.move_to_rapid(new_pos)
         self.tool.current_position = new_pos
 
         start = path[0].start
 
         new_pos = [start[0], start[1], new_pos[2]]
-        out+= self.state.settings.default_pp.move_to_rapid(new_pos)
+        out+= Singleton.state.settings.default_pp.move_to_rapid(new_pos)
         self.tool.current_position = new_pos
 
         for step in range(int(self.depth/(self.tool.diameter/2.0))+1):
@@ -104,14 +104,14 @@ class TOAbstractFollow(ToolOperation):
                 out += self.process_el_to_gcode(e, step)
 
             new_pos = [self.tool.current_position[0], self.tool.current_position[1], self.tool.default_height]
-            out+= self.state.settings.default_pp.move_to_rapid(new_pos)
+            out+= Singleton.state.settings.default_pp.move_to_rapid(new_pos)
             self.tool.current_position = new_pos
 
             new_pos = [start[0], start[1], self.tool.default_height]
-            out+= self.state.settings.default_pp.move_to_rapid(new_pos)
+            out+= Singleton.state.settings.default_pp.move_to_rapid(new_pos)
             self.tool.current_position = new_pos
 
         new_pos = [self.tool.current_position[0], self.tool.current_position[1], self.tool.default_height]
-        out+= self.state.settings.default_pp.move_to_rapid(new_pos)
+        out+= Singleton.state.settings.default_pp.move_to_rapid(new_pos)
         self.tool.current_position = new_pos
         return out

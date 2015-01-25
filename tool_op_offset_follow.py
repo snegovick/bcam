@@ -92,7 +92,7 @@ class TOOffsetFollow(TOAbstractFollow):
             
             x = (a*e_dx-b*ne_dx)/(e_dy*ne_dx-ne_dy*e_dx)
             if e_dx == 0:
-                y = ne_e_pt[1]
+                y = (x*ne_dy+a)/ne_dx
             else:
                 y = (x*e_dy+b)/e_dx
             debug("  case 3, x: "+str(x)+" y: "+str(y))

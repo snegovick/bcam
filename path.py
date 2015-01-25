@@ -177,7 +177,7 @@ class Path(Element):
 
         if abs(ce[0].start[0]-ce[-1].end[0])<0.001 and abs(ce[0].start[1]-ce[-1].end[1])<0.001:
             pass # have to move joined path to separate subpath
-        debug("  available len", available_len, "len(ce):"+str(len(ce)))
+        debug("  available len: "+str(available_len)+" len(ce): "+str(len(ce)))
         debug("  "+str(available))
         #if available_len == len(ce):
         p = Path(self.state, ce, self.name+".sub", self.state.settings.get_def_lt().name)

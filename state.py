@@ -1,11 +1,16 @@
 from settings import Settings
+from singleton import Singleton
 
 from logging import debug, info, warning, error, critical
 from util import dbgfname
 
-
 class State:
     def __init__(self, data=None):
+        Singleton.state = self
+        self.operation_in_progress = None
+        self.spinner = ['-', '\\', '|', '/']
+        self.spinner_frame = 0
+
         if data == None:
             self.settings = Settings()
             self.__total_offset = (0,0)
@@ -16,10 +21,6 @@ class State:
             self.tool_operations = []
         else:
             self.deserialize(data)
-
-        self.operation_in_progress = None
-        self.spinner = ['-', '\\', '|', '/']
-        self.spinner_frame = 0
 
     def set_operation_in_progress(self, operation):
         self.operation_in_progress = operation
@@ -126,8 +127,4 @@ class State:
                 op = TOPocketing(state=self, data=to)
             else:
                 debug("  Unknown tool operation: "+str(to["type"]))
-
             self.tool_operations.append(op)
-
-
-state = State()

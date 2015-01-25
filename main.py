@@ -11,7 +11,8 @@ import gtk, gobject, cairo
 import sys
 from events import EVEnum, EventProcessor, ee, ep
 from main_window import MainWindow
-from state import state
+from singleton import Singleton
+import state
 
 class Screen(gtk.DrawingArea):
 
@@ -63,11 +64,11 @@ class Screen(gtk.DrawingArea):
     # Handle the expose-event by drawing
     def do_expose_event(self, event):
         # Create the cairo context
-        #state.offset = (self.allocation.width/2,self.allocation.height/2)
-        state.set_screen_offset((self.allocation.width/2, self.allocation.height/2))
+        #Singleton.state.offset = (self.allocation.width/2,self.allocation.height/2)
+        Singleton.state.set_screen_offset((self.allocation.width/2, self.allocation.height/2))
         
-        offset = state.get_offset()
-        scale = state.get_scale()
+        offset = Singleton.state.get_offset()
+        scale = Singleton.state.get_scale()
 
         cr_gdk = self.window.cairo_create()
         surface = cr_gdk.get_target()
@@ -83,9 +84,9 @@ class Screen(gtk.DrawingArea):
         cr.fill()
 
         # grid drawing
-        cr.set_line_width(1.0/state.scale[0])
+        cr.set_line_width(1.0/Singleton.state.scale[0])
         cr.translate(offset[0], offset[1])
-        cr.scale(state.scale[0], -state.scale[1])
+        cr.scale(Singleton.state.scale[0], -Singleton.state.scale[1])
         cr.set_source_rgb(1.0, 0, 0)
         cr.move_to(-10, 0)
         cr.line_to(10, 0)
@@ -98,8 +99,8 @@ class Screen(gtk.DrawingArea):
 
         cr.set_source_rgb(1.0, 1.0, 1.0)
         step = 1.0
-        xsteps = self.allocation.width/state.scale[0]/step
-        ysteps = self.allocation.height/state.scale[1]/step
+        xsteps = self.allocation.width/Singleton.state.scale[0]/step
+        ysteps = self.allocation.height/Singleton.state.scale[1]/step
         maxsteps = max(xsteps, ysteps)
         mins = 40
         maxs = 80
@@ -108,45 +109,45 @@ class Screen(gtk.DrawingArea):
                 if (step/10 == 0):
                     break
                 step/=10
-                xsteps = self.allocation.width/state.scale[0]/step
-                ysteps = self.allocation.height/state.scale[1]/step
+                xsteps = self.allocation.width/Singleton.state.scale[0]/step
+                ysteps = self.allocation.height/Singleton.state.scale[1]/step
                 maxsteps = max(xsteps, ysteps)
         if (maxsteps > maxs):
             while (maxsteps > maxs):
                 step*=10
-                xsteps = self.allocation.width/state.scale[0]/step
-                ysteps = self.allocation.height/state.scale[1]/step
+                xsteps = self.allocation.width/Singleton.state.scale[0]/step
+                ysteps = self.allocation.height/Singleton.state.scale[1]/step
                 maxsteps = max(xsteps, ysteps)
 
-        x = (offset[0]/state.scale[0])%(step)
-        y = (offset[1]/state.scale[1])%(step)
-        while (x*state.scale[0]<self.allocation.width):
-            y = (offset[1]/state.scale[1])%(step)
-            while (y*state.scale[1]<self.allocation.height):
-                cr.rectangle(x*state.scale[0], y*state.scale[1], 1, 1)
+        x = (offset[0]/Singleton.state.scale[0])%(step)
+        y = (offset[1]/Singleton.state.scale[1])%(step)
+        while (x*Singleton.state.scale[0]<self.allocation.width):
+            y = (offset[1]/Singleton.state.scale[1])%(step)
+            while (y*Singleton.state.scale[1]<self.allocation.height):
+                cr.rectangle(x*Singleton.state.scale[0], y*Singleton.state.scale[1], 1, 1)
                 cr.fill()
                 y += step
             x += step
 
-        if state.tool_operations!=None:
+        if Singleton.state.tool_operations!=None:
             cr.translate(offset[0], offset[1])
-            cr.scale(state.scale[0], -state.scale[1])
-            for o in state.tool_operations:
+            cr.scale(Singleton.state.scale[0], -Singleton.state.scale[1])
+            for o in Singleton.state.tool_operations:
                 o.draw(cr)
             cr.identity_matrix()
         
-        if state.paths!=None:
+        if Singleton.state.paths!=None:
             cr.translate(offset[0], offset[1])
-            cr.scale(state.scale[0], -state.scale[1])
-            for p in state.paths:
+            cr.scale(Singleton.state.scale[0], -Singleton.state.scale[1])
+            for p in Singleton.state.paths:
                 p.draw(cr)
             cr.identity_matrix()
 
         # draw selection box
         if ep.left_press_start != None:
             cr.translate(offset[0], offset[1])
-            cr.scale(state.scale[0], -state.scale[1])
-            state.settings.select_box_lt.set_lt(cr)
+            cr.scale(Singleton.state.scale[0], -Singleton.state.scale[1])
+            Singleton.state.settings.select_box_lt.set_lt(cr)
             w = ep.pointer_position[0] - ep.left_press_start[0]
             h = ep.pointer_position[1] - ep.left_press_start[1]
             cr.rectangle(ep.left_press_start[0], ep.left_press_start[1], w, h)
@@ -162,6 +163,7 @@ mw = None
 # GTK mumbo-jumbo to show the widget in a window and quit when it's closed
 def run():
     global mw, ep
+    state.State()
     mw = MainWindow(Screen)
     ep.mw = mw
     mw.run()

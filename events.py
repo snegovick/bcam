@@ -5,7 +5,6 @@ import sys
 import os
 
 from loader_dxf import DXFLoader
-from state import state, State
 from tool_operation import TOResult
 from tool_op_drill import TODrill
 from tool_op_exact_follow import TOExactFollow
@@ -18,6 +17,8 @@ from generalized_setting import TOSTypes
 
 from logging import debug, info, warning, error, critical
 from util import dbgfname
+
+from singleton import Singleton
 
 class EVEnum:
     load_click = "load_click"
@@ -68,6 +69,8 @@ class EventProcessor(object):
     shift_pressed = False
 
     def __init__(self):
+        Singleton.ee = self.ee
+        Singleton.ep = self
         self.events = {
             self.ee.load_click: self.load_click,
             self.ee.save_click: self.save_click,
@@ -156,22 +159,22 @@ class EventProcessor(object):
     def new_project_click(self, args):
         dbgfname()
         debug("  new project clicked")
-        if not state.is_clean():
+        if not Singleton.state.is_clean():
             debug("  not clean, ask to save")
             if self.mw.mk_question_dialog("Current project has some unsaved data.\nWould you like to save it?"):
                 self.save_project_click(None)
 
         self.reset()
-        state.set(State())
+        Singleton.state = State()
         self.push_event(self.ee.update_tool_operations_list, (None))
         self.push_event(self.ee.update_paths_list, (None))
-        project.push_state(state)
+        project.push_state(Singleton.state)
         self.mw.widget.update()
 
     def quit_click(self, args):
         dbgfname()
         debug("  quit clicked")
-        if not state.is_clean():
+        if not Singleton.state.is_clean():
             debug("  not clean, ask to save")
             if self.mw.mk_question_dialog("Current project has some unsaved data.\nWould you like to save it?"):
                 self.save_project_click(None)
@@ -180,28 +183,28 @@ class EventProcessor(object):
             exit(0)
 
     def update_paths_list(self, args):
-        if state.paths != None:
+        if Singleton.state.paths != None:
             self.mw.clear_list(self.mw.gtklist)
-            for p in state.paths:
+            for p in Singleton.state.paths:
                 if p.name[0] == '*':
                     continue
                 self.mw.add_item_to_list(self.mw.gtklist, p.name, self.ee.paths_check_button_click)
 
     def update_tool_operations_list(self, args):
-        if state.tool_operations != None:
+        if Singleton.state.tool_operations != None:
             self.mw.clear_list(self.mw.tp_gtklist)
-            for p in state.tool_operations:
+            for p in Singleton.state.tool_operations:
                 self.mw.add_item_to_list(self.mw.tp_gtklist, p.display_name, self.ee.tool_paths_check_button_click)
 
     def load_file(self, args):
         dbgfname()
         debug("  load file: "+str(args))
         dxfloader = DXFLoader()
-        state.add_paths(dxfloader.load(args[0]))
+        Singleton.state.add_paths(dxfloader.load(args[0]))
         self.push_event(self.ee.update_paths_list, (None))
-        project.push_state(state)
+        project.push_state(Singleton.state)
         self.mw.widget.update()
-        feedrate = state.settings.tool.get_feedrate()
+        feedrate = Singleton.state.settings.tool.get_feedrate()
         debug("  feedrate: "+str(feedrate))
 
     def save_file(self, args):
@@ -211,14 +214,14 @@ class EventProcessor(object):
         if os.path.splitext(file_path)[1][1:].strip() != "ngc":
             file_path+=".ngc"
         out = ""
-        out+=state.settings.default_pp.set_metric()
-        out+=state.settings.default_pp.set_absolute()
-        feedrate = state.settings.tool.get_feedrate()
+        out+=Singleton.state.settings.default_pp.set_metric()
+        out+=Singleton.state.settings.default_pp.set_absolute()
+        feedrate = Singleton.state.settings.tool.get_feedrate()
         debug("  feedrate: "+str(feedrate))
-        out+=state.settings.default_pp.set_feedrate(feedrate)
-        for p in state.tool_operations:
+        out+=Singleton.state.settings.default_pp.set_feedrate(feedrate)
+        for p in Singleton.state.tool_operations:
             out+=p.get_gcode()
-        out+= state.settings.default_pp.move_to_rapid([0, 0, state.settings.tool.default_height])
+        out+= Singleton.state.settings.default_pp.move_to_rapid([0, 0, Singleton.state.settings.tool.default_height])
         f = open(file_path, "w")
         f.write(out)
         f.close()
@@ -239,8 +242,8 @@ class EventProcessor(object):
     def screen_left_press(self, args):
         dbgfname()
         debug("  press at:"+str(args))
-        offset = state.get_offset()
-        scale = state.get_scale()
+        offset = Singleton.state.get_offset()
+        scale = Singleton.state.get_scale()
         cx = (args[0][0]-offset[0])/scale[0]
         cy = (args[0][1]-offset[1])/scale[1]
         self.left_press_start = (cx, cy)
@@ -250,13 +253,13 @@ class EventProcessor(object):
     def screen_left_release(self, args):
         dbgfname()
         debug("  release at: "+str(args))
-        offset = state.get_offset()
-        scale = state.get_scale()
+        offset = Singleton.state.get_offset()
+        scale = Singleton.state.get_scale()
         cx = (args[0][0]-offset[0])/scale[0]
         cy = (args[0][1]-offset[1])/scale[1]
         self.pointer_position = (cx, cy)
         if (self.left_press_start!=None):
-            if state.paths == None:
+            if Singleton.state.paths == None:
                 self.left_press_start=None
                 return
 
@@ -265,7 +268,7 @@ class EventProcessor(object):
             dy = abs(cy-self.left_press_start[1])
             debug("  dx, dy: "+str(dx)+" "+str(dy))
             if dx<1 and dy<1:
-                for p in state.paths:
+                for p in Singleton.state.paths:
                     for e in p.elements:
                         if (e.distance_to_pt((cx, cy))<1):
                             if self.shift_pressed:
@@ -290,7 +293,7 @@ class EventProcessor(object):
                 select_aabb = AABB(sx, sy, ex, ey)
                 if not self.shift_pressed:
                     self.deselect_all(None)
-                for p in state.paths:
+                for p in Singleton.state.paths:
                     for e in p.elements:
                         if not e in self.selected_elements:
                             e_aabb = e.get_aabb()
@@ -307,8 +310,8 @@ class EventProcessor(object):
         self.left_press_start=None
         
     def pointer_motion(self, args):
-        offset = state.get_offset()
-        scale = state.get_scale()
+        offset = Singleton.state.get_offset()
+        scale = Singleton.state.get_scale()
         cx = (args[0][0]-offset[0])/scale[0]
         cy = (args[0][1]-offset[1])/scale[1]
         self.pointer_position = (cx, cy)
@@ -320,21 +323,21 @@ class EventProcessor(object):
         debug("  drill tool click:"+str(args))
         debug("  "+str(self.selected_elements))
         for e in self.selected_elements:
-            debug("  thickness:"+str(state.get_settings().get_material().get_thickness()))
-            drl_op = TODrill(state, index=len(state.tool_operations))
-            if drl_op.apply(e, state.get_settings().get_material().get_thickness()):
-                state.tool_operations.append(drl_op)
+            debug("  thickness:"+str(Singleton.state.get_settings().get_material().get_thickness()))
+            drl_op = TODrill(Singleton.state, index=len(Singleton.state.tool_operations))
+            if drl_op.apply(e, Singleton.state.get_settings().get_material().get_thickness()):
+                Singleton.state.tool_operations.append(drl_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
-                project.push_state(state)
-        debug("  "+str(state.tool_operations))
+                project.push_state(Singleton.state)
+        debug("  "+str(Singleton.state.tool_operations))
         self.mw.widget.update()
 
     def join_elements(self, args):
         dbgfname()
-        sp = state.paths
+        sp = Singleton.state.paths
         if self.selected_elements!=None:
             debug("  selected: "+str(self.selected_elements))
-            p = Path(state, self.selected_elements, "path", state.settings.get_def_lt().name)
+            p = Path(Singleton.state, self.selected_elements, "path", Singleton.state.settings.get_def_lt().name)
             connected = p.mk_connected_path()
             debug("  connected elements: "+str(connected))
             if connected != None:
@@ -346,7 +349,7 @@ class EventProcessor(object):
                             sp[i].elements.remove(e)
                 sp.append(connected)
                 self.push_event(self.ee.update_paths_list, (None))
-                project.push_state(state)
+                project.push_state(Singleton.state)
                 return connected
         return None
 
@@ -368,7 +371,7 @@ class EventProcessor(object):
         self.selected_path = None
         for li in selection:
             name = li.children()[0].children()[1].get_text()
-            for p in state.paths:
+            for p in Singleton.state.paths:
                 if p.name == name:
                     self.selected_path = p
                     for e in p.elements:
@@ -382,7 +385,7 @@ class EventProcessor(object):
         self.selected_tool_operation = None
         for li in selection:
             name = li.children()[0].children()[1].get_text()
-            for p in state.tool_operations:
+            for p in Singleton.state.tool_operations:
                 if p.display_name == name:
                     self.selected_tool_operation = p
                     self.mw.new_settings_vbox(p.get_settings_list(), p.display_name+" settings")
@@ -394,12 +397,12 @@ class EventProcessor(object):
         connected = self.join_elements(None)
         debug("  selected path: "+str(self.selected_path))
         if connected != None:
-            path_follow_op = TOExactFollow(state, index=len(state.tool_operations), depth=state.get_settings().get_material().get_thickness())
+            path_follow_op = TOExactFollow(Singleton.state, index=len(Singleton.state.tool_operations), depth=Singleton.state.get_settings().get_material().get_thickness())
             if path_follow_op.apply(connected):
-                state.add_tool_operations([path_follow_op])
+                Singleton.state.add_tool_operations([path_follow_op])
                 #state.tool_operations.append(path_follow_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
-                project.push_state(state)
+                project.push_state(Singleton.state)
         self.mw.widget.update()
 
     def offset_follow_tool_click(self, args):
@@ -409,11 +412,11 @@ class EventProcessor(object):
         debug("  selected path: "+str(self.selected_path))
         debug("  connected: "+str(connected))
         if connected != None:
-            path_follow_op = TOOffsetFollow(state, index=len(state.tool_operations), depth=state.get_settings().get_material().get_thickness())
+            path_follow_op = TOOffsetFollow(Singleton.state, index=len(Singleton.state.tool_operations), depth=Singleton.state.get_settings().get_material().get_thickness())
             if path_follow_op.apply(connected):
-                state.tool_operations.append(path_follow_op)
+                Singleton.state.tool_operations.append(path_follow_op)
                 self.push_event(self.ee.update_tool_operations_list, (None))
-                project.push_state(state)
+                project.push_state(Singleton.state)
         self.mw.widget.update()
 
     def pocket_tool_click(self, args):
@@ -424,38 +427,38 @@ class EventProcessor(object):
             connected = self.join_elements(None)
             #debug("  selected path: "+str(self.selected_path))
             if connected != None:
-                pocket_op = TOPocketing(state, index=len(state.tool_operations), depth=state.get_settings().get_material().get_thickness())
+                pocket_op = TOPocketing(Singleton.state, index=len(Singleton.state.tool_operations), depth=Singleton.state.get_settings().get_material().get_thickness())
                 result = pocket_op.apply(connected)
                 if result == TOResult.ok:
-                    if state.get_tool_operation_by_name(pocket_op.display_name) == None:
-                        state.tool_operations.append(pocket_op)
-                        project.push_state(state)
+                    if Singleton.state.get_tool_operation_by_name(pocket_op.display_name) == None:
+                        Singleton.state.tool_operations.append(pocket_op)
+                        project.push_state(Singleton.state)
                         self.push_event(self.ee.update_tool_operations_list, (None))
                 elif result == TOResult.repeat:
-                    state.set_operation_in_progress(pocket_op)
+                    Singleton.state.set_operation_in_progress(pocket_op)
                     self.push_event(self.ee.update_progress, True)
                     self.push_event(self.ee.pocket_tool_click, None)
         else:
-            op = state.get_operation_in_progress()
+            op = Singleton.state.get_operation_in_progress()
             #debug("  Operation in progress: "+str(op))
             if op != None:
                 if op.apply(None) == TOResult.repeat:
                     self.push_event(self.ee.update_progress, True)
                     self.push_event(self.ee.pocket_tool_click, None)
                 else:
-                    if state.get_tool_operation_by_name(op.display_name) == None:
-                        state.tool_operations.append(op)
-                        project.push_state(state)
+                    if Singleton.state.get_tool_operation_by_name(op.display_name) == None:
+                        Singleton.state.tool_operations.append(op)
+                        project.push_state(Singleton.state)
                         self.push_event(self.ee.update_tool_operations_list, (None))
                     self.push_event(self.ee.update_progress, False)
-                    state.unset_operation_in_progress()
+                    Singleton.state.unset_operation_in_progress()
         self.mw.widget.update()
 
     def update_progress(self, args):
         if args[0] == True:
-            state.spinner_frame+=1
-            state.spinner_frame %= (len(state.spinner)*20)
-            self.mw.progress_label.set_text("progress: "+state.spinner[int(state.spinner_frame/20)])
+            Singleton.state.spinner_frame+=1
+            Singleton.state.spinner_frame %= (len(Singleton.state.spinner)*20)
+            self.mw.progress_label.set_text("progress: "+Singleton.state.spinner[int(Singleton.state.spinner_frame/20)])
             self.mw.widget.update()
         else:
             self.mw.progress_label.set_text("No task running")
@@ -468,7 +471,7 @@ class EventProcessor(object):
         if setting.type == TOSTypes.float:
             new_value = args[0][1][0].get_value()
             setting.set_value(new_value)
-            project.push_state(state)
+            project.push_state(Singleton.state)
         elif setting.type == TOSTypes.button:
             setting.set_value(None)
         else:
@@ -480,53 +483,53 @@ class EventProcessor(object):
         debug("  tool operation up")
         if self.selected_tool_operation==None:
             return
-        if len(state.tool_operations)==0:
+        if len(Singleton.state.tool_operations)==0:
             return
-        cur_idx = state.tool_operations.index(self.selected_tool_operation)
+        cur_idx = Singleton.state.tool_operations.index(self.selected_tool_operation)
         debug("  cur idx: "+str(cur_idx))
         if cur_idx == 0:
             return
         temp = self.selected_tool_operation
-        state.tool_operations.remove(self.selected_tool_operation)
-        state.tool_operations.insert(cur_idx-1, temp)
+        Singleton.state.tool_operations.remove(self.selected_tool_operation)
+        Singleton.state.tool_operations.insert(cur_idx-1, temp)
         self.push_event(self.ee.update_tool_operations_list, (None))
-        project.push_state(state)
+        project.push_state(Singleton.state)
 
     def tool_operation_down_click(self, args):
         dbgfname()
         debug("  tool operation down")
         if self.selected_tool_operation==None:
             return
-        if len(state.tool_operations)==0:
+        if len(Singleton.state.tool_operations)==0:
             return
-        cur_idx = state.tool_operations.index(self.selected_tool_operation)
+        cur_idx = Singleton.state.tool_operations.index(self.selected_tool_operation)
         debug("  cur idx: "+str(cur_idx))
-        if cur_idx == len(state.tool_operations)-1:
+        if cur_idx == len(Singleton.state.tool_operations)-1:
             return
         temp = self.selected_tool_operation
-        state.tool_operations.remove(self.selected_tool_operation)
-        state.tool_operations.insert(cur_idx+1, temp)
+        Singleton.state.tool_operations.remove(self.selected_tool_operation)
+        Singleton.state.tool_operations.insert(cur_idx+1, temp)
         self.push_event(self.ee.update_tool_operations_list, (None))
-        project.push_state(state)
+        project.push_state(Singleton.state)
 
     def scroll_up(self, args):
         dbgfname()
         debug("  scroll up")
-        if state.scale[0]<=1:
-            state.scale = (state.scale[0]+0.1, state.scale[1]+0.1)
+        if Singleton.state.scale[0]<=1:
+            Singleton.state.scale = (Singleton.state.scale[0]+0.1, Singleton.state.scale[1]+0.1)
         else:
-            state.scale = (state.scale[0]+1, state.scale[1]+1)
+            Singleton.state.scale = (Singleton.state.scale[0]+1, Singleton.state.scale[1]+1)
         #project.push_state(self.file_data, self.operations, settings, state)
         self.mw.widget.update()
 
     def scroll_down(self, args):
         dbgfname()
         debug("  scroll down")
-        if state.scale[0]>0.1:
-            if state.scale[0]<=1:
-                state.scale = (state.scale[0]-0.1, state.scale[1]-0.1)
+        if Singleton.state.scale[0]>0.1:
+            if Singleton.state.scale[0]<=1:
+                Singleton.state.scale = (Singleton.state.scale[0]-0.1, Singleton.state.scale[1]-0.1)
             else:
-                state.scale = (state.scale[0]-1, state.scale[1]-1)
+                Singleton.state.scale = (Singleton.state.scale[0]-1, Singleton.state.scale[1]-1)
         #project.push_state(self.file_data, self.operations, settings, state)
         self.mw.widget.update()
 
@@ -534,21 +537,21 @@ class EventProcessor(object):
         dbgfname()
         debug("  hscroll: "+str(args))
         debug("  "+str(args[0][0].get_value()))
-        offset = state.get_base_offset()
-        state.set_base_offset((-args[0][0].get_value(), offset[1]))
+        offset = Singleton.state.get_base_offset()
+        Singleton.state.set_base_offset((-args[0][0].get_value(), offset[1]))
         self.mw.widget.update()
 
     def vscroll(self, args):
         dbgfname()
         debug("  vscroll: "+str(args))
         debug("  "+str(args[0][0].get_value()))
-        offset = state.get_base_offset()
-        state.set_base_offset((offset[0], -args[0][0].get_value()))
+        offset = Singleton.state.get_base_offset()
+        Singleton.state.set_base_offset((offset[0], -args[0][0].get_value()))
         self.mw.widget.update()
 
     def tool_paths_check_button_click(self, args):
         name = args[0][0]
-        for o in state.tool_operations:
+        for o in Singleton.state.tool_operations:
             if o.display_name == name:
                 o.display = not o.display
                 break
@@ -556,29 +559,27 @@ class EventProcessor(object):
 
     def paths_check_button_click(self, args):
         name = args[0][0]
-        for p in state.paths:
+        for p in Singleton.state.paths:
             if p.name == name:
                 p.display = not p.display
                 break
         self.mw.widget.update()
 
     def path_delete_button_click(self, args):
-        if self.selected_path in state.paths:
-            state.paths.remove(self.selected_path)
+        if self.selected_path in Singleton.state.paths:
+            Singleton.state.paths.remove(self.selected_path)
             self.selected_path = None
             self.push_event(self.ee.update_paths_list, (None))
-            project.push_state(state)
+            project.push_state(Singleton.state)
         self.mw.widget.update()
 
     def tool_operation_delete_button_click(self, args):
-        if self.selected_tool_operation in state.tool_operations:
-            state.tool_operations.remove(self.selected_tool_operation)
+        if self.selected_tool_operation in Singleton.state.tool_operations:
+            Singleton.state.tool_operations.remove(self.selected_tool_operation)
             self.selected_tool_operation = None
             self.push_event(self.ee.update_tool_operations_list, (None))
-            project.push_state(state)
+            project.push_state(Singleton.state)
         self.mw.widget.update()
         
 ee = EVEnum()
 ep = EventProcessor()
-state.ep = ep
-state.ee = ee

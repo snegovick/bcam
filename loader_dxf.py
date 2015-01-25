@@ -1,7 +1,7 @@
 import loader
 from calc_utils import rgb255_to_rgb1
 from path import ELine, EArc, ECircle, EPoint, Path
-from state import state
+from singleton import Singleton
 
 from logging import debug, info, warning, error, critical
 from util import dbgfname
@@ -36,7 +36,7 @@ class DXFLoader(loader.SourceLoader):
         end[0]+=e[0]
         end[1]+=e[1]
 
-        return ELine(tuple(start), tuple(end), state.settings.get_def_lt(), color)
+        return ELine(tuple(start), tuple(end), Singleton.state.settings.get_def_lt(), color)
 
     def __basic_el(self, e, p, offset, layers, block):
         layer = layers[e.layer]
@@ -64,7 +64,7 @@ class DXFLoader(loader.SourceLoader):
                 center = [0,0]
             center[0] += e.center[0]
             center[1] += e.center[1]
-            el = EArc(tuple(center[:2]), e.radius, e.startangle, e.endangle, state.settings.get_def_lt(), color=color)
+            el = EArc(tuple(center[:2]), e.radius, e.startangle, e.endangle, Singleton.state.settings.get_def_lt(), color=color)
             p.add_element(el)
         elif e.dxftype == DXFEnum.circle:
             #print "circle"
@@ -75,7 +75,7 @@ class DXFLoader(loader.SourceLoader):
             center[0] += e.center[0]
             center[1] += e.center[1]
 
-            el = ECircle(tuple(center[:2]), e.radius, state.settings.get_def_lt(), color)
+            el = ECircle(tuple(center[:2]), e.radius, Singleton.state.settings.get_def_lt(), color)
             p.add_element(el)
         elif e.dxftype == DXFEnum.point:
             #print "circle"
@@ -86,7 +86,7 @@ class DXFLoader(loader.SourceLoader):
             center[0] += e.point[0]
             center[1] += e.point[1]
 
-            el = EPoint(tuple(center[:2]), state.settings.get_def_lt(), color)
+            el = EPoint(tuple(center[:2]), Singleton.state.settings.get_def_lt(), color)
             p.add_element(el)
         elif e.dxftype == DXFEnum.polyline:
             start = None
@@ -120,14 +120,14 @@ class DXFLoader(loader.SourceLoader):
         blocks = dxf.blocks
         paths = []
         entities = [e for e in dxf.entities]
-        p = Path(state, [], "ungrouped", state.settings.get_def_lt().name)
+        p = Path(Singleton.state, [], "ungrouped", Singleton.state.settings.get_def_lt().name)
         for e in entities:
             if self.__is_basic(e):
                 self.__basic_el(e, p, None, dxf.layers, None)
             elif e.dxftype == DXFEnum.insert:
                 block_name = e.name
                 offset = e.insert[:2]
-                tp = Path(state, [], block_name, state.settings.get_def_lt().name)
+                tp = Path(Singleton.state, [], block_name, Singleton.state.settings.get_def_lt().name)
                 for b in dxf.blocks:
                     if b.name == block_name:
                         for e in b:

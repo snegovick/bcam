@@ -4,7 +4,7 @@ pygtk.require('2.0')
 import gtk, gobject, cairo
 import sys
 from events import EVEnum, EventProcessor, ee, ep
-from state import state
+from singleton import Singleton
 from generalized_setting import TOSTypes
 
 from logging import debug, info, warning, error, critical
@@ -281,14 +281,14 @@ class MainWindow(object):
         self.tool_label.show()
         self.right_vbox.pack_start(self.tool_label, expand=False, fill=False, padding=0)
 
-        settings_lst = state.get_tool().get_settings_list()
+        settings_lst = Singleton.state.get_tool().get_settings_list()
         self.populate_box_with_settings(self.right_vbox, settings_lst)
 
 
         self.material_label = gtk.Label("Material settings")
         self.material_label.show()
         self.right_vbox.pack_start(self.material_label, expand=False, fill=False, padding=0)
-        settings_lst = state.settings.material.get_settings_list()
+        settings_lst = Singleton.state.settings.material.get_settings_list()
         self.populate_box_with_settings(self.right_vbox, settings_lst)
 
         self.settings_vb = gtk.VBox(homogeneous=False, spacing=0)

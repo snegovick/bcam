@@ -1,7 +1,6 @@
 import math
 from tool_operation import ToolOperation, TOEnum
 from generalized_setting import TOSetting
-from state import state
 
 import json
 
