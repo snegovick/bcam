@@ -133,19 +133,19 @@ class Screen(gtk.DrawingArea):
                 cr.fill()
                 y += step
             x += step
-
-        if Singleton.state.tool_operations!=None:
-            cr.translate(offset[0], offset[1])
-            cr.scale(Singleton.state.scale[0], -Singleton.state.scale[1])
-            for o in Singleton.state.tool_operations:
-                o.draw(cr)
-            cr.identity_matrix()
         
         if Singleton.state.paths!=None:
             cr.translate(offset[0], offset[1])
             cr.scale(Singleton.state.scale[0], -Singleton.state.scale[1])
             for p in Singleton.state.paths:
                 p.draw(cr)
+            cr.identity_matrix()
+
+        if Singleton.state.tool_operations!=None:
+            cr.translate(offset[0], offset[1])
+            cr.scale(Singleton.state.scale[0], -Singleton.state.scale[1])
+            for o in Singleton.state.tool_operations:
+                o.draw(cr)
             cr.identity_matrix()
 
         # draw selection box
