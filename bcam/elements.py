@@ -330,7 +330,7 @@ class EPoint(Element):
         ctx.stroke()
 
     def distance_to_pt(self, pt):
-        cpu = PointUtils(self.center)
+        pu = PointUtils(self.center)
         return pu.distance_to_pt(pt)
 
     def get_aabb(self):
