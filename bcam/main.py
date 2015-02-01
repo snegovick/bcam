@@ -166,6 +166,11 @@ mw = None
         
 # GTK mumbo-jumbo to show the widget in a window and quit when it's closed
 def run():
+    args = {"--log": {"is_set": util.NOT_SET, "has_option": util.NO_OPTION, "option": None}}
+    util.parse_args(args)
+    if args["--log"]["is_set"]:
+        logging.getLogger("").setLevel(logging.DEBUG)
+
     global mw, ep
     state.State()
     mw = MainWindow(Screen)
@@ -174,8 +179,4 @@ def run():
     mw.run()
 
 if __name__ == "__main__":
-    args = {"--log": {"is_set": util.NOT_SET, "has_option": util.NO_OPTION, "option": None}}
-    util.parse_args(args)
-    if args["--log"]["is_set"]:
-        logging.getLogger("").setLevel(logging.DEBUG)
     run()
