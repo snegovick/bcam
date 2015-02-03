@@ -4,9 +4,11 @@ from tool_abstract_follow import TOAbstractFollow
 from generalized_setting import TOSetting
 from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len, scale_vect, pt_to_pt_dist
 from elements import ELine, EArc, ECircle
+from singleton import Singleton
 
 from logging import debug, info, warning, error, critical
 from util import dbgfname
+
 
 import cairo
 import json
@@ -35,12 +37,12 @@ class TOOffsetFollow(TOAbstractFollow):
         self.index = data["index"]
         self.offset = data["offset"]
 
-        p = self.try_load_path_by_name(data["path_ref"], self.state)
+        p = self.try_load_path_by_name(data["path_ref"], Singleton.state)
         if p:
             self.apply(p)
 
     def get_settings_list(self):
-        settings_lst = [TOSetting("float", 0, self.state.settings.material.thickness, self.depth, "Depth, mm: ", self.set_depth_s),
+        settings_lst = [TOSetting("float", 0, Singleton.state.settings.material.thickness, self.depth, "Depth, mm: ", self.set_depth_s),
                         TOSetting("float", None, None, self.offset, "Offset, mm: ", self.set_offset_s)]
         return settings_lst
 
@@ -49,11 +51,22 @@ class TOOffsetFollow(TOAbstractFollow):
 
     def set_offset_s(self, setting):
         self.offset = setting.new_value
-        self.__build_offset_path(self.path)
+        self.offset_path = self.__build_offset_path(self.path)
         self.draw_list = self.offset_path
 
+    def __remove_intersected_parts(self, p):
+        dbgfname()
+        return p
+
     def __build_offset_path(self, p):
-        return self.__build_offset_path_normals(p)
+        dbgfname()
+        offset_path = self.__build_offset_path_normals(p)
+        debug("  checking offset path")
+        if (offset_path != None):
+            out = self.__remove_intersected_parts(offset_path)
+            return out
+        debug("  offset path is None")
+        return None
 
     def __two_point_offset(self, prev, next):
         dbgfname()
@@ -104,7 +117,7 @@ class TOOffsetFollow(TOAbstractFollow):
         new_elements = []
         elements = p.get_ordered_elements()
         if len(elements)==0:
-            return False
+            return None
         if len(elements)==1:
             e = elements[0]
             if type(e).__name__ == "ECircle":
@@ -188,8 +201,9 @@ class TOOffsetFollow(TOAbstractFollow):
                 new_elements.append(ne)
                 s_pt = e_pt
                 e_pt = None
-        self.offset_path = new_elements
-        debug("  offset_path: "+str(self.offset_path))
+        offset_path = new_elements
+        debug("  offset_path: "+str(offset_path))
+        return offset_path
 
     def apply(self, path):
         dbgfname()
@@ -198,7 +212,7 @@ class TOOffsetFollow(TOAbstractFollow):
             debug("  path ordered elements: "+str(path.ordered_elements))
             if path.ordered_elements!=None:
                 self.path = path
-                self.__build_offset_path(path)
+                self.offset_path = self.__build_offset_path(path)
                 self.draw_list = self.offset_path
                 return True
         return False
