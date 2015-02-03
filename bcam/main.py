@@ -133,19 +133,19 @@ class Screen(gtk.DrawingArea):
                 cr.fill()
                 y += step
             x += step
-
-        if Singleton.state.tool_operations!=None:
-            cr.translate(offset[0], offset[1])
-            cr.scale(Singleton.state.scale[0], -Singleton.state.scale[1])
-            for o in Singleton.state.tool_operations:
-                o.draw(cr)
-            cr.identity_matrix()
         
         if Singleton.state.paths!=None:
             cr.translate(offset[0], offset[1])
             cr.scale(Singleton.state.scale[0], -Singleton.state.scale[1])
             for p in Singleton.state.paths:
                 p.draw(cr)
+            cr.identity_matrix()
+
+        if Singleton.state.tool_operations!=None:
+            cr.translate(offset[0], offset[1])
+            cr.scale(Singleton.state.scale[0], -Singleton.state.scale[1])
+            for o in Singleton.state.tool_operations:
+                o.draw(cr)
             cr.identity_matrix()
 
         # draw selection box
@@ -166,6 +166,11 @@ mw = None
         
 # GTK mumbo-jumbo to show the widget in a window and quit when it's closed
 def run():
+    args = {"--log": {"is_set": util.NOT_SET, "has_option": util.NO_OPTION, "option": None}}
+    util.parse_args(args)
+    if args["--log"]["is_set"]:
+        logging.getLogger("").setLevel(logging.DEBUG)
+
     global mw, ep
     state.State()
     mw = MainWindow(Screen)
@@ -174,8 +179,4 @@ def run():
     mw.run()
 
 if __name__ == "__main__":
-    args = {"--log": {"is_set": util.NOT_SET, "has_option": util.NO_OPTION, "option": None}}
-    util.parse_args(args)
-    if args["--log"]["is_set"]:
-        logging.getLogger("").setLevel(logging.DEBUG)
     run()
