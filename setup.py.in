@@ -10,7 +10,7 @@ def read(fname):
 
 setup(
     name = "bcam",
-    version = "0.3.1-0-gc2d3548",
+    version =
     author = "Konstantin Kirik (snegovick)",
     author_email = "snegovick@gmail.com",
     description = ("Basic computer-aided manufacturing program."),
