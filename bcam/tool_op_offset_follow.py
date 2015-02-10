@@ -97,6 +97,9 @@ class TOOffsetFollow(TOAbstractFollow):
             x = ne_e_pt[0]
             y = e_e_pt[1]
             debug("  case 2, x: "+str(x)+" y: "+str(y))
+        elif (((e_dy == 0) and (ne_dy == 0)) or ((e_dx == 0) and (ne_dx == 0))): #parallel lines
+            x = e_e_pt[0]
+            y = e_e_pt[1]
         else:
             a = (ne_e_pt[0]*ne_s_pt[1]-ne_s_pt[0]*ne_e_pt[1])
             b = (e_e_pt[0]*e_s_pt[1]-e_s_pt[0]*e_e_pt[1])
@@ -218,7 +221,7 @@ class TOOffsetFollow(TOAbstractFollow):
         return False
 
     def get_gcode(self):
-        return self.get_gcode_base(self.path.ordered_elements)
+        return self.get_gcode_base(self.draw_list)
 
     def __repr__(self):
         return "<Offset follow>"
