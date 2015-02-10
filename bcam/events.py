@@ -224,6 +224,7 @@ class EventProcessor(object):
         feedrate = Singleton.state.settings.tool.get_feedrate()
         debug("  feedrate: "+str(feedrate))
         out+=Singleton.state.settings.default_pp.set_feedrate(feedrate)
+        out+= Singleton.state.settings.default_pp.move_to_rapid([0, 0, Singleton.state.settings.tool.default_height])
         for p in Singleton.state.tool_operations:
             out+=p.get_gcode()
         out+= Singleton.state.settings.default_pp.move_to_rapid([0, 0, Singleton.state.settings.tool.default_height])
