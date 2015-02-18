@@ -61,6 +61,7 @@ class EVEnum:
     tool_operation_delete_button_click = "tool_operation_delete_button_click"
     update_progress = "update_progress"
     undo_click = "undo_click"
+    redo_click = "redo_click"
 
 class EventProcessor(object):
     ee = EVEnum()
@@ -116,6 +117,7 @@ class EventProcessor(object):
             self.ee.tool_operation_delete_button_click: self.tool_operation_delete_button_click,
             self.ee.update_progress: self.update_progress,
             self.ee.undo_click: self.undo_click,
+            self.ee.redo_click: self.redo_click,
         }
 
     def reset(self):
@@ -358,7 +360,7 @@ class EventProcessor(object):
                             sp[i].elements.remove(e)
                 sp.append(connected)
                 self.push_event(self.ee.update_paths_list, (None))
-                project.push_state(Singleton.state, "join_elements")
+                #project.push_state(Singleton.state, "join_elements")
                 return connected
         return None
 
@@ -611,14 +613,23 @@ class EventProcessor(object):
 
     def undo_click(self, args):
         dbgfname()
-        debug("  steps before: "+str(project.steps))
+        debug("  steps("+str(len(project.steps))+") before: "+str(project.steps))
         project.step_back()
-        debug("  steps after: "+str(project.steps))
+        debug("  steps("+str(len(project.steps))+") after: "+str(project.steps))
         
-        debug(  "paths: "+str(Singleton.state.paths))
         self.push_event(self.ee.update_tool_operations_list, (None))
         self.push_event(self.ee.update_paths_list, (None))
         self.mw.widget.update()
+
+    def redo_click(self, args):
+        dbgfname()
+        debug("  steps("+str(len(project.steps))+") before: "+str(project.steps))
+        project.step_forward()
+        debug("  steps("+str(len(project.steps))+") after: "+str(project.steps))
         
+        self.push_event(self.ee.update_tool_operations_list, (None))
+        self.push_event(self.ee.update_paths_list, (None))
+        self.mw.widget.update()
+
 ee = EVEnum()
 ep = EventProcessor()

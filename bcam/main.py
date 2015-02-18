@@ -12,6 +12,7 @@ import sys
 from events import EVEnum, EventProcessor, ee, ep
 from main_window import MainWindow
 from singleton import Singleton
+import project
 import state
 
 class Screen(gtk.DrawingArea):
@@ -176,6 +177,7 @@ def run():
     mw = MainWindow(Screen)
     Singleton.mw = mw
     ep.mw = mw
+    project.project.push_state(Singleton.state, "initial state")
     mw.run()
 
 if __name__ == "__main__":

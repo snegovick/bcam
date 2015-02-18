@@ -35,6 +35,7 @@ class Step(object):
 class Project(object):
     def __init__(self):
         self.steps = []
+        self.step_index = -1
 
     def load(self, project_path):
         dbgfname()
@@ -60,6 +61,9 @@ class Project(object):
 
     def push_state(self, state, description):
         dbgfname()
+        if (self.step_index != -1):
+            self.steps = self.steps[:self.step_index + 1]
+            self.step_index = -1
         self.steps.append(Step(state))
         self.steps[-1].dsc = description
         depth = 50
@@ -69,9 +73,17 @@ class Project(object):
 
     def step_back(self):
         dbgfname()
-        if len(self.steps)>1:
-            s = self.steps[-2]
-            self.steps = self.steps[:-1]
+        if abs(self.step_index)<len(self.steps):
+            self.step_index -= 1
+            s = self.steps[self.step_index]
+            s.unserialize()
+            Singleton.state.set(s.state);
+
+    def step_forward(self):
+        dbgfname()
+        if self.step_index < -1:
+            self.step_index += 1
+            s = self.steps[self.step_index]
             s.unserialize()
             Singleton.state.set(s.state);
 
