@@ -31,8 +31,12 @@ class Tool(object):
 
     def get_settings_list(self):
         settings_lst = [TOSetting("float", 0, None, self.diameter, "Diameter, mm: ", self.set_diameter_s),
-                        TOSetting("float", 0, None, self.feedrate, "Feedrate, mm/min: ", self.set_feedrate_s)]
+                        TOSetting("float", 0, None, self.feedrate, "Feedrate, mm/min: ", self.set_feedrate_s),
+                        TOSetting("float", 0, None, self.default_height, "Safe height, mm:", self.set_default_height_s)]
         return settings_lst
+
+    def set_default_height_s(self, setting):
+        self.default_height = setting.new_value
 
     def set_diameter_s(self, setting):
         self.diameter = setting.new_value
