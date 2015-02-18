@@ -12,11 +12,16 @@ from copy import deepcopy
 
 class Step(object):
     def __init__(self, state=None, data=None):
+        self.dsc = ""
         if data == None:
             self.state=state
         else:
             self.deserialize(data)
         self.serialized_state = self.state.serialize()
+
+    def unserialize(self):
+        # because we cant rely on self.state, but we can rely on self.serialized_state
+        self.deserialize(self.serialize())
 
     def serialize(self):
         return {'state': self.serialized_state}
@@ -25,8 +30,7 @@ class Step(object):
         self.state = State(data["state"])
 
     def __repr__(self):
-        return str(self.state)
-
+        return "<Step dsc:"+str(self.dsc)+">"#str(self.state)
 
 class Project(object):
     def __init__(self):
@@ -54,13 +58,22 @@ class Project(object):
         else:
             debug("  Can't load, unsupported format")
 
-    def push_state(self, state):
+    def push_state(self, state, description):
         dbgfname()
         self.steps.append(Step(state))
+        self.steps[-1].dsc = description
         depth = 50
         if (len(self.steps)>depth):
             self.steps = self.steps[-depth:]
         debug("  steps length:"+str(len(self.steps)))
+
+    def step_back(self):
+        dbgfname()
+        if len(self.steps)>1:
+            s = self.steps[-2]
+            self.steps = self.steps[:-1]
+            s.unserialize()
+            Singleton.state.set(s.state);
 
     def save(self, project_path):
         if os.path.splitext(project_path)[1][1:].strip() != "bcam":
