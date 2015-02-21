@@ -1,6 +1,8 @@
-from tool import Tool, ToolType
-from generalized_setting import TOSetting
-from pp_grbl import PPGRBL
+from __future__ import absolute_import
+
+from bcam.tool import Tool, ToolType
+from bcam.generalized_setting import TOSetting
+from bcam.pp_grbl import PPGRBL
 
 class LineType:
     def __init__(self, lw=None, selected_lw=None, color=None, selected_color=None, name=None, data=None):

@@ -1,14 +1,16 @@
 #-*- encoding: utf-8 -*-
+from __future__ import absolute_import
+
 import pygtk
 pygtk.require('2.0')
 import gtk, gobject, cairo
 import sys
-from events import EVEnum, EventProcessor, ee, ep
-from singleton import Singleton
-from generalized_setting import TOSTypes
+from bcam.events import EVEnum, EventProcessor, ee, ep
+from bcam.singleton import Singleton
+from bcam.generalized_setting import TOSTypes
 
 from logging import debug, info, warning, error, critical
-from util import dbgfname
+from bcam.util import dbgfname
 
 
 class MainWindow(object):

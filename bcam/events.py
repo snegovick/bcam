@@ -1,25 +1,27 @@
+from __future__ import absolute_import
+
 import pygtk
 pygtk.require('2.0')
 import gtk, gobject, cairo
 import sys
 import os
 
-from loader_dxf import DXFLoader
-from tool_operation import TOResult
-from tool_op_drill import TODrill
-from tool_op_exact_follow import TOExactFollow
-from tool_op_offset_follow import TOOffsetFollow
-from tool_op_pocketing import TOPocketing
-from calc_utils import AABB, OverlapEnum
-from path import Path
-from project import project
-from generalized_setting import TOSTypes
+from bcam.loader_dxf import DXFLoader
+from bcam.tool_operation import TOResult
+from bcam.tool_op_drill import TODrill
+from bcam.tool_op_exact_follow import TOExactFollow
+from bcam.tool_op_offset_follow import TOOffsetFollow
+from bcam.tool_op_pocketing import TOPocketing
+from bcam.calc_utils import AABB, OverlapEnum
+from bcam.path import Path
+from bcam.project import project
+from bcam.generalized_setting import TOSTypes
 
 from logging import debug, info, warning, error, critical
-from util import dbgfname
+from bcam.util import dbgfname
 
-from singleton import Singleton
-from state import State
+from bcam.singleton import Singleton
+from bcam.state import State
 
 class EVEnum:
     load_click = "load_click"

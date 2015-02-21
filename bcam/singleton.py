@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 class Singleton(type):
     _instances = {}
     def __call__(cls, *args, **kwargs):

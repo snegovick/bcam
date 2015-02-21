@@ -1,8 +1,10 @@
-from settings import Settings
-from singleton import Singleton
+from __future__ import absolute_import
+
+from bcam.settings import Settings
+from bcam.singleton import Singleton
 
 from logging import debug, info, warning, error, critical
-from util import dbgfname
+from bcam.util import dbgfname
 
 class State:
     def __init__(self, data=None):
@@ -98,11 +100,11 @@ class State:
 
     def deserialize(self, data):
         dbgfname()
-        from path import Path
-        from tool_op_exact_follow import TOExactFollow
-        from tool_op_offset_follow import TOOffsetFollow
-        from tool_op_drill import TODrill
-        from tool_op_pocketing import TOPocketing
+        from bcam.path import Path
+        from bcam.tool_op_exact_follow import TOExactFollow
+        from bcam.tool_op_offset_follow import TOOffsetFollow
+        from bcam.tool_op_drill import TODrill
+        from bcam.tool_op_pocketing import TOPocketing
 
         self.__screen_offset = data["screen_offset"]
         self.__base_offset = data["base_offset"]

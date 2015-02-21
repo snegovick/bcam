@@ -1,6 +1,8 @@
+from __future__ import absolute_import
+
 import math
-from tool_operation import ToolOperation, TOEnum
-from generalized_setting import TOSetting
+from bcam.tool_operation import ToolOperation, TOEnum
+from bcam.generalized_setting import TOSetting
 
 import json
 

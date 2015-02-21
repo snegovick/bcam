@@ -1,4 +1,6 @@
-from tool import Tool
+from __future__ import absolute_import
+
+from bcam.tool import Tool
 
 class TOEnum:
     drill = "drill"

@@ -1,13 +1,17 @@
+from __future__ import absolute_import
+
 import math
-from tool_operation import ToolOperation, TOEnum, TOResult
-from tool_abstract_follow import TOAbstractFollow
-from generalized_setting import TOSetting, TOSTypes
-from calc_utils import find_vect_normal, mk_vect, normalize, vect_sum, vect_len, linearized_path_aabb, find_center_of_mass, sign, LineUtils
-from elements import ELine, EArc, EPoint
-from singleton import Singleton
+from bcam.tool_operation import ToolOperation, TOEnum, TOResult
+from bcam.tool_abstract_follow import TOAbstractFollow
+from bcam.generalized_setting import TOSetting, TOSTypes
+from bcam.calc_utils import (find_vect_normal, mk_vect, normalize, vect_sum,
+                             vect_len, linearized_path_aabb,
+                             find_center_of_mass, sign, LineUtils)
+from bcam.elements import ELine, EArc, EPoint
+from bcam.singleton import Singleton
 
 from logging import debug, info, warning, error, critical
-from util import dbgfname
+from bcam.util import dbgfname
 
 import json
 import cairo

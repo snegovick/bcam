@@ -1,6 +1,8 @@
+from __future__ import absolute_import
+
 import math
 from logging import debug, info, warning, error, critical
-from util import dbgfname
+from bcam.util import dbgfname
 
 def rgb255_to_rgb1(rgb):
     return [rgb[0]/255.0, rgb[1]/255.0, rgb[2]/255.0]

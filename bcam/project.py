@@ -1,10 +1,12 @@
-from path import Path
-from state import State
-import state
-from singleton import Singleton
+from __future__ import absolute_import
+
+from bcam.path import Path
+from bcam.state import State
+from bcam import state
+from bcam.singleton import Singleton
 
 from logging import debug, info, warning, error, critical
-from util import dbgfname
+from bcam.util import dbgfname
 
 import os
 import json
@@ -39,7 +41,7 @@ class Project(object):
 
     def load(self, project_path):
         dbgfname()
-        from events import ep, ee
+        from bcam.events import ep, ee
         #global state
 
         debug("  loading project from "+str(project_path))
