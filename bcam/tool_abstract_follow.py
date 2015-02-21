@@ -1,8 +1,10 @@
-from tool_operation import ToolOperation
-from singleton import Singleton
+from __future__ import absolute_import
+
+from bcam.tool_operation import ToolOperation
+from bcam.singleton import Singleton
 
 from logging import debug, info, warning, error, critical
-from util import dbgfname
+from bcam.util import dbgfname
 
 import cairo
 

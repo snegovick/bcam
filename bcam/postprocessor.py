@@ -1,5 +1,7 @@
+from __future__ import absolute_import
+
 from logging import debug, info, warning, error, critical
-from util import dbgfname
+from bcam.util import dbgfname
 
 class Postprocessor:
     def __init__(self):

@@ -1,10 +1,12 @@
-import loader
-from calc_utils import rgb255_to_rgb1
-from path import ELine, EArc, ECircle, EPoint, Path
-from singleton import Singleton
+from __future__ import absolute_import
+
+from bcam import loader
+from bcam.calc_utils import rgb255_to_rgb1
+from bcam.path import ELine, EArc, ECircle, EPoint, Path
+from bcam.singleton import Singleton
 
 from logging import debug, info, warning, error, critical
-from util import dbgfname
+from bcam.util import dbgfname
 
 import dxfgrabber
 

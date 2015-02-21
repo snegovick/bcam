@@ -1,4 +1,6 @@
-from generalized_setting import TOSetting
+from __future__ import absolute_import
+
+from bcam.generalized_setting import TOSetting
 
 class ToolType:
     cylinder = "cylinder"

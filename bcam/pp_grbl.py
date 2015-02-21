@@ -1,4 +1,6 @@
-from postprocessor import Postprocessor
+from __future__ import absolute_import
+
+from bcam.postprocessor import Postprocessor
 
 class PPGRBL:
     def __init__(self):

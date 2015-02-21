@@ -1,7 +1,9 @@
+from __future__ import absolute_import
+
 from logging import debug, info, warning, error, critical
 import logging
-from util import dbgfname
-import util
+from bcam.util import dbgfname
+from bcam import util
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -9,11 +11,10 @@ import pygtk
 pygtk.require('2.0')
 import gtk, gobject, cairo
 import sys
-from events import EVEnum, EventProcessor, ee, ep
-from main_window import MainWindow
-from singleton import Singleton
-import project
-import state
+from bcam.events import EVEnum, EventProcessor, ee, ep
+from bcam.main_window import MainWindow
+from bcam.singleton import Singleton
+from bcam import project, state
 
 class Screen(gtk.DrawingArea):
 
