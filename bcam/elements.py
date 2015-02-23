@@ -164,7 +164,7 @@ class EArc(Element):
             ea+=math.pi*2
         da = (ea - sa)
 
-        n_steps = int(da//precision)
+        n_steps = int(da/precision)
         s_pt = (self.center[0]+math.cos(sa)*self.radius, self.center[1]+math.sin(sa)*self.radius)
         debug("  splitting arc, start angle: "+str(sa)+" start_pt: "+str(s_pt))
 
