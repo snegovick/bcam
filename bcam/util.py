@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 from logging import debug, info, warning, error, critical
 import traceback

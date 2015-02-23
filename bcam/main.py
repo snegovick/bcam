@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 from logging import debug, info, warning, error, critical
 import logging
@@ -71,8 +71,7 @@ class Screen(gtk.DrawingArea):
     # Handle the expose-event by drawing
     def do_expose_event(self, event):
         # Create the cairo context
-        #Singleton.state.offset = (self.allocation.width/2,self.allocation.height/2)
-        Singleton.state.set_screen_offset((self.allocation.width/2, self.allocation.height/2))
+        Singleton.state.set_screen_offset((self.allocation.width//2, self.allocation.height//2))
         
         offset = Singleton.state.get_offset()
         scale = Singleton.state.get_scale()
@@ -113,9 +112,9 @@ class Screen(gtk.DrawingArea):
         maxs = 80
         if (maxsteps < mins):
             while (maxsteps < mins):
-                if (step/10 == 0):
+                if (step//10 == 0):
                     break
-                step/=10
+                step//=10
                 xsteps = self.allocation.width/Singleton.state.scale[0]/step
                 ysteps = self.allocation.height/Singleton.state.scale[1]/step
                 maxsteps = max(xsteps, ysteps)

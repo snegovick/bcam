@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 import math
 from bcam.tool_operation import ToolOperation, TOEnum
@@ -153,7 +153,7 @@ class TOOffsetFollow(TOAbstractFollow):
                     da = (ea - sa)
 
                     
-                    n_steps = int(da/0.1)
+                    n_steps = int(da//0.1)
                     s_pt = (e.center[0]+math.cos(sa)*e.radius, e.center[1]+math.sin(sa)*e.radius)
                     debug("  splitting arc, start angle: "+str(sa)+" start_pt: "+str(s_pt))
                     for i in range(1,n_steps):

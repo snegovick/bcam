@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 import math
 from bcam.tool_operation import ToolOperation, TOEnum, TOResult
@@ -156,7 +156,7 @@ class TOPocketing(TOAbstractFollow):
         bottom = path_aabb.bottom - 10
         points = []
         step = 0.5
-        total_points = int(right-left+1)*int(top-bottom+1)/step
+        total_points = int(right-left+1)*int(top-bottom+1)//step
         debug("  AABB: "+str(path_aabb))
         point_counter = 0
         x = left
@@ -326,7 +326,7 @@ class TOPocketing(TOAbstractFollow):
         self.tool.current_position = new_pos
 
 
-        for step in range(int(self.depth/(self.tool.diameter/2.0))+1):
+        for step in range(int(self.depth//(self.tool.diameter/2.0))+1):
             for e in self.draw_list:
                 start = list(e.start)
                 new_pos = start[:2]+[self.tool.default_height]

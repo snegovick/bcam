@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 import math
 from logging import debug, info, warning, error, critical
@@ -93,8 +93,8 @@ def find_center_of_mass(path):
         x+=e.end[0]
         y+=e.end[1]
 
-    x_center = float(x)/len(path)
-    y_center = float(y)/len(path)
+    x_center = x/len(path)
+    y_center = y/len(path)
     return x_center, y_center
 
 class OverlapEnum:

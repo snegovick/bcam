@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 from bcam.elements import *
 from bcam.calc_utils import pt_to_pt_dist

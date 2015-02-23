@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 from bcam import loader
 from bcam.calc_utils import rgb255_to_rgb1

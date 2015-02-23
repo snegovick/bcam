@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 import math
 from bcam.tool_operation import ToolOperation, TOEnum
@@ -80,7 +80,7 @@ class TODrill(ToolOperation):
         out+= self.state.settings.default_pp.move_to_rapid(new_pos)
         self.tool.current_position = new_pos
 
-        for step in range(int(self.depth/(self.tool.diameter/2.0))+1):
+        for step in range(int(self.depth//(self.tool.diameter/2.0))+1):
             new_pos = [self.center[0], self.center[1], -step*self.tool.diameter/2.0]
             out+= self.state.settings.default_pp.move_to(new_pos)
             new_pos = [self.center[0], self.center[1], self.tool.diameter]

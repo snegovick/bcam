@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 from bcam.tool_operation import ToolOperation
 from bcam.singleton import Singleton
@@ -101,7 +101,7 @@ class TOAbstractFollow(ToolOperation):
         out+= Singleton.state.settings.default_pp.move_to_rapid(new_pos)
         self.tool.current_position = new_pos
 
-        for step in range(int(self.depth/(self.tool.diameter/2.0))+1):
+        for step in range(int(self.depth//(self.tool.diameter/2.0))+1):
             for e in path:
                 out += self.process_el_to_gcode(e, step)
 
