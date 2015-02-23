@@ -32,11 +32,25 @@ class TODrill(ToolOperation):
         self.index = data["index"]
 
     def set_lt(self, ctx):
-        ctx.set_source_rgb(1, 0, 0)
-        ctx.set_line_width(0.1)
+        if self.selected:
+            self.set_selected_lt(ctx)
+        else:
+            ctx.set_source_rgba(1, 0, 0, 0.5)
+            ctx.set_line_width(0.1)
 
     def set_fill_lt(self, ctx):
-        ctx.set_source_rgba(1, 0, 0, 0.5)
+        if self.selected:
+            self.set_selected_fill_lt(ctx)
+        else:
+            ctx.set_source_rgba(0.8, 0.1, 0.1, 0.5)
+            ctx.set_line_width(0.0)
+
+    def set_selected_lt(self, ctx):
+        ctx.set_source_rgba(1, 0, 0, 1.0)
+        ctx.set_line_width(0.1)
+
+    def set_selected_fill_lt(self, ctx):
+        ctx.set_source_rgba(0.8, 0.1, 0.1, 1.0)
         ctx.set_line_width(0.0)
 
     def draw(self, ctx):

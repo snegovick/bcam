@@ -370,6 +370,9 @@ class EventProcessor(object):
         for e in self.selected_elements:
             e.toggle_selected()
         self.selected_elements = []
+        if (self.selected_tool_operation != None):
+            self.selected_tool_operation.unset_selected()
+        self.selected_tool_operation = None
         self.mw.widget.update()
 
     def shift_press(self, args):
@@ -401,12 +404,14 @@ class EventProcessor(object):
 
     def tool_operations_list_selection_changed(self, args):
         selection = args[0][0].get_selection()
+        self.deselect_all(None)
         self.selected_tool_operation = None
         for li in selection:
             name = li.children()[0].children()[1].get_text()
             for p in Singleton.state.tool_operations:
                 if p.display_name == name:
                     self.selected_tool_operation = p
+                    p.set_selected()
                     self.mw.new_settings_vbox(p.get_settings_list(), p.display_name+" settings")
         self.mw.widget.update()
 

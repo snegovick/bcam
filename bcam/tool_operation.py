@@ -17,6 +17,7 @@ class ToolOperation(object):
     def __init__(self, state):
         self.tool=state.settings.tool
         self.display = True
+        self.selected = False
 
     def draw(self, ctx):
         pass
@@ -38,3 +39,9 @@ class ToolOperation(object):
 
     def deserialize(self, data):
         pass
+
+    def set_selected(self):
+        self.selected = True
+
+    def unset_selected(self):
+        self.selected = False
