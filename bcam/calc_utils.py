@@ -4,6 +4,14 @@ import math
 from logging import debug, info, warning, error, critical
 from bcam.util import dbgfname
 
+def transform_pt(pt, angle):
+    out = [0,0]
+    cos = math.cos(angle)
+    sin = math.sin(angle)
+    out[0] = pt[0]*cos - pt[1]*sin
+    out[1] = pt[0]*sin + pt[1]*cos
+    return out
+
 def rgb255_to_rgb1(rgb):
     return [rgb[0]/255.0, rgb[1]/255.0, rgb[2]/255.0]
 

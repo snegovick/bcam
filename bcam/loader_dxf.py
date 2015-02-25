@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division
 
 from bcam import loader
-from bcam.calc_utils import rgb255_to_rgb1
+from bcam.calc_utils import rgb255_to_rgb1, transform_pt
 from bcam.path import ELine, EArc, ECircle, EPoint, Path
 from bcam.singleton import Singleton
 
@@ -9,6 +9,7 @@ from logging import debug, info, warning, error, critical
 from bcam.util import dbgfname
 
 import dxfgrabber
+import math
 
 color_white = [255, 255, 255]
 default_color = color_white
@@ -25,22 +26,23 @@ class DXFLoader(loader.SourceLoader):
     def __init__(self):
         pass
 
-    def __mk_line(self, s, e, offset, color):
-        if offset !=None:
-            start = [offset[0], offset[1]]
-            end = [offset[0], offset[1]]
+    def __mk_line(self, s, e, offset, color, rotation):
+        start = [0,0]
+        end = [0,0]
+        if ((rotation != None) and (rotation != 0)):
+            start = transform_pt(s, math.radians(rotation))
+            end = transform_pt(e, math.radians(rotation))
         else:
-            start = [0,0]
-            end = [0,0]
-            
-        start[0]+=s[0]
-        start[1]+=s[1]
-        end[0]+=e[0]
-        end[1]+=e[1]
-
+            start[0]=s[0]
+            start[1]=s[1]
+            end[0]=e[0]
+            end[1]=e[1]
+        if offset !=None:
+            start = [start[0]+offset[0], start[1]+offset[1]]
+            end = [end[0]+offset[0], end[1]+offset[1]]
         return ELine(tuple(start), tuple(end), Singleton.state.settings.get_def_lt(), color)
 
-    def __basic_el(self, e, p, offset, layers, block):
+    def __basic_el(self, e, p, offset, layers, block, rotation=None):
         layer = layers[e.layer]
         color = None
         if e.color == dxfgrabber.BYLAYER:
@@ -56,37 +58,57 @@ class DXFLoader(loader.SourceLoader):
         color = rgb255_to_rgb1(dxfgrabber.color.TrueColor.from_aci(color).rgb())
         if e.dxftype == DXFEnum.line:
             #print "line"
-            el = self.__mk_line(e.start, e.end, offset, color)
+            el = self.__mk_line(e.start, e.end, offset, color, rotation)
             p.add_element(el)
         elif e.dxftype == DXFEnum.arc:
             #print "arc"
-            if offset != None:
-                center = [offset[0], offset[1]]
+            center = [0,0]
+            startangle = e.startangle
+            endangle = e.endangle
+
+            if ((rotation != None) and (rotation != 0)):
+                center = transform_pt(e.center, math.radians(rotation))
+                startangle = e.startangle + rotation
+                endangle = e.endangle + rotation
             else:
-                center = [0,0]
-            center[0] += e.center[0]
-            center[1] += e.center[1]
-            el = EArc(tuple(center[:2]), e.radius, e.startangle, e.endangle, Singleton.state.settings.get_def_lt(), color=color)
+                center[0] = e.center[0]
+                center[1] = e.center[1]
+
+            if offset != None:
+                center[0] += offset[0]
+                center[1] += offset[1]
+
+            el = EArc(tuple(center[:2]), e.radius, startangle, endangle, Singleton.state.settings.get_def_lt(), color=color)
             p.add_element(el)
         elif e.dxftype == DXFEnum.circle:
             #print "circle"
-            if offset != None:
-                center = [offset[0], offset[1]]
+            center = [0,0]
+
+            if ((rotation != None) and (rotation != 0)):
+                center = transform_pt(e.center, math.radians(rotation))
             else:
-                center = [0,0]
-            center[0] += e.center[0]
-            center[1] += e.center[1]
+                center[0] = e.center[0]
+                center[1] = e.center[1]
+
+            if offset != None:
+                center[0] += offset[0]
+                center[1] += offset[1]
 
             el = ECircle(tuple(center[:2]), e.radius, Singleton.state.settings.get_def_lt(), color)
             p.add_element(el)
         elif e.dxftype == DXFEnum.point:
             #print "circle"
-            if offset != None:
-                center = [offset[0], offset[1]]
+            center = [0,0]
+
+            if ((rotation != None) and (rotation != 0)):
+                center = transform_pt(e.center, math.radians(rotation))
             else:
-                center = [0,0]
-            center[0] += e.point[0]
-            center[1] += e.point[1]
+                center[0] = e.center[0]
+                center[1] = e.center[1]
+
+            if offset != None:
+                center[0] += offset[0]
+                center[1] += offset[1]
 
             el = EPoint(tuple(center[:2]), Singleton.state.settings.get_def_lt(), color)
             p.add_element(el)
@@ -98,7 +120,7 @@ class DXFLoader(loader.SourceLoader):
                     start = pt
 
                 else:
-                    el = self.__mk_line(start, end, offset, color)
+                    el = self.__mk_line(start, end, offset, color, rotation)
                     p.add_element(el)
                 start = end
                 
@@ -129,12 +151,14 @@ class DXFLoader(loader.SourceLoader):
             elif e.dxftype == DXFEnum.insert:
                 block_name = e.name
                 offset = e.insert[:2]
+                rotation = e.rotation
+                scale = e.scale[:2]
                 tp = Path(Singleton.state, [], block_name, Singleton.state.settings.get_def_lt().name)
                 for b in dxf.blocks:
                     if b.name == block_name:
                         for e in b:
                             if self.__is_basic(e):
-                                self.__basic_el(e, p, offset, dxf.layers, b)
+                                self.__basic_el(e, tp, offset, dxf.layers, b, rotation)
                             else:
                                 debug("  Unknown type: "+str(e.dxftype))
                                 debug("  "+str(e))
