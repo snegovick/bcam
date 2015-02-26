@@ -115,7 +115,7 @@ class TOAbstractFollow(ToolOperation):
         out+= Singleton.state.settings.default_pp.move_to_rapid(new_pos)
         self.tool.current_position = new_pos
 
-        for step in range(int(self.depth//(self.tool.diameter/2.0))+1):
+        for step in range(int(self.depth/(self.tool.diameter/2.0))+1):
             for e in path:
                 out += self.process_el_to_gcode(e, step)
 

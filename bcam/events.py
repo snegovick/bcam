@@ -481,7 +481,7 @@ class EventProcessor(object):
         if args[0] == True:
             Singleton.state.spinner_frame+=1
             Singleton.state.spinner_frame %= (len(Singleton.state.spinner)*20)
-            self.mw.progress_label.set_text("progress: "+Singleton.state.spinner[int(Singleton.state.spinner_frame//20)])
+            self.mw.progress_label.set_text("progress: "+Singleton.state.spinner[int(Singleton.state.spinner_frame/20)])
             self.mw.widget.update()
         else:
             self.mw.progress_label.set_text("No task running")

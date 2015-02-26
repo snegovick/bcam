@@ -326,7 +326,7 @@ class TOPocketing(TOAbstractFollow):
         self.tool.current_position = new_pos
 
 
-        for step in range(int(self.depth//(self.tool.diameter/2.0))+1):
+        for step in range(int(self.depth/(self.tool.diameter/2.0))+1):
             for e in self.draw_list:
                 start = list(e.start)
                 new_pos = start[:2]+[self.tool.default_height]
