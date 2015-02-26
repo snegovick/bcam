@@ -26,7 +26,7 @@ class DXFLoader(loader.SourceLoader):
     def __init__(self):
         pass
 
-    def __mk_line(self, s, e, offset, color, rotation):
+    def __mk_line(self, s, e, offset, color, rotation, scale):
         start = [0,0]
         end = [0,0]
         if ((rotation != None) and (rotation != 0)):
@@ -37,12 +37,17 @@ class DXFLoader(loader.SourceLoader):
             start[1]=s[1]
             end[0]=e[0]
             end[1]=e[1]
+
+        start = [start[0]*scale[0], start[1]*scale[1]]
+        end = [end[0]*scale[0], end[1]*scale[1]]
+
         if offset !=None:
             start = [start[0]+offset[0], start[1]+offset[1]]
             end = [end[0]+offset[0], end[1]+offset[1]]
+
         return ELine(tuple(start), tuple(end), Singleton.state.settings.get_def_lt(), color)
 
-    def __basic_el(self, e, p, offset, layers, block, rotation=None):
+    def __basic_el(self, e, p, offset, layers, block, scale=None, rotation=None):
         layer = layers[e.layer]
         color = None
         if e.color == dxfgrabber.BYLAYER:
@@ -55,10 +60,13 @@ class DXFLoader(loader.SourceLoader):
         else:
             color = e.color
 
+        if scale == None:
+            scale = [1, 1]
+
         color = rgb255_to_rgb1(dxfgrabber.color.TrueColor.from_aci(color).rgb())
         if e.dxftype == DXFEnum.line:
             #print "line"
-            el = self.__mk_line(e.start, e.end, offset, color, rotation)
+            el = self.__mk_line(e.start, e.end, offset, color, rotation, scale)
             p.add_element(el)
         elif e.dxftype == DXFEnum.arc:
             #print "arc"
@@ -74,11 +82,14 @@ class DXFLoader(loader.SourceLoader):
                 center[0] = e.center[0]
                 center[1] = e.center[1]
 
+            center = [center[0]*scale[0], center[1]*scale[1]]
+
             if offset != None:
                 center[0] += offset[0]
                 center[1] += offset[1]
 
-            el = EArc(tuple(center[:2]), e.radius, startangle, endangle, Singleton.state.settings.get_def_lt(), color=color)
+            radius = e.radius*scale[0]
+            el = EArc(tuple(center[:2]), radius, startangle, endangle, Singleton.state.settings.get_def_lt(), color=color)
             p.add_element(el)
         elif e.dxftype == DXFEnum.circle:
             #print "circle"
@@ -90,11 +101,15 @@ class DXFLoader(loader.SourceLoader):
                 center[0] = e.center[0]
                 center[1] = e.center[1]
 
+            center = [center[0]*scale[0], center[1]*scale[1]]
+
             if offset != None:
                 center[0] += offset[0]
                 center[1] += offset[1]
 
-            el = ECircle(tuple(center[:2]), e.radius, Singleton.state.settings.get_def_lt(), color)
+            radius = e.radius*scale[0]
+
+            el = ECircle(tuple(center[:2]), radius, Singleton.state.settings.get_def_lt(), color)
             p.add_element(el)
         elif e.dxftype == DXFEnum.point:
             #print "circle"
@@ -105,6 +120,8 @@ class DXFLoader(loader.SourceLoader):
             else:
                 center[0] = e.center[0]
                 center[1] = e.center[1]
+
+            center = [center[0]*scale[0], center[1]*scale[1]]
 
             if offset != None:
                 center[0] += offset[0]
@@ -120,7 +137,7 @@ class DXFLoader(loader.SourceLoader):
                     start = pt
 
                 else:
-                    el = self.__mk_line(start, end, offset, color, rotation)
+                    el = self.__mk_line(start, end, offset, color, rotation, scale)
                     p.add_element(el)
                 start = end
                 
@@ -147,7 +164,7 @@ class DXFLoader(loader.SourceLoader):
         p = Path(Singleton.state, [], "ungrouped", Singleton.state.settings.get_def_lt().name)
         for e in entities:
             if self.__is_basic(e):
-                self.__basic_el(e, p, None, dxf.layers, None)
+                self.__basic_el(e, p, None, dxf.layers, None, None)
             elif e.dxftype == DXFEnum.insert:
                 block_name = e.name
                 offset = e.insert[:2]
@@ -158,7 +175,7 @@ class DXFLoader(loader.SourceLoader):
                     if b.name == block_name:
                         for e in b:
                             if self.__is_basic(e):
-                                self.__basic_el(e, tp, offset, dxf.layers, b, rotation)
+                                self.__basic_el(e, tp, offset, dxf.layers, b, scale, rotation)
                             else:
                                 debug("  Unknown type: "+str(e.dxftype))
                                 debug("  "+str(e))
