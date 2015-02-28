@@ -2,7 +2,7 @@ from __future__ import absolute_import, division
 
 from bcam.generalized_setting import TOSetting
 
-class ToolType:
+class ToolType(object):
     cylinder = "cylinder"
     cone = "cone"
     ball = "ball"

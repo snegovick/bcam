@@ -14,7 +14,7 @@ import math
 color_white = [255, 255, 255]
 default_color = color_white
 
-class DXFEnum:
+class DXFEnum(object):
     line = "LINE"
     arc = "ARC"
     circle = "CIRCLE"

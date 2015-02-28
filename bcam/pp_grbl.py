@@ -2,7 +2,7 @@ from __future__ import absolute_import, division
 
 from bcam.postprocessor import Postprocessor
 
-class PPGRBL:
+class PPGRBL(object):
     def __init__(self):
         pass
 

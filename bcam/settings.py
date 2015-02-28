@@ -4,7 +4,7 @@ from bcam.tool import Tool, ToolType
 from bcam.generalized_setting import TOSetting
 from bcam.pp_grbl import PPGRBL
 
-class LineType:
+class LineType(object):
     def __init__(self, lw=None, selected_lw=None, color=None, selected_color=None, name=None, data=None):
         if data == None:
             self.lw = lw
@@ -39,7 +39,7 @@ class LineType:
         self.selected_lw = data["selected_lw"]
         self.name = data["name"]
 
-class Material:
+class Material(object):
     def __init__(self, data=None):
         if data == None:
             self.material_name = "default"
@@ -65,7 +65,7 @@ class Material:
         self.material_name = data["material_name"]
 
 
-class Settings:
+class Settings(object):
     def __init__(self, data=None):
         if data == None:
             self.line_types = {"default": LineType(0.5, 0.7, (0,0,0), (1,0,0), "default")}

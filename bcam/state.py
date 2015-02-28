@@ -6,7 +6,7 @@ from bcam.singleton import Singleton
 from logging import debug, info, warning, error, critical
 from bcam.util import dbgfname
 
-class State:
+class State(object):
     def __init__(self, data=None):
         Singleton.state = self
         self.operation_in_progress = None

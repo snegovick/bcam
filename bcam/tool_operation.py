@@ -2,13 +2,13 @@ from __future__ import absolute_import, division
 
 from bcam.tool import Tool
 
-class TOEnum:
+class TOEnum(object):
     drill = "drill"
     exact_follow = "exact follow"
     offset_follow = "offset follow"
     pocket = "pocket"
 
-class TOResult:
+class TOResult(object):
     ok = "ok"
     failed = "failed"
     repeat = "repeat"

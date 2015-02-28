@@ -23,7 +23,7 @@ from bcam.util import dbgfname
 from bcam.singleton import Singleton
 from bcam.state import State
 
-class EVEnum:
+class EVEnum(object):
     load_click = "load_click"
     save_click = "save_click"
     load_file = "load_file"
