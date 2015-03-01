@@ -1,14 +1,16 @@
 #-*- encoding: utf-8 -*-
+from __future__ import absolute_import, division
+
 import pygtk
 pygtk.require('2.0')
 import gtk, gobject, cairo
 import sys
-from events import EVEnum, EventProcessor, ee, ep
-from singleton import Singleton
-from generalized_setting import TOSTypes
+from bcam.events import EVEnum, EventProcessor, ee, ep
+from bcam.singleton import Singleton
+from bcam.generalized_setting import TOSTypes
 
 from logging import debug, info, warning, error, critical
-from util import dbgfname
+from bcam.util import dbgfname
 
 
 class MainWindow(object):
@@ -22,49 +24,10 @@ class MainWindow(object):
         self.window.connect("delete-event", gtk.main_quit)
 
         self.menu_bar = gtk.MenuBar()
-        self.file_menu = gtk.Menu()
-        self.file_item = gtk.MenuItem("_File")
-        self.file_item.set_submenu(self.file_menu)
-        self.menu_bar.append(self.file_item)
-
         agr = gtk.AccelGroup()
         self.window.add_accel_group(agr)
-
-        self.new_project_item = gtk.MenuItem("New project")
-        key, mod = gtk.accelerator_parse("<Control>N")
-        self.new_project_item.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
-
-        self.open_project_item = gtk.MenuItem("Open project ...")
-        key, mod = gtk.accelerator_parse("<Control>O")
-        self.open_project_item.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
-
-        self.save_project_item = gtk.MenuItem("Save project ...")
-        key, mod = gtk.accelerator_parse("<Control>S")
-        self.save_project_item.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
-
-        sep_export_import = gtk.SeparatorMenuItem()
-        self.export_item = gtk.MenuItem("Export ...")
-        self.import_item = gtk.MenuItem("Import ...")
-        sep_quit = gtk.SeparatorMenuItem()
-        self.quit_item = gtk.MenuItem("Quit")
-        key, mod = gtk.accelerator_parse("<Control>Q")
-        self.quit_item.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
-
-        self.file_menu.append(self.new_project_item)
-        self.file_menu.append(self.open_project_item)
-        self.file_menu.append(self.save_project_item)
-        self.file_menu.append(sep_export_import)
-        self.file_menu.append(self.import_item)
-        self.file_menu.append(self.export_item)
-        self.file_menu.append(sep_quit)
-        self.file_menu.append(self.quit_item)
-
-        self.import_item.connect("activate", lambda *args: ep.push_event(ee.load_click, args))
-        self.export_item.connect("activate", lambda *args: ep.push_event(ee.save_click, args))
-        self.new_project_item.connect("activate", lambda *args: ep.push_event(ee.new_project_click, args))
-        self.open_project_item.connect("activate", lambda *args: ep.push_event(ee.load_project_click, args))
-        self.save_project_item.connect("activate", lambda *args: ep.push_event(ee.save_project_click, args))
-        self.quit_item.connect("activate", lambda *args: ep.push_event(ee.quit_click, args))
+        self.mk_file_menu(agr)
+        self.mk_edit_menu(agr)
 
         self.window_vbox = gtk.VBox(homogeneous=False, spacing=0)
         self.window_vbox.pack_start(self.menu_bar, expand=False, fill=False, padding=0)
@@ -110,6 +73,71 @@ class MainWindow(object):
         self.hbox.pack_start(self.right_vbox, expand=False, fill=False, padding=0)
         gobject.timeout_add(10, self.widget.periodic)
         self.window_vbox.pack_start(self.hbox, expand=True, fill=True, padding=0)
+
+    def mk_file_menu(self, agr):
+        self.file_menu = gtk.Menu()
+        self.file_item = gtk.MenuItem("_File")
+        self.file_item.set_submenu(self.file_menu)
+        self.menu_bar.append(self.file_item)
+
+        self.new_project_item = gtk.MenuItem("New project")
+        key, mod = gtk.accelerator_parse("<Control>N")
+        self.new_project_item.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+
+        self.open_project_item = gtk.MenuItem("Open project ...")
+        key, mod = gtk.accelerator_parse("<Control>O")
+        self.open_project_item.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+
+        self.save_project_item = gtk.MenuItem("Save project ...")
+        key, mod = gtk.accelerator_parse("<Control>S")
+        self.save_project_item.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+
+        sep_export_import = gtk.SeparatorMenuItem()
+        self.export_item = gtk.MenuItem("Export ...")
+        self.import_item = gtk.MenuItem("Import ...")
+        sep_quit = gtk.SeparatorMenuItem()
+        self.quit_item = gtk.MenuItem("Quit")
+        key, mod = gtk.accelerator_parse("<Control>Q")
+        self.quit_item.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+
+        self.file_menu.append(self.new_project_item)
+        self.file_menu.append(self.open_project_item)
+        self.file_menu.append(self.save_project_item)
+        self.file_menu.append(sep_export_import)
+        self.file_menu.append(self.import_item)
+        self.file_menu.append(self.export_item)
+        self.file_menu.append(sep_quit)
+        self.file_menu.append(self.quit_item)
+
+        self.import_item.connect("activate", lambda *args: ep.push_event(ee.load_click, args))
+        self.export_item.connect("activate", lambda *args: ep.push_event(ee.save_click, args))
+        self.new_project_item.connect("activate", lambda *args: ep.push_event(ee.new_project_click, args))
+        self.open_project_item.connect("activate", lambda *args: ep.push_event(ee.load_project_click, args))
+        self.save_project_item.connect("activate", lambda *args: ep.push_event(ee.save_project_click, args))
+        self.quit_item.connect("activate", lambda *args: ep.push_event(ee.quit_click, args))
+
+    def mk_edit_menu(self, agr):
+        self.edit_menu = gtk.Menu()
+        self.edit_item = gtk.MenuItem("_Edit")
+        self.edit_item.set_submenu(self.edit_menu)
+        self.menu_bar.append(self.edit_item)
+
+        self.undo_item = gtk.MenuItem("Undo")
+        key, mod = gtk.accelerator_parse("<Control>Z")
+        self.undo_item.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+
+        self.redo_item = gtk.MenuItem("Redo")
+        key, mod = gtk.accelerator_parse("<Control>Y")
+        self.redo_item.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+
+        sep_undo_redo = gtk.SeparatorMenuItem()
+
+        self.edit_menu.append(sep_undo_redo)
+        self.edit_menu.append(self.undo_item)
+        self.edit_menu.append(self.redo_item)
+
+        self.undo_item.connect("activate", lambda *args: ep.push_event(ee.undo_click, args))
+        self.redo_item.connect("activate", lambda *args: ep.push_event(ee.redo_click, args))
 
     def run(self):
         self.window.show_all()

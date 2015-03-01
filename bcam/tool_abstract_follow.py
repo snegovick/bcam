@@ -1,8 +1,10 @@
-from tool_operation import ToolOperation
-from singleton import Singleton
+from __future__ import absolute_import, division
+
+from bcam.tool_operation import ToolOperation
+from bcam.singleton import Singleton
 
 from logging import debug, info, warning, error, critical
-from util import dbgfname
+from bcam.util import dbgfname
 
 import cairo
 
@@ -12,12 +14,26 @@ class TOAbstractFollow(ToolOperation):
         self.draw_list = []
 
     def set_lt(self, ctx):
-        ctx.set_source_rgba(1, 0, 0, 0.5)
-        ctx.set_line_width(self.tool.diameter)
+        if self.selected:
+            self.set_selected_lt(ctx)
+        else:
+            ctx.set_source_rgba(1, 0, 0, 0.5)
+            ctx.set_line_width(self.tool.diameter)
 
     def set_fill_lt(self, ctx):
+        if self.selected:
+            self.set_selected_fill_lt(ctx)
+        else:
+            ctx.set_source_rgba(0.8, 0.1, 0.1, 0.5)
+            ctx.set_line_width(self.tool.diameter*0.9)
+
+    def set_selected_lt(self, ctx):
+        ctx.set_source_rgba(1, 0, 0, 1.0)
+        ctx.set_line_width(self.tool.diameter)
+
+    def set_selected_fill_lt(self, ctx):
         ctx.set_source_rgba(0.8, 0.1, 0.1, 1.0)
-        ctx.set_line_width(self.tool.diameter*0.7)
+        ctx.set_line_width(self.tool.diameter*0.9)
 
     def __draw_elements(self, ctx):
         if self.draw_list != None:

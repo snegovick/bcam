@@ -1,6 +1,16 @@
+from __future__ import absolute_import, division
+
 import math
 from logging import debug, info, warning, error, critical
-from util import dbgfname
+from bcam.util import dbgfname
+
+def transform_pt(pt, angle):
+    out = [0,0]
+    cos = math.cos(angle)
+    sin = math.sin(angle)
+    out[0] = pt[0]*cos - pt[1]*sin
+    out[1] = pt[0]*sin + pt[1]*cos
+    return out
 
 def rgb255_to_rgb1(rgb):
     return [rgb[0]/255.0, rgb[1]/255.0, rgb[2]/255.0]
@@ -91,17 +101,17 @@ def find_center_of_mass(path):
         x+=e.end[0]
         y+=e.end[1]
 
-    x_center = float(x)/len(path)
-    y_center = float(y)/len(path)
+    x_center = x/len(path)
+    y_center = y/len(path)
     return x_center, y_center
 
-class OverlapEnum:
+class OverlapEnum(object):
     fully_covers = 1
     partially_overlap = 2
     fully_lays_inside = 3
     no_overlap = 4
 
-class AABB:
+class AABB(object):
     def __init__(self, sx, sy, ex, ey):
         debug("AABB sx, sy, ex, ey: "+str(sx)+" "+str(sy)+" "+str(ex)+" "+str(ey))
         self.left = min(sx, ex)
@@ -149,7 +159,7 @@ class AABB:
 def pt_to_pt_dist(p1, p2):
     return math.sqrt((p1[0]-p2[0])**2+(p1[1]-p2[1])**2)
 
-class CircleUtils:
+class CircleUtils(object):
     def __init__(self, center, radius, uses_inner_space=False):
         self.center = center
         self.radius = radius
@@ -167,7 +177,7 @@ class CircleUtils:
             return 0 if dist<0 else dist
         return abs(dist)
 
-class PointUtils:
+class PointUtils(object):
     def __init__(self, center):
         self.center = center
 
@@ -181,7 +191,7 @@ class PointUtils:
         dist = pt_to_pt_dist(pt, self.center)
         return abs(dist)
 
-class ArcUtils:
+class ArcUtils(object):
     def __init__(self, center, radius, startangle, endangle, turnaround=False):
         self.ta = turnaround
         self.center = center
@@ -311,7 +321,7 @@ class ArcUtils:
         return None
 
 
-class LineUtils:
+class LineUtils(object):
     def __init__(self, start, end):
         self.start = start
         self.end = end

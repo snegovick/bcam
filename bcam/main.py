@@ -1,7 +1,9 @@
+from __future__ import absolute_import, division
+
 from logging import debug, info, warning, error, critical
 import logging
-from util import dbgfname
-import util
+from bcam.util import dbgfname
+from bcam import util
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -9,10 +11,10 @@ import pygtk
 pygtk.require('2.0')
 import gtk, gobject, cairo
 import sys
-from events import EVEnum, EventProcessor, ee, ep
-from main_window import MainWindow
-from singleton import Singleton
-import state
+from bcam.events import EVEnum, EventProcessor, ee, ep
+from bcam.main_window import MainWindow
+from bcam.singleton import Singleton
+from bcam import project, state
 
 class Screen(gtk.DrawingArea):
 
@@ -69,8 +71,7 @@ class Screen(gtk.DrawingArea):
     # Handle the expose-event by drawing
     def do_expose_event(self, event):
         # Create the cairo context
-        #Singleton.state.offset = (self.allocation.width/2,self.allocation.height/2)
-        Singleton.state.set_screen_offset((self.allocation.width/2, self.allocation.height/2))
+        Singleton.state.set_screen_offset((self.allocation.width//2, self.allocation.height//2))
         
         offset = Singleton.state.get_offset()
         scale = Singleton.state.get_scale()
@@ -111,9 +112,9 @@ class Screen(gtk.DrawingArea):
         maxs = 80
         if (maxsteps < mins):
             while (maxsteps < mins):
-                if (step/10 == 0):
+                if (step//10 == 0):
                     break
-                step/=10
+                step//=10
                 xsteps = self.allocation.width/Singleton.state.scale[0]/step
                 ysteps = self.allocation.height/Singleton.state.scale[1]/step
                 maxsteps = max(xsteps, ysteps)
@@ -166,16 +167,18 @@ mw = None
         
 # GTK mumbo-jumbo to show the widget in a window and quit when it's closed
 def run():
+    args = {"--log": {"is_set": util.NOT_SET, "has_option": util.NO_OPTION, "option": None}}
+    util.parse_args(args)
+    if args["--log"]["is_set"]:
+        logging.getLogger("").setLevel(logging.DEBUG)
+
     global mw, ep
     state.State()
     mw = MainWindow(Screen)
     Singleton.mw = mw
     ep.mw = mw
+    project.project.push_state(Singleton.state, "initial state")
     mw.run()
 
 if __name__ == "__main__":
-    args = {"--log": {"is_set": util.NOT_SET, "has_option": util.NO_OPTION, "option": None}}
-    util.parse_args(args)
-    if args["--log"]["is_set"]:
-        logging.getLogger("").setLevel(logging.DEBUG)
     run()

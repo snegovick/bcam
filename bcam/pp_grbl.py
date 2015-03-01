@@ -1,6 +1,8 @@
-from postprocessor import Postprocessor
+from __future__ import absolute_import, division
 
-class PPGRBL:
+from bcam.postprocessor import Postprocessor
+
+class PPGRBL(object):
     def __init__(self):
         pass
 

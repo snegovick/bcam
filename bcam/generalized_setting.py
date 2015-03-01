@@ -1,8 +1,10 @@
-class TOSTypes:
+from __future__ import absolute_import, division
+
+class TOSTypes(object):
     button = "button"
     float = "float"
 
-class TOSetting:
+class TOSetting(object):
     def __init__(self, type, min=None, max=None, default=None, display_name="", parent_cb=None):
         self.type = type
         self.min = min
