@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division
+from __future__ import absolute_import, division, print_function
 
 import math
 from logging import debug, info, warning, error, critical
@@ -391,15 +391,12 @@ class LineUtils(object):
         miny = min(self.start[1], self.end[1])
         maxy = max(self.start[1], self.end[1])
 
-        #print "s:", (minx, miny), "e:", (maxx, maxy)
-
         x_intersects = False
         y_intersects = False
 
         if abs(minx-maxx)<0.001:
             if abs(x_i-minx)<0.001:
                 x_intersects = True
-                #print "dx=0"
             else:
                 return False
         elif x_i>=minx and x_i<=maxx:
@@ -408,7 +405,6 @@ class LineUtils(object):
         if abs(miny-maxy)<0.001:
             if abs(y_i-miny)<0.001:
                 y_intersects = True
-                #print "dy=0"
             else:
                 return False
         elif y_i>=miny and y_i<=maxy:
@@ -422,9 +418,7 @@ class LineUtils(object):
     def find_intersection(self, other_element):
         #debug("In LineUtils.find_intersection")
         oe = other_element
-        #print oe
         if other_element.__class__.__name__ == "LineUtils":
-            #print "line to line"
             # line to line intersection
             ms, me = self.start, self.end
 
@@ -440,27 +434,18 @@ class LineUtils(object):
             det = float(ma*ob - oa*mb)
             if det == 0:
                 # lines are parallel
-                #print "parallel"
                 return None
             else:
                 x_i = (ob*mc-mb*oc)/det
                 y_i = (ma*oc-oa*mc)/det
-                #print "int:", x_i, y_i
                 if self.check_if_pt_belongs((x_i, y_i)):
-                    #print "on self"
                     if oe.check_if_pt_belongs((x_i, y_i)):
-                        #print "on oe"
                         return [x_i, y_i]
                     else:
-                        #print "not on oe"
-                        #print "int:", x_i, y_i
-                        #print "oe:", oe.start, oe.end
                         pass
                 else:
                     pass
-                    #print "not on self"
         elif other_element.__class__.__name__ == "ArcUtils":
-            #print "arc to line"
             return oe.find_intersection(self)
         else:
             debug("  Not calc util:", other_element.__class__.__name__)
@@ -484,12 +469,12 @@ if __name__=="__main__":
     au = ArcUtils((0, 0), 1, -10*math.pi/180.0, 300*math.pi/180.0)
     
     angle = 90
-    print "checking angle", angle, au.check_angle_in_range(angle*math.pi/180.0)
+    print("checking angle", angle, au.check_angle_in_range(angle*math.pi/180))
     angle = 190
-    print "checking angle", angle, au.check_angle_in_range(angle*math.pi/180.0)
+    print("checking angle", angle, au.check_angle_in_range(angle*math.pi/180))
     angle = -15
-    print "checking angle", angle, au.check_angle_in_range(angle*math.pi/180.0)
+    print("checking angle", angle, au.check_angle_in_range(angle*math.pi/180))
     angle = 290
-    print "checking angle", angle, au.check_angle_in_range(angle*math.pi/180.0)
+    print("checking angle", angle, au.check_angle_in_range(angle*math.pi/180))
     angle = 301
-    print "checking angle", angle, au.check_angle_in_range(angle*math.pi/180.0)
+    print("checking angle", angle, au.check_angle_in_range(angle*math.pi/180))

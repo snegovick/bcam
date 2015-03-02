@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division
+from __future__ import absolute_import, division, print_function
 
 from bcam.elements import *
 from bcam.calc_utils import pt_to_pt_dist
@@ -76,7 +76,6 @@ class Path(Element):
         min_dist = pt_to_pt_dist(available[0].start, current.end)
         min_dist_id = 0
         min_order = {"turnaround": False, "offset": 1}
-        #print "current:", current
         for i, e in enumerate(available):
             orders = []
             dists = []
@@ -91,12 +90,10 @@ class Path(Element):
                 dists.append(pt_to_pt_dist(e.start, current.start))
                 orders.append({"turnaround": True, "offset": -1})
             md = min(dists)
-            #print dists
             if md<min_dist:
                 min_dist = md
                 min_dist_id = i
                 min_order = orders[dists.index(md)]
-                #print "md, i:", md, i
         return min_dist, min_dist_id, min_order
 
     def __append_element(self, min_dist_id, min_order, available, ordered_elements, ce):
@@ -156,21 +153,15 @@ class Path(Element):
                 break
             cont = False
             current = (ordered_elements[-1], ordered_elements[0])
-            #print "ordered_elements:", ordered_elements
-            #print "current:", current
-            #print "available:", available
             min_dist, min_dist_id, min_order = self.__find_adjacent_element(current[0], available)
-            #print "md, mdi, mo:", min_dist, min_dist_id, min_order
             if (min_dist<0.001):
                 
                 self.__append_element(min_dist_id, min_order, available, ordered_elements, ce)
-                #print "append, turnaround:", min_order["turnaround"]
                 cont = True
             if not cont:
                 min_dist, min_dist_id, min_order = self.__find_adjacent_element(current[1], available, False)
                 if (min_dist<0.001):
                     self.__append_element(min_dist_id, min_order, available, ordered_elements, ce)
-                    #print "prepend, turnaround:", min_order["turnaround"]
                     cont = True
 
             if not cont:
