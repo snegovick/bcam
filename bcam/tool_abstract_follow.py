@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division
+from __future__ import absolute_import, division, print_function
 
 from bcam.tool_operation import ToolOperation
 from bcam.singleton import Singleton

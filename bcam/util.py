@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division
+from __future__ import absolute_import, division, print_function
 
 from logging import debug, info, warning, error, critical
 import traceback
@@ -31,8 +31,9 @@ def parse_args(args):
                 try:
                     args[arg]["option"] = sys.argv[i+1]
                 except:
-                    print "expected option for argument", arg, ", but it doesnt exist"
-                    print usage
+                    print("expected option for argument", arg,
+                          ", but it doesnt exist")
+                    print(usage)
                     exit()
                 else:
                     args[arg]["is_set"] = SET

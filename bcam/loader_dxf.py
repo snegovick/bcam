@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division
+from __future__ import absolute_import, division, print_function
 
 from bcam import loader
 from bcam.calc_utils import rgb255_to_rgb1, transform_pt
@@ -65,11 +65,9 @@ class DXFLoader(loader.SourceLoader):
 
         color = rgb255_to_rgb1(dxfgrabber.color.TrueColor.from_aci(color).rgb())
         if e.dxftype == DXFEnum.line:
-            #print "line"
             el = self.__mk_line(e.start, e.end, offset, color, rotation, scale)
             p.add_element(el)
         elif e.dxftype == DXFEnum.arc:
-            #print "arc"
             center = [0,0]
             startangle = e.startangle
             endangle = e.endangle
@@ -92,7 +90,6 @@ class DXFLoader(loader.SourceLoader):
             el = EArc(tuple(center[:2]), radius, startangle, endangle, Singleton.state.settings.get_def_lt(), color=color)
             p.add_element(el)
         elif e.dxftype == DXFEnum.circle:
-            #print "circle"
             center = [0,0]
 
             if ((rotation != None) and (rotation != 0)):
@@ -112,7 +109,6 @@ class DXFLoader(loader.SourceLoader):
             el = ECircle(tuple(center[:2]), radius, Singleton.state.settings.get_def_lt(), color)
             p.add_element(el)
         elif e.dxftype == DXFEnum.point:
-            #print "circle"
             center = [0,0]
 
             if ((rotation != None) and (rotation != 0)):

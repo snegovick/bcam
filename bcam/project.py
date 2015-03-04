@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division
+from __future__ import absolute_import, division, print_function
 
 from bcam.path import Path
 from bcam.state import State
@@ -50,7 +50,6 @@ class Project(object):
         f.close()
         parsed_json = json.loads(data)
         self.steps = []
-        #print "json:", parsed_json
         if parsed_json["format_version"] == 2:
             step = Step(data=parsed_json["step"])
             self.steps.append(step)
