@@ -1,0 +1,5 @@
+# Python bytecode files
+*.pyc
+*.pyo
+# Virtual environments
+.tox

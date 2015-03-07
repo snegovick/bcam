@@ -464,17 +464,3 @@ class LineUtils(object):
 
     def __reproject_pt(self, pt, sina, cosa):
         return (pt[0]*cosa-pt[1]*sina, pt[0]*sina+pt[1]*cosa)
-
-if __name__=="__main__":
-    au = ArcUtils((0, 0), 1, -10*math.pi/180.0, 300*math.pi/180.0)
-    
-    angle = 90
-    print("checking angle", angle, au.check_angle_in_range(angle*math.pi/180))
-    angle = 190
-    print("checking angle", angle, au.check_angle_in_range(angle*math.pi/180))
-    angle = -15
-    print("checking angle", angle, au.check_angle_in_range(angle*math.pi/180))
-    angle = 290
-    print("checking angle", angle, au.check_angle_in_range(angle*math.pi/180))
-    angle = 301
-    print("checking angle", angle, au.check_angle_in_range(angle*math.pi/180))
