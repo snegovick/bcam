@@ -133,10 +133,8 @@ class AABB(object):
         """
         x = pt[0]
         y = pt[1]
-        
-        if (x>=self.left and x<=self.right and y>=self.bottom and y<=self.top):
-            return True
-        return False
+        return (x>=self.left and x<=self.right and
+                y>=self.bottom and y<=self.top)
 
     def aabb_in_aabb(self, box, check_inside_overlap=True):
         """Tests if another AABB overlaps with this one.
@@ -144,21 +142,11 @@ class AABB(object):
         Returns one of OverlapEnum's elements indicating the overlap state.
 
         """
-        lt = False
-        lb = False
-        rt = False
-        rb = False
-
-        if self.point_in_aabb((box.left, box.top)):
-            lt = True
-        if self.point_in_aabb((box.left, box.bottom)):
-            lb = True
-        if self.point_in_aabb((box.right, box.bottom)):
-            rb = True
-        if self.point_in_aabb((box.right, box.top)):
-            rt = True
+        lt = self.point_in_aabb((box.left, box.top))
+        lb = self.point_in_aabb((box.left, box.bottom))
+        rb = self.point_in_aabb((box.right, box.bottom))
+        rt = self.point_in_aabb((box.right, box.top))
             
-        oe = OverlapEnum
         if lt and lb and rt and rb:
             return OverlapEnum.fully_covers
         elif (check_inside_overlap and
