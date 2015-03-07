@@ -112,6 +112,11 @@ class OverlapEnum(object):
     no_overlap = 4
 
 class AABB(object):
+    """Axis-Aligned Bounding Box.
+
+    Represents a rectangle with sides parallel to the coordinate system.
+
+    """
     def __init__(self, sx, sy, ex, ey):
         debug("AABB sx, sy, ex, ey: "+str(sx)+" "+str(sy)+" "+str(ex)+" "+str(ey))
         self.left = min(sx, ex)
@@ -120,6 +125,12 @@ class AABB(object):
         self.bottom = min(sy, ey)
 
     def point_in_aabb(self, pt):
+        """Tests if point pt is in the bounding box.
+
+        Returns True if the point is inside or on the boundary of the bounding
+        box, False otherwise.
+
+        """
         x = pt[0]
         y = pt[1]
         
@@ -128,6 +139,11 @@ class AABB(object):
         return False
 
     def aabb_in_aabb(self, box, check_inside_overlap=True):
+        """Tests if another AABB overlaps with this one.
+
+        Returns one of OverlapEnum's elements indicating the overlap state.
+
+        """
         lt = False
         lb = False
         rt = False
@@ -145,11 +161,11 @@ class AABB(object):
         oe = OverlapEnum
         if lt and lb and rt and rb:
             return OverlapEnum.fully_covers
+        elif (check_inside_overlap and
+              box.aabb_in_aabb(self, False)==OverlapEnum.fully_covers):
+            return OverlapEnum.fully_lays_inside
         elif lt or lb or rt or rb:
             return OverlapEnum.partially_overlap
-        if check_inside_overlap:
-            if box.aabb_in_aabb(self, False)==OverlapEnum.fully_covers:
-                return OverlapEnum.fully_lays_inside
         return OverlapEnum.no_overlap
         
     def __repr__(self):
@@ -224,6 +240,7 @@ class ArcUtils(object):
         return d
 
     def check_angle_in_range(self, a):
+        """Checks whether angle a is between the start and end of the arc."""
         s = self.sa
         e = self.ea
         se_dist = self.__angledist(s, e)
