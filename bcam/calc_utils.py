@@ -170,12 +170,20 @@ class CircleUtils(object):
         self.uses_inner_space=uses_inner_space
 
     def get_aabb(self):
+        """Returns the axis-aligned bounding box that encloses this circle."""
         cx = self.center[0]
         cy = self.center[1]
         r = self.radius
         return AABB(cx-r, cy-r, cx+r, cy+r)
 
     def distance_to_pt(self, pt):
+        """Returns the distance from this circle to the given point.
+
+        If uses_inner_space has been set to True for this circle, then any
+        point inside the circle will be considered to have zero distance to
+        the circle.  Otherwise, absolute distance to the edge is returned.
+
+        """
         dist = pt_to_pt_dist(pt, self.center)-self.radius
         if self.uses_inner_space:
             return 0 if dist<0 else dist

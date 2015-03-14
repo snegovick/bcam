@@ -1,4 +1,4 @@
-from math import pi
+from math import pi, sqrt
 import pytest
 from bcam import calc_utils
 
@@ -35,6 +35,32 @@ def test_aabb_in(box1, box2, check_inside, expected):
     aabb1 = calc_utils.AABB(*box1)
     aabb2 = calc_utils.AABB(*box2)
     assert aabb1.aabb_in_aabb(aabb2, check_inside) == expected
+
+
+# Test CircleUtils.
+@pytest.mark.parametrize('center, radius, box', [
+    ([0, 0], 1, [-1, 1, 1, -1]),
+    ([1.3, -2.7], 33, [-31.7, 34.3, 30.3, -35.7]),
+])
+def test_circle_get_aabb(center, radius, box):
+    aabb = calc_utils.CircleUtils(center, radius).get_aabb()
+    assert aabb.left == box[0]
+    assert aabb.right == box[1]
+    assert aabb.top == box[2]
+    assert aabb.bottom == box[3]
+
+@pytest.mark.parametrize('center, radius, inner_space, pt, distance', [
+    ([0, 0], 1, False, [0, 0], 1),
+    ([0, 0], 1, True, [0, 0], 0),
+    ([0, 0], 1, False, [0.5, 0], 0.5),
+    ([0, 0], 1, True, [0.5, 0], 0),
+    ([0, 0], 1, False, [0, 1], 0),
+    ([0, 0], 1, True, [0, 1], 0),
+    ([1, 1], 1, True, [2, 2], sqrt(2) - 1),
+])
+def test_circle_distance_to_pt(center, radius, inner_space, pt, distance):
+    c = calc_utils.CircleUtils(center, radius, inner_space)
+    assert c.distance_to_pt(pt) == distance
 
 
 # Test ArcUtils.
