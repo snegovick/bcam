@@ -61,6 +61,9 @@ class TOPocketing(TOAbstractFollow):
             if type(e).__name__ == "EArc":
                 lpath = e.to_line_sequence(tolerance)
                 linearized_path += lpath
+            elif type(e).__name__ == "ECircle":
+                lpath = e.to_line_sequence(tolerance)
+                linearized_path += lpath
             elif type(e).__name__ == "ELine":
                 linearized_path.append(e)
         return linearized_path

@@ -291,6 +291,30 @@ class ECircle(Element):
         self.draw_element(ctx)
         ctx.stroke()
 
+    def to_line_sequence(self, precision):
+        dbgfname()
+        sa = 0.0
+        ea = math.pi*2
+        da = (ea - sa)
+
+        n_steps = int(da/precision)
+        s_pt = (self.center[0]+math.cos(sa)*self.radius, self.center[1]+math.sin(sa)*self.radius)
+        debug("  splitting arc, start angle: "+str(sa)+" start_pt: "+str(s_pt))
+
+        converted_elements = []
+
+        for i in range(1,n_steps):
+            a = sa+i*0.1
+            e_pt = (self.center[0]+math.cos(a)*self.radius, self.center[1]+math.sin(a)*self.radius)
+            ne = ELine(s_pt, e_pt, self.lt, self.color)
+            debug("  angle: "+str(a)+" line: "+str(s_pt)+" "+str(e_pt))
+            s_pt = e_pt
+            converted_elements.append(ne)
+        e_pt = self.end
+        ne = ELine(s_pt, e_pt, self.lt, self.color)
+        converted_elements.append(ne)
+        return converted_elements
+
     def distance_to_pt(self, pt):
         cu = CircleUtils(self.center, self.radius)
         return cu.distance_to_pt(pt)
