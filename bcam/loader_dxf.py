@@ -112,10 +112,10 @@ class DXFLoader(loader.SourceLoader):
             center = [0,0]
 
             if ((rotation != None) and (rotation != 0)):
-                center = transform_pt(e.center, math.radians(rotation))
+                center = transform_pt(e.point, math.radians(rotation))
             else:
-                center[0] = e.center[0]
-                center[1] = e.center[1]
+                center[0] = e.point[0]
+                center[1] = e.point[1]
 
             center = [center[0]*scale[0], center[1]*scale[1]]
 
