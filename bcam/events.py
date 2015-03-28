@@ -163,10 +163,13 @@ class EventProcessor(object):
     def save_project_click(self, args):
         dbgfname()
         debug("  save project clicked")
-        mimes = [("BCam project (*.bcam)", "Application/bcam", "*.bcam")]
-        result = self.mw.mk_file_save_dialog("Save project ...", mimes)
-        if result!=None:
-            self.save_project((result, ))
+        if (project.get_path() != None):
+            self.save_project((project.get_path(), ))
+        else:
+            mimes = [("BCam project (*.bcam)", "Application/bcam", "*.bcam")]
+            result = self.mw.mk_file_save_dialog("Save project ...", mimes)
+            if result!=None:
+                self.save_project((result, ))
 
     def new_project_click(self, args):
         dbgfname()

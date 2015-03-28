@@ -38,11 +38,20 @@ class Project(object):
     def __init__(self):
         self.steps = []
         self.step_index = -1
+        self.path = None
+
+    def get_path(self):
+        return self.path
+
+    def set_path(self, path):
+        self.path = path
 
     def load(self, project_path):
         dbgfname()
         from bcam.events import ep, ee
         #global state
+
+        self.path = project_path
 
         debug("  loading project from "+str(project_path))
         f = open(project_path)
@@ -59,6 +68,17 @@ class Project(object):
             ep.mw.widget.update()
         else:
             debug("  Can't load, unsupported format")
+
+    def save(self, project_path):
+        if os.path.splitext(project_path)[1][1:].strip() != "bcam":
+            project_path+=".bcam"
+
+        # format 2
+        f = open(project_path, 'w')
+        f.write(json.dumps({'format_version': 2, 'step': self.steps[-1].serialize()}))
+        f.close()
+        self.set_path(project_path)
+        return True
 
     def push_state(self, state, description):
         dbgfname()
@@ -88,14 +108,5 @@ class Project(object):
             s.unserialize()
             Singleton.state.set(s.state);
 
-    def save(self, project_path):
-        if os.path.splitext(project_path)[1][1:].strip() != "bcam":
-            project_path+=".bcam"
-
-        # format 2
-        f = open(project_path, 'w')
-        f.write(json.dumps({'format_version': 2, 'step': self.steps[-1].serialize()}))
-        f.close()
-        return True
 
 project = Project()
