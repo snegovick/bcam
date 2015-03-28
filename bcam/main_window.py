@@ -224,6 +224,14 @@ class MainWindow(object):
         for c in children:
             lst.remove(c)
 
+    def set_item_selected(self, lst, idx):
+        dbgfname()
+        if len(lst.children()) > idx:
+            debug("  selecting %i"%(idx,))
+            lst.select_child(lst.children()[idx])
+        else:
+            debug("  len(lst.children()) = %i, idx = %i"%(len(lst.children()), idx))
+
     def add_item_to_list(self, lst, label_text, event):
         check_button = gtk.CheckButton("")
         check_button.set_active(True)

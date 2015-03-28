@@ -203,10 +203,16 @@ class EventProcessor(object):
                 self.mw.add_item_to_list(self.mw.gtklist, p.name, self.ee.paths_check_button_click)
 
     def update_tool_operations_list(self, args):
+        dbgfname()
+        debug("  args: "+str(args))
         if Singleton.state.tool_operations != None:
             self.mw.clear_list(self.mw.tp_gtklist)
             for p in Singleton.state.tool_operations:
                 self.mw.add_item_to_list(self.mw.tp_gtklist, p.display_name, self.ee.tool_paths_check_button_click)
+            if (args!=(None,)):
+                if "selection" in args[0]:
+                    idx = args[0]["selection"]
+                    self.mw.set_item_selected(self.mw.tp_gtklist, idx)
 
     def load_file(self, args):
         dbgfname()
@@ -515,7 +521,7 @@ class EventProcessor(object):
         temp = self.selected_tool_operation
         Singleton.state.tool_operations.remove(self.selected_tool_operation)
         Singleton.state.tool_operations.insert(cur_idx-1, temp)
-        self.push_event(self.ee.update_tool_operations_list, (None))
+        self.push_event(self.ee.update_tool_operations_list, {"selection": cur_idx-1})
         project.push_state(Singleton.state, "tool_operation_up_click")
 
     def tool_operation_down_click(self, args):
@@ -532,7 +538,7 @@ class EventProcessor(object):
         temp = self.selected_tool_operation
         Singleton.state.tool_operations.remove(self.selected_tool_operation)
         Singleton.state.tool_operations.insert(cur_idx+1, temp)
-        self.push_event(self.ee.update_tool_operations_list, (None))
+        self.push_event(self.ee.update_tool_operations_list, {"selection": cur_idx+1})
         project.push_state(Singleton.state, "tool_operation_down_click")
 
     def scroll_up(self, args):
