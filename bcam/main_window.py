@@ -88,9 +88,13 @@ class MainWindow(object):
         key, mod = gtk.accelerator_parse("<Control>O")
         self.open_project_item.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
 
-        self.save_project_item = gtk.MenuItem("Save project ...")
+        self.save_project_item = gtk.MenuItem("Save project")
         key, mod = gtk.accelerator_parse("<Control>S")
         self.save_project_item.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+
+        self.save_project_as_item = gtk.MenuItem("Save project as ...")
+        key, mod = gtk.accelerator_parse("<Control><Shift>S")
+        self.save_project_as_item.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
 
         sep_export_import = gtk.SeparatorMenuItem()
         self.export_item = gtk.MenuItem("Export ...")
@@ -103,6 +107,7 @@ class MainWindow(object):
         self.file_menu.append(self.new_project_item)
         self.file_menu.append(self.open_project_item)
         self.file_menu.append(self.save_project_item)
+        self.file_menu.append(self.save_project_as_item)
         self.file_menu.append(sep_export_import)
         self.file_menu.append(self.import_item)
         self.file_menu.append(self.export_item)
@@ -114,6 +119,7 @@ class MainWindow(object):
         self.new_project_item.connect("activate", lambda *args: ep.push_event(ee.new_project_click, args))
         self.open_project_item.connect("activate", lambda *args: ep.push_event(ee.load_project_click, args))
         self.save_project_item.connect("activate", lambda *args: ep.push_event(ee.save_project_click, args))
+        self.save_project_as_item.connect("activate", lambda *args: ep.push_event(ee.save_project_as_click, args))
         self.quit_item.connect("activate", lambda *args: ep.push_event(ee.quit_click, args))
 
     def mk_edit_menu(self, agr):

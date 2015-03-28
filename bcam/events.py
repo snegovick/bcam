@@ -30,6 +30,7 @@ class EVEnum(object):
     save_file = "save_file"
     load_project_click = "load_project_click"
     save_project_click = "save_project_click"
+    save_project_as_click = "save_project_as_click"
     load_project = "load_project"
     save_project = "save_project"
     new_project_click = "new_project_click"
@@ -86,6 +87,7 @@ class EventProcessor(object):
             self.ee.save_file: self.save_file,
             self.ee.load_project_click: self.load_project_click,
             self.ee.save_project_click: self.save_project_click,
+            self.ee.save_project_as_click: self.save_project_as_click,
             self.ee.load_project: self.load_project,
             self.ee.save_project: self.save_project,
             self.ee.new_project_click: self.new_project_click,
@@ -170,6 +172,14 @@ class EventProcessor(object):
             result = self.mw.mk_file_save_dialog("Save project ...", mimes)
             if result!=None:
                 self.save_project((result, ))
+
+    def save_project_as_click(self, args):
+        dbgfname()
+        debug("  save project as clicked")
+        mimes = [("BCam project (*.bcam)", "Application/bcam", "*.bcam")]
+        result = self.mw.mk_file_save_dialog("Save project as ...", mimes)
+        if result!=None:
+            self.save_project((result, ))
 
     def new_project_click(self, args):
         dbgfname()
