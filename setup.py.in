@@ -12,7 +12,7 @@ setup(
     name = "bcam",
     version =
     author = "Konstantin Kirik (snegovick)",
-    author_email = "snegovick@gmail.com",
+    author_email = "snegovick@uprojects.org",
     description = ("Basic computer-aided manufacturing program."),
     license = "GNU GPL",
     keywords = "CAM, hobby, CNC",
