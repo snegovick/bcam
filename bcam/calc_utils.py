@@ -4,6 +4,9 @@ import math
 from logging import debug, info, warning, error, critical
 from bcam.util import dbgfname
 
+def inch_to_mm(i):
+    return i*25.4
+
 def transform_pt(pt, angle):
     out = [0,0]
     cos = math.cos(angle)

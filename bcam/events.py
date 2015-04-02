@@ -7,6 +7,7 @@ import sys
 import os
 
 from bcam.loader_dxf import DXFLoader
+from bcam.loader_excellon import ExcellonLoader
 from bcam.tool_operation import TOResult
 from bcam.tool_op_drill import TODrill
 from bcam.tool_op_exact_follow import TOExactFollow
@@ -145,7 +146,8 @@ class EventProcessor(object):
                 warning("  Please report")
 
     def load_click(self, args):
-        mimes = [("Blueprints (*.dxf)", "Application/dxf", "*.dxf")]
+        mimes = [("Drawings (*.dxf)", "Application/dxf", "*.dxf"),
+                 ("Drill files (*.drl)", "Application/drl", "*.drl")]
         result = self.mw.mk_file_dialog("Open ...", mimes)
         if result!=None:
             self.push_event(self.ee.load_file, result)
@@ -230,8 +232,14 @@ class EventProcessor(object):
     def load_file(self, args):
         dbgfname()
         debug("  load file: "+str(args))
-        dxfloader = DXFLoader()
-        Singleton.state.add_paths(dxfloader.load(args[0]))
+        ext = os.path.splitext(args[0])[1][1:].strip()
+        if (ext == "dxf"):
+            dxfloader = DXFLoader()
+            Singleton.state.add_paths(dxfloader.load(args[0]))
+        else:
+            excloader = ExcellonLoader()
+            Singleton.state.add_paths(excloader.load(args[0]))
+
         self.push_event(self.ee.update_paths_list, (None))
         project.push_state(Singleton.state, "load_file")
         self.mw.widget.update()
