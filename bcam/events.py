@@ -3,7 +3,9 @@ from __future__ import absolute_import, division, print_function
 import pygtk
 pygtk.require('2.0')
 import gtk, gobject, cairo
+import time
 import sys
+import imp
 import os
 
 from bcam.loader_dxf import DXFLoader
@@ -66,6 +68,8 @@ class EVEnum(object):
     update_progress = "update_progress"
     undo_click = "undo_click"
     redo_click = "redo_click"
+    main_start = "main_start"
+    pause = "pause"
 
 class EventProcessor(object):
     ee = EVEnum()
@@ -81,48 +85,51 @@ class EventProcessor(object):
     def __init__(self):
         Singleton.ee = self.ee
         Singleton.ep = self
+        self.started = False
         self.events = {
-            self.ee.load_click: self.load_click,
-            self.ee.save_click: self.save_click,
-            self.ee.load_file: self.load_file,
-            self.ee.save_file: self.save_file,
-            self.ee.load_project_click: self.load_project_click,
-            self.ee.save_project_click: self.save_project_click,
-            self.ee.save_project_as_click: self.save_project_as_click,
-            self.ee.load_project: self.load_project,
-            self.ee.save_project: self.save_project,
-            self.ee.new_project_click: self.new_project_click,
-            self.ee.quit_click: self.quit_click,
-            self.ee.screen_left_press: self.screen_left_press,
-            self.ee.screen_left_release: self.screen_left_release,
-            self.ee.pointer_motion: self.pointer_motion,
-            self.ee.drill_tool_click: self.drill_tool_click,
-            self.ee.deselect_all: self.deselect_all,
-            self.ee.shift_press: self.shift_press,
-            self.ee.shift_release: self.shift_release,
-            self.ee.ctrl_press: self.ctrl_press,
-            self.ee.ctrl_release: self.ctrl_release,
-            self.ee.update_paths_list: self.update_paths_list,
-            self.ee.path_list_selection_changed: self.path_list_selection_changed,
-            self.ee.exact_follow_tool_click: self.exact_follow_tool_click,
-            self.ee.offset_follow_tool_click: self.offset_follow_tool_click,
-            self.ee.pocket_tool_click: self.pocket_tool_click,
-            self.ee.update_tool_operations_list: self.update_tool_operations_list,
-            self.ee.tool_operations_list_selection_changed: self.tool_operations_list_selection_changed,
-            self.ee.update_settings: self.update_settings,
-            self.ee.tool_operation_up_click: self.tool_operation_up_click,
-            self.ee.tool_operation_down_click: self.tool_operation_down_click,
-            self.ee.scroll_up: self.scroll_up,
-            self.ee.scroll_down: self.scroll_down,
-            self.ee.hscroll: self.hscroll,
-            self.ee.vscroll: self.vscroll,
-            self.ee.tool_paths_check_button_click: self.tool_paths_check_button_click,
-            self.ee.paths_check_button_click: self.paths_check_button_click,
-            self.ee.path_delete_button_click: self.path_delete_button_click,
-            self.ee.tool_operation_delete_button_click: self.tool_operation_delete_button_click,
-            self.ee.update_progress: self.update_progress,
-            self.ee.undo_click: self.undo_click,
-            self.ee.redo_click: self.redo_click,
+            self.ee.load_click: [self.load_click],
+            self.ee.save_click: [self.save_click],
+            self.ee.load_file: [self.load_file],
+            self.ee.save_file: [self.save_file],
+            self.ee.load_project_click: [self.load_project_click],
+            self.ee.save_project_click: [self.save_project_click],
+            self.ee.save_project_as_click: [self.save_project_as_click],
+            self.ee.load_project: [self.load_project],
+            self.ee.save_project: [self.save_project],
+            self.ee.new_project_click: [self.new_project_click],
+            self.ee.quit_click: [self.quit_click],
+            self.ee.screen_left_press: [self.screen_left_press],
+            self.ee.screen_left_release: [self.screen_left_release],
+            self.ee.pointer_motion: [self.pointer_motion],
+            self.ee.drill_tool_click: [self.drill_tool_click],
+            self.ee.deselect_all: [self.deselect_all],
+            self.ee.shift_press: [self.shift_press],
+            self.ee.shift_release: [self.shift_release],
+            self.ee.ctrl_press: [self.ctrl_press],
+            self.ee.ctrl_release: [self.ctrl_release],
+            self.ee.update_paths_list: [self.update_paths_list],
+            self.ee.path_list_selection_changed: [self.path_list_selection_changed],
+            self.ee.exact_follow_tool_click: [self.exact_follow_tool_click],
+            self.ee.offset_follow_tool_click: [self.offset_follow_tool_click],
+            self.ee.pocket_tool_click: [self.pocket_tool_click],
+            self.ee.update_tool_operations_list: [self.update_tool_operations_list],
+            self.ee.tool_operations_list_selection_changed: [self.tool_operations_list_selection_changed],
+            self.ee.update_settings: [self.update_settings],
+            self.ee.tool_operation_up_click: [self.tool_operation_up_click],
+            self.ee.tool_operation_down_click: [self.tool_operation_down_click],
+            self.ee.scroll_up: [self.scroll_up],
+            self.ee.scroll_down: [self.scroll_down],
+            self.ee.hscroll: [self.hscroll],
+            self.ee.vscroll: [self.vscroll],
+            self.ee.tool_paths_check_button_click: [self.tool_paths_check_button_click],
+            self.ee.paths_check_button_click: [self.paths_check_button_click],
+            self.ee.path_delete_button_click: [self.path_delete_button_click],
+            self.ee.tool_operation_delete_button_click: [self.tool_operation_delete_button_click],
+            self.ee.update_progress: [self.update_progress],
+            self.ee.undo_click: [self.undo_click],
+            self.ee.redo_click: [self.redo_click],
+            self.ee.main_start: [self.main_start],
+            self.ee.pause: [self.pause],
         }
 
     def reset(self):
@@ -131,15 +138,30 @@ class EventProcessor(object):
         self.selected_tool_operation = None
         self.left_press_start = None
 
+    def append_event_processor(self, event, proc):
+        self.events[event].append(proc)
+
+    def prepend_event_processor(self, event, proc):
+        self.events[event].insert(0, proc)
+
+    def set_event(self, event, proc_list):
+        self.events[event] = proc_list
+
     def push_event(self, event, *args):
         self.event_list.append((event, args))
 
     def process(self):
+        if self.started == False:
+            self.push_event(self.ee.main_start, None)
+            self.started = True
         event_list = self.event_list[:]
         self.event_list = []
         for e, args in event_list:
             if e in self.events:
-                self.events[e](args)
+                for p in self.events[e]:
+                    r = p(args)
+                    if (r == False):
+                        break
             else:
                 dbgfname()
                 warning("  Unknown event:"+str(e)+" args: "+str(args))
@@ -572,11 +594,21 @@ class EventProcessor(object):
             offset = Singleton.state.get_base_offset()
             Singleton.mw.widget_hscroll.set_value(-(offset[0]+10*Singleton.state.scale[0]))
         else:
-            if Singleton.state.scale[0]<=1:
+            osx, osy = Singleton.state.scale
+            if Singleton.state.scale[0]<=0.01:
                 Singleton.state.scale = (Singleton.state.scale[0]+0.1, Singleton.state.scale[1]+0.1)
             else:
-                Singleton.state.scale = (Singleton.state.scale[0]+1, Singleton.state.scale[1]+1)
-            #project.push_state(self.file_data, self.operations, settings, state)
+                Singleton.state.scale = (Singleton.state.scale[0]*1.5, Singleton.state.scale[1]*1.5)
+            tx, ty = Singleton.state.get_offset()
+            sx, sy = Singleton.state.get_screen_size()
+            px, py = self.pointer_position
+            nsx, nsy = Singleton.state.scale
+            debug("  Old px, py: %f, %f"%(px, py))
+            debug("  Screen size: %s"%((sx, sy),))
+            Singleton.state.set_base_offset((px-px*nsx, -(py-py*nsy)))
+            debug("  New px, py: %f, %f"%((-(px-px/nsx), (py-py/nsy))))
+            debug("  New scale: %s"%((nsx, nsy),))
+            self.mw.cursor_pos_label.set_text("cur: %.3f:%.3f"%(px, py))
         self.mw.widget.update()
 
     def scroll_down(self, args):
@@ -593,8 +625,10 @@ class EventProcessor(object):
                 if Singleton.state.scale[0]<=1:
                     Singleton.state.scale = (Singleton.state.scale[0]-0.1, Singleton.state.scale[1]-0.1)
                 else:
-                    Singleton.state.scale = (Singleton.state.scale[0]-1, Singleton.state.scale[1]-1)
-            #project.push_state(self.file_data, self.operations, settings, state)
+                    Singleton.state.scale = (Singleton.state.scale[0]/1.5, Singleton.state.scale[1]/1.5)
+                px, py = self.pointer_position
+                nsx, nsy = Singleton.state.scale
+                Singleton.state.set_base_offset((-px*nsx, py*nsy))
         self.mw.widget.update()
 
     def hscroll(self, args):
@@ -664,6 +698,31 @@ class EventProcessor(object):
         self.push_event(self.ee.update_tool_operations_list, (None))
         self.push_event(self.ee.update_paths_list, (None))
         self.mw.widget.update()
+
+    def main_start(self, args):
+        Singleton.plugins = []
+        if Singleton.plugins_dir != None:
+            for dirname, subdirs, files in os.walk(Singleton.plugins_dir):
+                debug('Found directory: %s' % dirname)
+                for fname in files:
+                    if os.path.splitext(fname)[1] == ".py":
+                        debug('F\t%s' % fname)
+                        plugin_path = os.path.abspath(os.path.join(Singleton.plugins_dir, fname))
+                        plugin_mod_name = os.path.splitext(fname)[0]
+                        debug("Loading module with spec %s:%s"%(plugin_mod_name, plugin_path))
+                        imp.load_source(plugin_mod_name, plugin_path)
+
+                for dname in subdirs:
+                    debug('D\t%s' % dname)
+        debug("Registering plugins")
+        for p in Singleton.plugins:
+            p.register()
+
+    def pause(self, args):
+        p = args[0]
+        debug("Pause for %f"%(p,))
+        time.sleep(p)
+
 
 ee = EVEnum()
 ep = EventProcessor()

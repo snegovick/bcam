@@ -75,6 +75,9 @@ class State(object):
             self.__screen_offset = offset
             self.__total_offset = (self.__base_offset[0]+self.__screen_offset[0], self.__base_offset[1]+self.__screen_offset[1])
 
+    def get_screen_size(self):
+        return (self.__screen_offset[0]*2, self.__screen_offset[1]*2)
+
     def add_paths(self, new_paths):
         self.paths+=new_paths
 

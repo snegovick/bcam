@@ -24,7 +24,7 @@ class TOOffsetFollow(TOAbstractFollow):
         if data == None:
             self.index = index
             self.depth = depth
-            self.offset = 0
+            self.offset = offset
             self.path = None
             self.offset_path = None
         else:

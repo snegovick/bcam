@@ -23,8 +23,11 @@ class Screen(gtk.DrawingArea):
     step = 0
     event_consumers = []
     active_event_consumer = None
+    expose_called = True
 
     def periodic(self):
+        if (self.expose_called == False):
+            return True
         ep.process()
         return True
 
@@ -32,6 +35,7 @@ class Screen(gtk.DrawingArea):
         pass
 
     def update(self):
+        self.expose_called = False
         self.queue_draw()
 
     def scroll_event(self, widget, event):
@@ -60,7 +64,6 @@ class Screen(gtk.DrawingArea):
         elif event.keyval == 65507: # shift
             ep.push_event(ee.ctrl_release, (None))
 
-
     def button_release_event(self, widget, event):
         if event.button == 1:
             ep.push_event(ee.screen_left_release, (event.x, event.y))
@@ -71,6 +74,7 @@ class Screen(gtk.DrawingArea):
     # Handle the expose-event by drawing
     def do_expose_event(self, event):
         # Create the cairo context
+        self.expose_called = True
         Singleton.state.set_screen_offset((self.allocation.width//2, self.allocation.height//2))
         
         offset = Singleton.state.get_offset()
@@ -91,8 +95,10 @@ class Screen(gtk.DrawingArea):
 
         # grid drawing
         cr.set_line_width(1.0/Singleton.state.scale[0])
+        #cr.set_line_width(1.0)
         cr.translate(offset[0], offset[1])
         cr.scale(Singleton.state.scale[0], -Singleton.state.scale[1])
+
         cr.set_source_rgb(1.0, 0, 0)
         cr.move_to(-10, 0)
         cr.line_to(10, 0)
@@ -167,10 +173,15 @@ mw = None
         
 # GTK mumbo-jumbo to show the widget in a window and quit when it's closed
 def run():
-    args = {"--log": {"is_set": util.NOT_SET, "has_option": util.NO_OPTION, "option": None}}
+    args = {"--log": {"is_set": util.NOT_SET, "has_option": util.NO_OPTION, "option": None},
+            "--plugins-dir": {"is_set": util.NOT_SET, "has_option": util.HAS_OPTION, "option": None}}
     util.parse_args(args)
     if args["--log"]["is_set"]:
         logging.getLogger("").setLevel(logging.DEBUG)
+
+    Singleton.plugins_dir = None
+    if args["--plugins-dir"]["is_set"]:
+        Singleton.plugins_dir = args["--plugins-dir"]["option"]
 
     global mw, ep
     state.State()

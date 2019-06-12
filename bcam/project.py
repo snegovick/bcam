@@ -75,7 +75,7 @@ class Project(object):
 
         # format 2
         f = open(project_path, 'w')
-        f.write(json.dumps({'format_version': 2, 'step': self.steps[-1].serialize()}))
+        f.write(json.dumps({'format_version': 2, 'step': self.steps[-1].serialize()}, indent=2))
         f.close()
         self.set_path(project_path)
         return True

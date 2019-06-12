@@ -68,7 +68,7 @@ class Material(object):
 class Settings(object):
     def __init__(self, data=None):
         if data == None:
-            self.line_types = {"default": LineType(0.5, 0.7, (0,0,0), (1,0,0), "default")}
+            self.line_types = {"default": LineType(0.05, 0.1, (0,0,0), (1,0,0), "default")}
             self.tool = Tool("cylinder", ToolType.cylinder)
             self.material = Material()
         else:

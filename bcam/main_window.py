@@ -258,6 +258,28 @@ class MainWindow(object):
         list_item.add(hbox)
         lst.add(list_item)
 
+    def gen_labeled_spin(self, dct, mlabel, value=3.0, lower=-999.0, upper=999.0, step_incr=0.01, page_incr=0.5):
+        if lower == None:
+            lower = -999.0
+        if upper == None:
+            upper = 999.0
+        if step_incr == None:
+            step_incr = 0.01
+        if page_incr == None:
+            page_incr = 0.5
+        hbox = gtk.HBox(homogeneous=False, spacing=0)
+        hbox.show()
+        dct["hbox"] = hbox
+        label = gtk.Label(mlabel)
+        label.show()
+        dct["label"] = label
+        spin = gtk.SpinButton(adjustment=gtk.Adjustment(value=value, lower=lower, upper=upper, step_incr=step_incr, page_incr=page_incr, page_size=0), climb_rate=0.01, digits=3)
+        spin.show()
+        dct["spin"] = spin
+        hbox.pack_start(label, expand=False, fill=False, padding=0)
+        hbox.pack_start(spin, expand=True, fill=True, padding=0)
+        return hbox
+
     def __mk_labeled_spin(self, dct, mlabel, data=None, value=3.0, lower=-999.0, upper=999.0, step_incr=0.01, page_incr=0.5):
         if lower == None:
             lower = -999.0
